@@ -5,25 +5,27 @@ badNumberOfModeParamaters = Exception('Bad number of paramaters passed to mode')
 badParamater = Exception('Bad paramater value')
 
 class ModeType(Enum):
-  HOURLY = 1
-  DAILY = 2
-  ONMON = 2
-  ONTUE = 2
-  ONWED = 2
-  ONTHU = 2
-  ONFRI = 2
-  ONSAT = 2
-  ONSUN = 2
-  WEEKDAY = 2	#Same hour and minute each weekday (24 hour clock)				"WEEKDAY:13:39" = Run at 1:39pm each weekday
-  WEEKEND = 2	#Same hour and minute each weekend day (24 hour clock)			"WEEKEND:13:39" = Run at 1:39pm each weekend
+  HOURLY = 1 #Single paramater which is the minute past the error
+  DAILY = 2  #three params, minute, hour, days (+-+-+-- Each char represents DOW mon-sun + means include day, - do not)
   MONTHLY = 3	#Same hour and minute each day of the month (24 hour clock)	"MONTHLY:13:39:3" = Run at 1:39pm each 3rd of month
   # params are always minute:hour:day
+  def getExpectedNumParams(self):
+    if (self == ModeType.HOURLY):
+      return 1
+    if (self == ModeType.DAILY):
+      return 3
+    if (self == ModeType.MONTHLY):
+      return 3
+    return -1
 
 class RepetitionIntervalClass():
   mode = None;
   minute = -1;
   hour = -1; #hour in 24 hour format
   dayOfMonth = -1; #only used in o nthly mode
+
+  ##Array represent days to run pos 0 = Monday, 1 = Tuesday .. 6 = Sunday
+  daysForDaily = [False,False,False,False,False,False,False]
 
   def __init__(self, intervalString):
     if (None == intervalString):
@@ -33,14 +35,16 @@ class RepetitionIntervalClass():
       raise badModeException
     modeType = None
     a[0] = a[0].upper().strip()
-    for curModeType in ModeType:
+    for name, curModeType in ModeType.__members__.items():
       if (curModeType.name == a[0]):
         modeType = curModeType
     if (None == modeType):
       raise badModeException
-    if ((1+modeType.value) != len(a)):
+    if ((1+modeType.getExpectedNumParams()) != len(a)):
       raise badNumberOfModeParamaters
     self.mode = modeType
+
+    #minute is always there and is always first param
     self.minute = a[1].strip()
     if (" " in self.minute):
       raise badParamater
@@ -53,8 +57,8 @@ class RepetitionIntervalClass():
     if (self.minute > 59):
       raise badParamater
 
-    #work out hour
-    if (self.mode.value > 1):
+    #work out hour always second param if it is there
+    if (modeType.getExpectedNumParams() > 1):
       self.hour = a[2].strip()
       if (" " in self.hour):
         raise badParamater
@@ -67,19 +71,31 @@ class RepetitionIntervalClass():
       if (self.hour > 23):
         raise badParamater
 
-    #work out day of month
-    if (self.mode.value > 2):
-      self.dayOfMonth = a[3].strip()
-      if (" " in self.dayOfMonth):
-        raise badParamater
-      try:
-        self.dayOfMonth = int(self.dayOfMonth)
-      except ValueError:
-        raise badParamater
-      if (self.dayOfMonth < 0):
-        raise badParamater
-      if (self.dayOfMonth > 31):
-        raise badParamater
+    #work out thrid paramater if it is there
+    if (modeType.getExpectedNumParams() > 2):
+      if (modeType == modeType.DAILY):
+        daysOfWeek = a[3].strip()
+        if (len(daysOfWeek) != 7):
+          raise badParamater
+        for x in range(0, 6):
+          if (daysOfWeek[x]=="+"):
+            self.daysForDaily[x] = True
+          elif (daysOfWeek[x]=="-"):
+           self. daysForDaily[x] = False
+          else:
+            raise badParamater
+      else:
+        self.dayOfMonth = a[3].strip()
+        if (" " in self.dayOfMonth):
+          raise badParamater
+        try:
+          self.dayOfMonth = int(self.dayOfMonth)
+        except ValueError:
+          raise badParamater
+        if (self.dayOfMonth < 0):
+          raise badParamater
+        if (self.dayOfMonth > 31):
+          raise badParamater
 
     pass
 
@@ -189,6 +205,7 @@ class RepetitionIntervalClass():
 #		if (m_mode==ModeType.HOURLY) return true; //this path is never used
 #		if (m_mode==ModeType.MONTHLY) throw new Exception("Function used where it wasn't designed to be used");
 #		
+#   I think this is a bug I think if should be if m_mode === MONTHLY
 #		if (m_mode==ModeType.DAILY) return equals(p_cal.get(Calendar.DAY_OF_MONTH)==m_day_of_month);
 #		
 #		int dow = p_cal.get(Calendar.DAY_OF_WEEK);

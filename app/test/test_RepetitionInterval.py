@@ -137,9 +137,27 @@ class test_RepetitionInterval(unittest.TestCase):
       a = RepetitionIntervalClass("MONTHLY:01:1 1:1")
     self.checkGotRightException(context,badParamater)
 
-  def test_initDatWithSpaceException(self):
+  def test_initDayWithSpaceException(self):
     with self.assertRaises(Exception) as context:
       a = RepetitionIntervalClass("MONTHLY:01:ABC:1")
+    self.checkGotRightException(context,badParamater)
+
+  def test_initDailyWithInvalidNumParams(self):
+    with self.assertRaises(Exception) as context:
+      a = RepetitionIntervalClass("DAILY:1:dd:£:$:5:6")
+    self.checkGotRightException(context,badNumberOfModeParamaters)
+
+  def test_initDaily(self):
+    a = RepetitionIntervalClass("DAILY:1:11:+++++--")
+
+  def test_initDailyWithWrongNumberOfChars(self):
+    with self.assertRaises(Exception) as context:
+      a = RepetitionIntervalClass("DAILY:1:11:+++++")
+    self.checkGotRightException(context,badParamater)
+
+  def test_initDailyWithInvalidChar(self):
+    with self.assertRaises(Exception) as context:
+      a = RepetitionIntervalClass("DAILY:1:11:+++++XX")
     self.checkGotRightException(context,badParamater)
 
 #public class RepetitionIntervalTest {
