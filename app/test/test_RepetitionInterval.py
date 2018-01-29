@@ -1,5 +1,6 @@
 import unittest
-from RepetitionInterval import RepetitionIntervalClass, badModeException, badNumberOfModeParamaters, badParamater
+from RepetitionInterval import RepetitionIntervalClass, badModeException, badNumberOfModeParamaters, badParamater, unknownTimezone
+import datetime
  
 
 class test_RepetitionInterval(unittest.TestCase):
@@ -9,11 +10,42 @@ class test_RepetitionInterval(unittest.TestCase):
         raise context.exception
     self.assertTrue(ExpectedException == context.exception)
 
+  def checkNextRun(self, riOBj, curTime, expTime):
+    nextRun = riOBj.getNextOccuranceDatetime(curTime)
+    self.assertEqual(nextRun, expTime)
+
+#-----------------------------------------------
+# Helpers above actual tests below
+#-----------------------------------------------
+
+  def test_nextdateHourlyModeJustBeforeMinute(self):
+    ri = RepetitionIntervalClass("HOURLY:03")
+    self.checkNextRun(ri,datetime.datetime(2016,1,5,14,2,59,0,None),datetime.datetime(2016,1,5,14,3,0,0,None))
+
+  def test_nextdateHourlyModeExactlyInMinute(self):
+    ri = RepetitionIntervalClass("HOURLY:03")
+    self.checkNextRun(ri,datetime.datetime(2016,1,14,14,3,0,0,None),datetime.datetime(2016,1,14,15,3,0,0,None))
+
+  def test_nextdateHourlyModeJustAfterMinute(self):
+    ri = RepetitionIntervalClass("HOURLY:03")
+    self.checkNextRun(ri,datetime.datetime(2016,1,14,14,3,1,0,None),datetime.datetime(2016,1,14,15,3,0,0,None))
+
+  def test_nextdateHourlyModeLastMinuteDayBefore(self):
+    ri = RepetitionIntervalClass("HOURLY:03")
+    self.checkNextRun(ri,datetime.datetime(2016,1,14,23,3,1,0,None),datetime.datetime(2016,1,15,00,3,0,0,None))
+
+
+#		//Daily Tests
+#		numErrors += runNextDateTest("January 14, 2016 14:01:02","ND Daily","DAILY:15:07","January 14, 2016 15:07:00");
+#		numErrors += runNextDateTest("January 14, 2016 16:01:02","ND Daily","DAILY:15:07","January 15, 2016 15:07:00");
+#		numErrors += runNextDateTest("January 14, 2016 16:01:02","ND Daily","DAILY:15:07","January 15, 2016 15:07:00");
+
+
+# class init tests
   def test_initWithNoneRaisesException(self):
     with self.assertRaises(Exception) as context:
       a = RepetitionIntervalClass(None)
     self.checkGotRightException(context,badModeException)
-
   def test_initWithNonsenseRaisesException(self):
     with self.assertRaises(Exception) as context:
       a = RepetitionIntervalClass("Null mode")
@@ -105,41 +137,41 @@ class test_RepetitionInterval(unittest.TestCase):
     self.checkGotRightException(context,badNumberOfModeParamaters)
 
   def test_initMonthlyOK(self):
-    a = RepetitionIntervalClass("MONTHLY:59:23:11")
+    a = RepetitionIntervalClass("MONTHLY:59:23:11:UTC")
 
   def test_initInvalidMinuteRaisesException(self):
     with self.assertRaises(Exception) as context:
-      a = RepetitionIntervalClass("MONTHLY:61:01:11")
+      a = RepetitionIntervalClass("MONTHLY:61:01:11:UTC")
     self.checkGotRightException(context,badParamater)
 
   def test_initInvalidHourRaisesException(self):
     with self.assertRaises(Exception) as context:
-      a = RepetitionIntervalClass("MONTHLY:01:61:11")
+      a = RepetitionIntervalClass("MONTHLY:01:61:11:UTC")
     self.checkGotRightException(context,badParamater)
 
   def test_initInvalidDayRaisesException(self):
     with self.assertRaises(Exception) as context:
-      a = RepetitionIntervalClass("MONTHLY:01:01:32")
+      a = RepetitionIntervalClass("MONTHLY:01:01:32:UTC")
     self.checkGotRightException(context,badParamater)
 
   def test_initDatOfMonthNotIntException(self):
     with self.assertRaises(Exception) as context:
-      a = RepetitionIntervalClass("MONTHLY:01:01:ABC")
+      a = RepetitionIntervalClass("MONTHLY:01:01:ABC:UTC")
     self.checkGotRightException(context,badParamater)
 
   def test_initDatOfMonthWithSpaceException(self):
     with self.assertRaises(Exception) as context:
-      a = RepetitionIntervalClass("MONTHLY:01:01:1 1")
+      a = RepetitionIntervalClass("MONTHLY:01:01:1 1:UTC")
     self.checkGotRightException(context,badParamater)
 
   def test_initDatNotIntException(self):
     with self.assertRaises(Exception) as context:
-      a = RepetitionIntervalClass("MONTHLY:01:1 1:1")
+      a = RepetitionIntervalClass("MONTHLY:01:1 1:1:UTC")
     self.checkGotRightException(context,badParamater)
 
   def test_initDayWithSpaceException(self):
     with self.assertRaises(Exception) as context:
-      a = RepetitionIntervalClass("MONTHLY:01:ABC:1")
+      a = RepetitionIntervalClass("MONTHLY:01:ABC:1:UTC")
     self.checkGotRightException(context,badParamater)
 
   def test_initDailyWithInvalidNumParams(self):
@@ -148,17 +180,23 @@ class test_RepetitionInterval(unittest.TestCase):
     self.checkGotRightException(context,badNumberOfModeParamaters)
 
   def test_initDaily(self):
-    a = RepetitionIntervalClass("DAILY:1:11:+++++--")
+    a = RepetitionIntervalClass("DAILY:1:11:+++++--:UTC")
+
+  def test_initDailyWithInvalidTimezone(self):
+    with self.assertRaises(Exception) as context:
+      a = RepetitionIntervalClass("DAILY:1:11:+++++--:dfsf")
+    self.checkGotRightException(context,unknownTimezone)
 
   def test_initDailyWithWrongNumberOfChars(self):
     with self.assertRaises(Exception) as context:
-      a = RepetitionIntervalClass("DAILY:1:11:+++++")
+      a = RepetitionIntervalClass("DAILY:1:11:+++++:UTC")
     self.checkGotRightException(context,badParamater)
 
   def test_initDailyWithInvalidChar(self):
     with self.assertRaises(Exception) as context:
-      a = RepetitionIntervalClass("DAILY:1:11:+++++XX")
+      a = RepetitionIntervalClass("DAILY:1:11:+++++XX:UTC")
     self.checkGotRightException(context,badParamater)
+
 
 #public class RepetitionIntervalTest {
 #	//Code Only for testing below ***********************************
@@ -178,39 +216,7 @@ class test_RepetitionInterval(unittest.TestCase):
 #		if (!ri.equals(new RepetitionInterval(ri.toString()))) throw new Exception("Equilivance Mismatch");
 #	}
 
-#	public static int runInitTest(String p_testNam, String p_in, boolean p_shouldExcept) {
-#		int r = 0;
-#		RepetitionInterval ri = null;
-#		Exception ee = null;
-#		String output = "Test start:" + p_testNam;
-#		try {
-#			ri = new RepetitionInterval(p_in);
-#			equivTest(p_in);
-#		} catch (Exception e) {
-#			ee = e;
-#		}
-#		
-#		if (ee==null) {
-#			if (p_shouldExcept) {
-#				output += " ERR-> should have thrown an exception but didn't      ******************";				
-#				r++;
-#			}
-#		} else {
-#			if (!p_shouldExcept) {
-#				//ee.printStackTrace();
-#				output += " ERR->" + ee.getMessage() + " ******************";
-#				r++;
-#			} else {
-#				output += " EXCOK=" + ee.getMessage();
-#			}
-#		}
-#		
-#		if ((r>0) || m_outputon) {
-#			System.out.println(output);
-#		}
-#		
-#		return r;
-#	}
+
 #	public static int runNextDateTest(String p_testAtDate, String p_testNam, String p_in, String p_expectedResult) {
 #		int r = 0;
 #		String output = "Test start:" + p_testNam;
@@ -239,27 +245,7 @@ class test_RepetitionInterval(unittest.TestCase):
 #		
 #		return r;
 #	}	
-#	
-#	@Test
-#	public void test() {
-#		int numErrors = 0;
-#		
 
-
-#		//Hourly Next Date Test
-#		numErrors += runNextDateTest("January 14, 2016 14:00:00","ND Hourly","HOURLY:03","January 14, 2016 14:03:00");
-#		numErrors += runNextDateTest("January 14, 2016 14:02:59","ND Hourly MATCH-1","HOURLY:03","January 14, 2016 14:03:00");
-#		numErrors += runNextDateTest("January 14, 2016 14:03:00","ND Hourly MATCH 0","HOURLY:03","January 14, 2016 15:03:00");
-#		numErrors += runNextDateTest("January 14, 2016 14:03:01","ND Hourly MATCH 1","HOURLY:03","January 14, 2016 15:03:00");
-#		numErrors += runNextDateTest("January 14, 2016 14:54:32","ND Hourly Over hour","HOURLY:03","January 14, 2016 15:03:00");
-#		numErrors += runNextDateTest("January 14, 2016 23:54:32","ND Hourly Over day","HOURLY:03","January 15, 2016 00:03:00");
-#		
-#		//Daily Tests
-#		numErrors += runNextDateTest("January 14, 2016 14:01:02","ND Daily","DAILY:15:07","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 14, 2016 16:01:02","ND Daily","DAILY:15:07","January 15, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 14, 2016 16:01:02","ND Daily","DAILY:15:07","January 15, 2016 15:07:00");
-#		
-#		
 #		//MONTHLY Tests
 #		numErrors += runNextDateTest("January 13, 2016 14:01:02","ND Monthly day before TB","MONTHLY:15:07:14","January 14, 2016 15:07:00");
 #		numErrors += runNextDateTest("January 14, 2016 14:01:02","ND Monthly same day TB","MONTHLY:15:07:14","January 14, 2016 15:07:00");

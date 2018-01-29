@@ -1,28 +1,39 @@
 from enum import Enum
+import datetime
+from datetime import timedelta
+import pytz
 
 badModeException = Exception('Bad Mode')
 badNumberOfModeParamaters = Exception('Bad number of paramaters passed to mode')
 badParamater = Exception('Bad paramater value')
+unknownTimezone = Exception('Unknown Timezone')
 
 class ModeType(Enum):
   HOURLY = 1 #Single paramater which is the minute past the error
-  DAILY = 2  #three params, minute, hour, days (+-+-+-- Each char represents DOW mon-sun + means include day, - do not)
-  MONTHLY = 3	#Same hour and minute each day of the month (24 hour clock)	"MONTHLY:13:39:3" = Run at 1:39pm each 3rd of month
+  DAILY = 2  #three params, minute, hour, days (+-+-+-- Each char represents DOW mon-sun + means include day, - do not), final paramater is the timezone the passed in date is
+  MONTHLY = 3	#Same hour and minute each day of the month (24 hour clock)	"MONTHLY:13:39:3" = Run at 1:39pm each 3rd of month, final paramater is the timezone the passed in date is
   # params are always minute:hour:day
+
+  #                       | HOURLY  | DAILY  | MONTHLY |
+  # Has Day of month      |   no    |   no   |   yes   |
+  # Has Days of week      |   no    |   yes  |   no    |
+  # Cares about timezone  |   no    |   yes  |   yes   |
+
   def getExpectedNumParams(self):
     if (self == ModeType.HOURLY):
       return 1
     if (self == ModeType.DAILY):
-      return 3
+      return 4
     if (self == ModeType.MONTHLY):
-      return 3
+      return 4
     return -1
 
 class RepetitionIntervalClass():
   mode = None;
   minute = -1;
   hour = -1; #hour in 24 hour format
-  dayOfMonth = -1; #only used in o nthly mode
+  dayOfMonth = -1; #only used in monthly mode
+  timezone = "UTC"
 
   ##Array represent days to run pos 0 = Monday, 1 = Tuesday .. 6 = Sunday
   daysForDaily = [False,False,False,False,False,False,False]
@@ -97,11 +108,35 @@ class RepetitionIntervalClass():
         if (self.dayOfMonth > 31):
           raise badParamater
 
-    pass
+    #if it is there the 4th paramter is always the timezone the passed in date is.
+    if (modeType.getExpectedNumParams() > 3):
+      try:
+        self.timezone = pytz.timezone(a[4].strip())
+      except pytz.exceptions.UnknownTimeZoneError:
+        raise unknownTimezone
+
+
+  #Returns the next time that the repetition interval defines according to the current datetime passed in
+  def getNextOccuranceDatetime(self, curDateTime):
+    if (self.mode == ModeType.HOURLY):
+      nd = datetime.datetime(
+        curDateTime.year,
+        curDateTime.month,
+        curDateTime.day,
+        curDateTime.hour,
+        self.minute,
+        0,
+        0,
+        curDateTime.tzinfo
+      )
+      if (nd <= curDateTime):
+        nd += timedelta(hours=1)
+      return nd
+    return datetime.datetime.utcnow()
 
 
 #public class RepetitionInterval {
-#	
+#	 
 #	//Modes
 #	//Hourly Mode - 
 #	//Daily Mode - 
