@@ -37,6 +37,7 @@ class RepetitionIntervalClass():
   timezone = "UTC"
 
   ##Array represent days to run pos 0 = Monday, 1 = Tuesday .. 6 = Sunday
+  ## matches datetime.weekday function
   daysForDaily = [False,False,False,False,False,False,False]
 
   def __init__(self, intervalString):
@@ -89,13 +90,17 @@ class RepetitionIntervalClass():
         daysOfWeek = a[3].strip()
         if (len(daysOfWeek) != 7):
           raise badParamater
+        numDays = 0
         for x in range(0, 6):
           if (daysOfWeek[x]=="+"):
             self.daysForDaily[x] = True
+            numDays = numDays + 1
           elif (daysOfWeek[x]=="-"):
            self. daysForDaily[x] = False
           else:
             raise badParamater
+        if (numDays == 0):
+          raise badParamater
       else:
         self.dayOfMonth = a[3].strip()
         if (" " in self.dayOfMonth):
@@ -123,6 +128,9 @@ class RepetitionIntervalClass():
     return utctime.astimezone(time.tzinfo)
 
 
+  #Return True if the day passed in is present in the array
+  def isValidDay(self, datetimeVal):
+    return self.daysForDaily[datetimeVal.weekday()]
 
   #Returns the next time that the repetition interval defines according to the current datetime passed in
   def getNextOccuranceDatetime(self, curDateTime):
@@ -144,7 +152,26 @@ class RepetitionIntervalClass():
       if (nd <= curDateTime):
         nd = self.addTimeInUTC(nd, timedelta(hours=1))
       return nd
-    return datetime.datetime.utcnow()
+    if (self.mode == ModeType.DAILY):
+      nd = datetime.datetime(
+        curDateTime.year,
+        curDateTime.month,
+        curDateTime.day,
+        self.hour,
+        self.minute,
+        0,
+        0,
+        curDateTime.tzinfo
+      )
+      if (nd <= curDateTime):
+        nd = self.addTimeInUTC(nd, timedelta(days=1))
+      #keep incrementing the day value until it falls on a valid day
+      while (self.isValidDay(nd) != True):
+        nd = self.addTimeInUTC(nd, timedelta(days=1))
+      return nd
+
+
+    raise Exception('Not Implemented')
 
 
 #public class RepetitionInterval {

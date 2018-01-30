@@ -61,9 +61,37 @@ class test_RepetitionInterval(unittest.TestCase):
 
 
 # Daily Tests
-#		numErrors += runNextDateTest("January 14, 2016 14:01:02","ND Daily","DAILY:15:07","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 14, 2016 16:01:02","ND Daily","DAILY:15:07","January 15, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 14, 2016 16:01:02","ND Daily","DAILY:15:07","January 15, 2016 15:07:00");
+## Every day of week
+  def test_DailyEveryDayOnThatDay(self):
+    ri = RepetitionIntervalClass("DAILY:03:15:+++++++:Europe/London")
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,0,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,15,3,0,0)))
+
+  def test_DailyEveryDayOnPrevDay(self):
+    ri = RepetitionIntervalClass("DAILY:03:15:+++++++:Europe/London")
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,30,15,3,0,0)))
+
+## Only on Wednesdays
+  def test_DailyEveryDayOnWed(self):
+    ri = RepetitionIntervalClass("DAILY:03:15:--+----:Europe/London")
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,31,15,3,0,0)))
+
+## Only on Fridays
+  def test_DailyEveryDayOnFri(self):
+    ri = RepetitionIntervalClass("DAILY:03:15:----+--:Europe/London")
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,2,15,3,0,0)))
+
+# MONTHLY Tests
+#		numErrors += runNextDateTest("January 13, 2016 14:01:02","ND Monthly day before TB","MONTHLY:15:07:14","January 14, 2016 15:07:00");
+#		numErrors += runNextDateTest("January 14, 2016 14:01:02","ND Monthly same day TB","MONTHLY:15:07:14","January 14, 2016 15:07:00");
+#		numErrors += runNextDateTest("January 15, 2016 14:01:02","ND Monthly day after TB","MONTHLY:15:07:14","February 14, 2016 15:07:00");
+
+#		numErrors += runNextDateTest("January 13, 2016 15:07:00","ND Monthly day before TM","MONTHLY:15:07:14","January 14, 2016 15:07:00");
+#		numErrors += runNextDateTest("January 14, 2016 15:07:00","ND Monthly same day TM","MONTHLY:15:07:14","February 14, 2016 15:07:00");
+#		numErrors += runNextDateTest("January 15, 2016 15:07:00","ND Monthly day after TM","MONTHLY:15:07:14","February 14, 2016 15:07:00");
+#		
+#		numErrors += runNextDateTest("January 13, 2016 16:07:00","ND Monthly day before TA","MONTHLY:15:07:14","January 14, 2016 15:07:00");
+#		numErrors += runNextDateTest("January 14, 2016 16:07:00","ND Monthly same day TA","MONTHLY:15:07:14","February 14, 2016 15:07:00");
+#		numErrors += runNextDateTest("January 15, 2016 16:07:00","ND Monthly day after TA","MONTHLY:15:07:14","February 14, 2016 15:07:00");
 
 
 # class init tests
@@ -227,135 +255,10 @@ class test_RepetitionInterval(unittest.TestCase):
       a = RepetitionIntervalClass("DAILY:1:11:+++++++:None")
     self.checkGotRightException(context,unknownTimezone)
 
+  def test_initDailyWithNoDaysErrors(self):
+    with self.assertRaises(Exception) as context:
+      a = RepetitionIntervalClass("DAILY:1:11:-------:UTC")
+    self.checkGotRightException(context,badParamater)
 
-#public class RepetitionIntervalTest {
-#	//Code Only for testing below ***********************************
-#	//Expire 35 minutes past each hour
-#	//Expire 1pm every day
-#	//Expire 1pm every monday
-#	//Expire 1pm every weekday
-#	//Expire 1pm every Mon
-#	//Expire 1pm every 1st of the month
-#	//Expire 1pm every 5th of Jan, Nov
-#	
-#	//Returns number of errors
-#	private static boolean  m_outputon = false;	
-#	private static DateFormat m_dateFormat = new SimpleDateFormat("MMMM d, yyyy h:m:s", Locale.ENGLISH);
-#	public static void equivTest(String p_in) throws Exception {
-#		RepetitionInterval ri = new RepetitionInterval(p_in);
-#		if (!ri.equals(new RepetitionInterval(ri.toString()))) throw new Exception("Equilivance Mismatch");
-#	}
-
-
-#	public static int runNextDateTest(String p_testAtDate, String p_testNam, String p_in, String p_expectedResult) {
-#		int r = 0;
-#		String output = "Test start:" + p_testNam;
-#		RepetitionInterval ri = null;
-
-#		try {
-#			Date testAtDate = m_dateFormat.parse(p_testAtDate);
-#			Date exp = m_dateFormat.parse(p_expectedResult);
-#			ri = new RepetitionInterval(p_in);
-#			
-#			Date got = ri.getNextDate(testAtDate);
-#			if (got==null) throw new Exception("Returned null string");
-#			
-#			if (!got.equals(exp)) throw new Exception(" Fail, start:" + testAtDate.toLocaleString() + " int:" + p_in + " expected:" + exp.toLocaleString() + " got:" + got.toLocaleString());
-#			equivTest(p_in);
-#		} catch (Exception e) {
-#			//e.printStackTrace();
-#			output += " ERR->" + e.getMessage() + " ******************";
-#			r++;
-#		}
-#		
-#		
-#		if ((r>0) || m_outputon) {
-#			System.out.println(output);
-#		}
-#		
-#		return r;
-#	}	
-
-#		//MONTHLY Tests
-#		numErrors += runNextDateTest("January 13, 2016 14:01:02","ND Monthly day before TB","MONTHLY:15:07:14","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 14, 2016 14:01:02","ND Monthly same day TB","MONTHLY:15:07:14","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 15, 2016 14:01:02","ND Monthly day after TB","MONTHLY:15:07:14","February 14, 2016 15:07:00");
-
-#		numErrors += runNextDateTest("January 13, 2016 15:07:00","ND Monthly day before TM","MONTHLY:15:07:14","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 14, 2016 15:07:00","ND Monthly same day TM","MONTHLY:15:07:14","February 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 15, 2016 15:07:00","ND Monthly day after TM","MONTHLY:15:07:14","February 14, 2016 15:07:00");
-#		
-#		numErrors += runNextDateTest("January 13, 2016 16:07:00","ND Monthly day before TA","MONTHLY:15:07:14","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 14, 2016 16:07:00","ND Monthly same day TA","MONTHLY:15:07:14","February 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 15, 2016 16:07:00","ND Monthly day after TA","MONTHLY:15:07:14","February 14, 2016 15:07:00");
-#		
-#		//OnMon Tests 
-#		numErrors += runNextDateTest("January 13, 2016 11:07:00","ND ONMON TB","ONMON:15:07","January 18, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 13, 2016 18:07:00","ND ONMON TA","ONMON:15:07","January 18, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 11:07:00","ND ONMON d TB","ONMON:15:07","January 18, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 18:07:00","ND ONMON d TA","ONMON:15:07","January 25, 2016 15:07:00");
-
-#		//OnTue Tests
-#		numErrors += runNextDateTest("January 13, 2016 11:07:00","ND ONTUE TB","ONTUE:15:07","January 19, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 13, 2016 18:07:00","ND ONTUE TA","ONTUE:15:07","January 19, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 11:07:00","ND ONTUE d TB","ONTUE:15:07","January 19, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 18:07:00","ND ONTUE d TA","ONTUE:15:07","January 19, 2016 15:07:00");
-
-#		//OnWed Tests
-#		numErrors += runNextDateTest("January 13, 2016 11:07:00","ND ONWED TB","ONWED:15:07","January 13, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 13, 2016 18:07:00","ND ONWED TA","ONWED:15:07","January 20, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 11:07:00","ND ONWED d TB","ONWED:15:07","January 20, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 18:07:00","ND ONWED d TA","ONWED:15:07","January 20, 2016 15:07:00");
-
-#		//OnThu Tests
-#		numErrors += runNextDateTest("January 13, 2016 11:07:00","ND ONTHU TB","ONTHU:15:07","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 13, 2016 18:07:00","ND ONTHU TA","ONTHU:15:07","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 11:07:00","ND ONTHU d TB","ONTHU:15:07","January 21, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 18:07:00","ND ONTHU d TA","ONTHU:15:07","January 21, 2016 15:07:00");
-
-#		//OnFri Tests
-#		numErrors += runNextDateTest("January 13, 2016 11:07:00","ND ONFRI TB","ONFRI:15:07","January 15, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 13, 2016 18:07:00","ND ONFRI TA","ONFRI:15:07","January 15, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 11:07:00","ND ONFRI d TB","ONFRI:15:07","January 22, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 18:07:00","ND ONFRI d TA","ONFRI:15:07","January 22, 2016 15:07:00");
-
-#		//OnSat Tests
-#		numErrors += runNextDateTest("January 13, 2016 11:07:00","ND ONSAT TB","ONSAT:15:07","January 16, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 13, 2016 18:07:00","ND ONSAT TA","ONSAT:15:07","January 16, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 11:07:00","ND ONSAT d TB","ONSAT:15:07","January 23, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 18:07:00","ND ONSAT d TA","ONSAT:15:07","January 23, 2016 15:07:00");
-
-#		//OnSun Tests
-#		numErrors += runNextDateTest("January 13, 2016 11:07:00","ND ONSUN TB","ONSUN:15:07","January 17, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 13, 2016 18:07:00","ND ONSUN TA","ONSUN:15:07","January 17, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 11:07:00","ND ONSUN d TB","ONSUN:15:07","January 24, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 18:07:00","ND ONSUN d TA","ONSUN:15:07","January 24, 2016 15:07:00");
-
-#		//Weekday Tests 
-#		numErrors += runNextDateTest("January 17, 2016 11:07:00","ND WEEKDAY SUN TB","WEEKDAY:15:07","January 18, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 17, 2016 18:07:00","ND WEEKDAY SUN TA","WEEKDAY:15:07","January 18, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 11:07:00","ND WEEKDAY MON TB","WEEKDAY:15:07","January 18, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 18:07:00","ND WEEKDAY MON TA","WEEKDAY:15:07","January 19, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 22, 2016 11:07:00","ND WEEKDAY FRI TB","WEEKDAY:15:07","January 22, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 22, 2016 18:07:00","ND WEEKDAY FRI TA","WEEKDAY:15:07","January 25, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 23, 2016 11:07:00","ND WEEKDAY SAT TB","WEEKDAY:15:07","January 25, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 23, 2016 18:07:00","ND WEEKDAY SAT TA","WEEKDAY:15:07","January 25, 2016 15:07:00");
-#		
-#		//Weekend Tests
-#		numErrors += runNextDateTest("January 17, 2016 11:07:00","ND WEEKEND SUN TB","WEEKEND:15:07","January 17, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 17, 2016 18:07:00","ND WEEKEND SUN TA","WEEKEND:15:07","January 23, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 11:07:00","ND WEEKEND MON TB","WEEKEND:15:07","January 23, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 18, 2016 18:07:00","ND WEEKEND MON TA","WEEKEND:15:07","January 23, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 22, 2016 11:07:00","ND WEEKEND FRI TB","WEEKEND:15:07","January 23, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 22, 2016 18:07:00","ND WEEKEND FRI TA","WEEKEND:15:07","January 23, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 23, 2016 11:07:00","ND WEEKEND SAT TB","WEEKEND:15:07","January 23, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 23, 2016 18:07:00","ND WEEKEND SAT TA","WEEKEND:15:07","January 24, 2016 15:07:00");
-#		
-#		
-#		System.out.println("");
-#		if (numErrors>0) {
-#			fail(numErrors + " Tests failed!!!!!!!!!!!!!!!!");
-#		}		
-#	}
 
 
