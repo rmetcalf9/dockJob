@@ -81,18 +81,25 @@ class test_RepetitionInterval(unittest.TestCase):
     self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,2,15,3,0,0)))
 
 # MONTHLY Tests
-#		numErrors += runNextDateTest("January 13, 2016 14:01:02","ND Monthly day before TB","MONTHLY:15:07:14","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 14, 2016 14:01:02","ND Monthly same day TB","MONTHLY:15:07:14","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 15, 2016 14:01:02","ND Monthly day after TB","MONTHLY:15:07:14","February 14, 2016 15:07:00");
+  def test_MonthlyDayBefore(self):
+    ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,10,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,15,3,0,0)))
 
-#		numErrors += runNextDateTest("January 13, 2016 15:07:00","ND Monthly day before TM","MONTHLY:15:07:14","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 14, 2016 15:07:00","ND Monthly same day TM","MONTHLY:15:07:14","February 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 15, 2016 15:07:00","ND Monthly day after TM","MONTHLY:15:07:14","February 14, 2016 15:07:00");
-#		
-#		numErrors += runNextDateTest("January 13, 2016 16:07:00","ND Monthly day before TA","MONTHLY:15:07:14","January 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 14, 2016 16:07:00","ND Monthly same day TA","MONTHLY:15:07:14","February 14, 2016 15:07:00");
-#		numErrors += runNextDateTest("January 15, 2016 16:07:00","ND Monthly day after TA","MONTHLY:15:07:14","February 14, 2016 15:07:00");
+  def test_MonthlyOnDayTimeBefore(self):
+    ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,10,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,15,3,0,0)))
 
+  def test_MonthlyOnDayTimeAfter(self):
+    ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,11,15,3,0,0)))
+
+  def test_MonthlyDayAfter(self):
+    ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,12,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,11,15,3,0,0)))
+
+  def test_MonthlyYearRollover(self):
+    ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,12,12,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2019,1,11,15,3,0,0)))
 
 # class init tests
   def test_initWithNoneRaisesException(self):
