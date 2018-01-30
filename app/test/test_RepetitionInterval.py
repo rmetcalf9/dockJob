@@ -1,7 +1,8 @@
 import unittest
-from RepetitionInterval import RepetitionIntervalClass, badModeException, badNumberOfModeParamaters, badParamater, unknownTimezone
+from RepetitionInterval import RepetitionIntervalClass, badModeException, badNumberOfModeParamaters, badParamater, unknownTimezone, missingTimezoneException
 import datetime
- 
+from datetime import timedelta
+import pytz
 
 class test_RepetitionInterval(unittest.TestCase):
   def checkGotRightException(self, context, ExpectedException):
@@ -12,30 +13,54 @@ class test_RepetitionInterval(unittest.TestCase):
 
   def checkNextRun(self, riOBj, curTime, expTime):
     nextRun = riOBj.getNextOccuranceDatetime(curTime)
+    if (nextRun != expTime):
+      print("Next Run:" + str(nextRun))
+      print("Expected:" + str(expTime))
     self.assertEqual(nextRun, expTime)
 
 #-----------------------------------------------
 # Helpers above actual tests below
 #-----------------------------------------------
 
+# HOURLY TESTS
+  def test_PassedInDatetimeMustBeTimezoneAwear(self):
+    ri = RepetitionIntervalClass("HOURLY:03")
+    with self.assertRaises(Exception) as context:
+      nextRun = ri.getNextOccuranceDatetime(datetime.datetime(2016,1,5,14,2,59,0,None))
+    self.checkGotRightException(context,missingTimezoneException)
+
   def test_nextdateHourlyModeJustBeforeMinute(self):
     ri = RepetitionIntervalClass("HOURLY:03")
-    self.checkNextRun(ri,datetime.datetime(2016,1,5,14,2,59,0,None),datetime.datetime(2016,1,5,14,3,0,0,None))
+    self.checkNextRun(ri,datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('Europe/London')),datetime.datetime(2016,1,5,14,3,0,0,pytz.timezone('Europe/London')))
 
   def test_nextdateHourlyModeExactlyInMinute(self):
     ri = RepetitionIntervalClass("HOURLY:03")
-    self.checkNextRun(ri,datetime.datetime(2016,1,14,14,3,0,0,None),datetime.datetime(2016,1,14,15,3,0,0,None))
+    self.checkNextRun(ri,datetime.datetime(2016,1,14,14,3,0,0,pytz.timezone('Europe/London')),datetime.datetime(2016,1,14,15,3,0,0,pytz.timezone('Europe/London')))
 
   def test_nextdateHourlyModeJustAfterMinute(self):
     ri = RepetitionIntervalClass("HOURLY:03")
-    self.checkNextRun(ri,datetime.datetime(2016,1,14,14,3,1,0,None),datetime.datetime(2016,1,14,15,3,0,0,None))
+    self.checkNextRun(ri,datetime.datetime(2016,1,14,14,3,1,0,pytz.timezone('Europe/London')),datetime.datetime(2016,1,14,15,3,0,0,pytz.timezone('Europe/London')))
 
   def test_nextdateHourlyModeLastMinuteDayBefore(self):
     ri = RepetitionIntervalClass("HOURLY:03")
-    self.checkNextRun(ri,datetime.datetime(2016,1,14,23,3,1,0,None),datetime.datetime(2016,1,15,00,3,0,0,None))
+    self.checkNextRun(ri,datetime.datetime(2016,1,14,23,3,1,0,pytz.timezone('Europe/London')),datetime.datetime(2016,1,15,00,3,0,0,pytz.timezone('Europe/London')))
+
+  def test_HourlyBeforeDSTJumpForward(self):
+    #25 mar 2018 1am becomes 2am
+    # there won't be a 1:03 so it should jump to 2:03
+    ri = RepetitionIntervalClass("HOURLY:03")
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,3,25,0,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,3,25,2,3,0,0)))
+
+  def test_HourlyBeforeDSTJumpBack(self):
+    #29 oct 2018 2am becomes 1am
+    # there won't be a 1:03 so it should jump to 2:03`
+    ri = RepetitionIntervalClass("HOURLY:03")
+    # the time 1:03 can't be represented in Europe/London as it has two UTC values
+    # so the test specifies a UTC time
+    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,0,30,0,0)),pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,1,3,0,0)))
 
 
-#		//Daily Tests
+# Daily Tests
 #		numErrors += runNextDateTest("January 14, 2016 14:01:02","ND Daily","DAILY:15:07","January 14, 2016 15:07:00");
 #		numErrors += runNextDateTest("January 14, 2016 16:01:02","ND Daily","DAILY:15:07","January 15, 2016 15:07:00");
 #		numErrors += runNextDateTest("January 14, 2016 16:01:02","ND Daily","DAILY:15:07","January 15, 2016 15:07:00");
@@ -196,6 +221,11 @@ class test_RepetitionInterval(unittest.TestCase):
     with self.assertRaises(Exception) as context:
       a = RepetitionIntervalClass("DAILY:1:11:+++++XX:UTC")
     self.checkGotRightException(context,badParamater)
+
+  def test_initDailyWithNoneTimezoneErrors(self):
+    with self.assertRaises(Exception) as context:
+      a = RepetitionIntervalClass("DAILY:1:11:+++++++:None")
+    self.checkGotRightException(context,unknownTimezone)
 
 
 #public class RepetitionIntervalTest {

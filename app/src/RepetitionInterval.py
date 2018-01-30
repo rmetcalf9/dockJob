@@ -7,6 +7,7 @@ badModeException = Exception('Bad Mode')
 badNumberOfModeParamaters = Exception('Bad number of paramaters passed to mode')
 badParamater = Exception('Bad paramater value')
 unknownTimezone = Exception('Unknown Timezone')
+missingTimezoneException = Exception('datetime objects passed must be timezone awear')
 
 class ModeType(Enum):
   HOURLY = 1 #Single paramater which is the minute past the error
@@ -115,10 +116,21 @@ class RepetitionIntervalClass():
       except pytz.exceptions.UnknownTimeZoneError:
         raise unknownTimezone
 
+  #We must do arethmetic in UTC only or datetime gives wrong answer
+  def addTimeInUTC(self, time, amount):
+    utctime = time.astimezone(pytz.timezone('UTC'))
+    utctime += amount
+    return utctime.astimezone(time.tzinfo)
+
+
 
   #Returns the next time that the repetition interval defines according to the current datetime passed in
   def getNextOccuranceDatetime(self, curDateTime):
+    if (curDateTime.tzinfo == None):
+      raise missingTimezoneException
     if (self.mode == ModeType.HOURLY):
+      # Tried using localize method here but it dosen't seem to work that way
+      #  this way passes the tests
       nd = datetime.datetime(
         curDateTime.year,
         curDateTime.month,
@@ -130,7 +142,7 @@ class RepetitionIntervalClass():
         curDateTime.tzinfo
       )
       if (nd <= curDateTime):
-        nd += timedelta(hours=1)
+        nd = self.addTimeInUTC(nd, timedelta(hours=1))
       return nd
     return datetime.datetime.utcnow()
 
