@@ -1,16 +1,10 @@
-import unittest
+from TestHelperSuperClass import testHelperSuperClass
 from RepetitionInterval import RepetitionIntervalClass, badModeException, badNumberOfModeParamaters, badParamater, unknownTimezone, missingTimezoneException
 import datetime
 from datetime import timedelta
 import pytz
 
-class test_RepetitionInterval(unittest.TestCase):
-  def checkGotRightException(self, context, ExpectedException):
-    if (context.exception != None):
-      if (context.exception != ExpectedException):
-        raise context.exception
-    self.assertTrue(ExpectedException == context.exception)
-
+class test_RepetitionInterval(testHelperSuperClass):
   def checkNextRun(self, riOBj, curTime, expTime):
     nextRun = riOBj.getNextOccuranceDatetime(curTime)
     if (nextRun != expTime):
