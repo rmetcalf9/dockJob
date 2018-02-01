@@ -23,5 +23,12 @@ Job schedular with a web UI - designed to run as a container. I am creating this
  - Design UI
  - Get UI MVP working
 
+# TODO Running instructions (docker compose file)
+
+# Running just the backend server
+
+````
+sudo python3 ./app/src/app.py
+````
 
 

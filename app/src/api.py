@@ -1,11 +1,14 @@
 from flask import Flask
-import signal
+from appObj import appObjClass
+import datetime
+import pytz
 app = Flask(__name__)
-@app.route('/')
-def hello_world():
-    return 'Hello, World!'
 
-@app.route('/hello/<name>')
-def hello(name):
-    return 'Hello ' + name
+
+appObj = appObjClass()
+
+@app.route('/serverinfo')
+def serverinfo():
+  curDatetime = datetime.datetime.now(pytz.utc)
+  return appObj.getServerInfoJSON(curDatetime)
 
