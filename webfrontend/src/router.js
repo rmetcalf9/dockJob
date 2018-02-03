@@ -1,7 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import globalStore from './components/globalStore'
 
 Vue.use(VueRouter)
+
+function defaultBeforeNavFn (to, from, next, pageTitle) {
+  globalStore.commit('SET_PAGE_TITLE', pageTitle)
+  next()
+}
 
 function load (component) {
   // '@' is aliased to src/components
@@ -25,7 +31,14 @@ export default new VueRouter({
   scrollBehavior: () => ({ y: 0 }),
 
   routes: [
-    { path: '/', component: load('Hello') },
+    {
+      path: '/',
+      component: load('Index'),
+      children: [
+        { path: '/', redirect: '/dashboard' },
+        { path: 'dashboard', component: load('Dashboard'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Dashboard') } }
+      ]
+    },
 
     // Always leave this last one
     { path: '*', component: load('Error404') } // Not found
