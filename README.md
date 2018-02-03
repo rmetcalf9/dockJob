@@ -24,7 +24,7 @@ Job schedular with a web UI - designed to run as a container. I am creating this
  - Get UI MVP working
 
 # Links
-[Description of Architecture](ARCHITECTUREure.md)
+[Description of Architecture](./ARCHITECTUREure.md)
 
 # TODO Running instructions (docker compose file)
 
