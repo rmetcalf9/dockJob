@@ -6,9 +6,17 @@ Inside the image are two seperate components. Firstly the app, this is a python 
 
 When the image is running it will run the python flask application to provide the API's. It will also serve the javascript files for the quasar frontend.
 
-API URL: TODO
-Frontend URL: TODO
+API URL: http://host:80/dockjobapi/
+Frontend URL: http://host:80/dockjobfrontend/
 
 The full application is designed to run inside a docker stack fronted by an API gateway like Kong.
+
+## Security
+
+The API is protected by Kong using a username and password.
+(Future plan is to implement a login endpoint and make this a jwt token.)
+
+The dockjobfrontend is not protected by any security, however to operate it must access the API using the users username and password.
+
 
 
