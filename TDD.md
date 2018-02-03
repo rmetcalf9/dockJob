@@ -13,6 +13,12 @@ I have used (http://codecept.io/quickstart/) to create the tests here. To run th
 1. Start a Standalone Selenium server. I am using the Webdriver and the server should support at least one browser
 2. In the integration directory run "codeceptjs run --steps"
 
+
+To generate a new test, go to the integrationtests directory and run
+````
+codeceptjs gt
+````
+
 ### API Unit Tests
 
 The API is a flask app and unit tests can be run continously during development. To do this goto the app directory and run the script continous_test.sh
