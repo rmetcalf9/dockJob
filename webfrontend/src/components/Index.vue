@@ -26,6 +26,10 @@
         <q-item-side icon="home" />
         <q-item-main label="Dashboard" />
       </q-side-link>
+      <q-side-link item to="/dashboard2">
+        <q-item-side icon="home" />
+        <q-item-main label="Dashboard2" />
+      </q-side-link>
 
     </q-scroll-area>
 
