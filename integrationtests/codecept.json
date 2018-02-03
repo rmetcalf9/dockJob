@@ -4,7 +4,7 @@
   "output": "./output",
   "helpers": {
     "WebDriverIO": {
-      "url": "http://localhost",
+      "url": "http://localhost:8080",
       "browser": "chrome"
     }
   },
