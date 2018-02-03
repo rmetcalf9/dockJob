@@ -23,6 +23,9 @@ Job schedular with a web UI - designed to run as a container. I am creating this
  - Design UI
  - Get UI MVP working
 
+# Links
+[Description of Architecture](ARCHITECTUREure.md)
+
 # TODO Running instructions (docker compose file)
 
 # Running just the backend server
