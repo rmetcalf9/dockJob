@@ -19,7 +19,8 @@ The API is a flask app and unit tests can be run continously during development.
 
 ### Frontend Unit Tests
 
-TODO
+I have added [Jest](https://facebook.github.io/jest/docs/en/getting-started.html) to the quasar project. Unit tests can be run by changing to the /webfrontend directory and running "npm test".
+Tests are in the /webfrontend/test folder and follow the naming convention *.test.js
 
 
 ## Build Process
