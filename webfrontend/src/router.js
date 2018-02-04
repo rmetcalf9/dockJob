@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import globalStore from './components/globalStore'
+import globalStore from './stores/globalStore'
 
 Vue.use(VueRouter)
 

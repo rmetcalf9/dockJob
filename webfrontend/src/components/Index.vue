@@ -57,7 +57,7 @@ import {
   QListHeader,
   QScrollArea
 } from 'quasar'
-import globalStore from './globalStore'
+import globalStore from '../stores/globalStore'
 
 export default {
   components: {
