@@ -14,7 +14,7 @@
       </q-btn>
       <q-toolbar-title>
         {{ pageTitle }}
-        <span slot="subtitle">Scheduled Job Runner</span>
+        <span slot="subtitle">dockJob - Scheduled Job Runner by RJM</span>
       </q-toolbar-title>
 
     </q-toolbar>

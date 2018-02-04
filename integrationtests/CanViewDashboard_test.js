@@ -1,10 +1,15 @@
 
 Feature('CanViewDashboard');
 
-Scenario('test something', (I) => {
+Scenario('I can view the dashboard', (I) => {
   I.amOnPage('/');
   I.seeCurrentUrlEquals('/#/dashboard');
-  within('DIV.layout DIV.layout-page-container .layout-page', () => {
+  within('DIV.layout > header > div.q-toolbar', () => {
     I.see('Dashboard');
   });
+  within('DIV.layout > DIV.layout-page-container > .layout-page', () => {
+    I.see('Server Info');
+  });
 });
+
+//

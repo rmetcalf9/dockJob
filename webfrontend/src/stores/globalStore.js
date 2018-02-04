@@ -11,7 +11,7 @@ const state = {
 
 const mutations = {
   SET_PAGE_TITLE (state, link) {
-    state.pageTitle = 'DockJob by RJM - ' + link
+    state.pageTitle = link
   }
 }
 
