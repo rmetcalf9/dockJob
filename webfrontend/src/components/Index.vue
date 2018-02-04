@@ -36,7 +36,10 @@
     <router-view />
 
     <q-toolbar slot="footer">
-        <a href="https://github.com/rmetcalf9/dockJob">GitHub</a>
+        <table width="100%"><tr>
+        <td><a href="https://github.com/rmetcalf9/dockJob">GitHub</a></td>
+        <td align="right">Version: {{serverData.version}}</td>
+        </tr></table>
     </q-toolbar>
   </q-layout>
 </template>
@@ -94,7 +97,10 @@ export default {
       return newPath
     },
     pageTitle () {
-      return globalStore.state.pageTitle
+      return globalStore.getters.pageTitle
+    },
+    serverData () {
+      return globalStore.getters.serverData
     }
   },
   methods: {

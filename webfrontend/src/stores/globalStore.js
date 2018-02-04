@@ -2,8 +2,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import serverData from './serverData.js'
+
 const state = {
-  pageTitle: 'Default Page Title'
+  pageTitle: 'Default Page Title',
+  serverData: serverData
 }
 
 const mutations = {
@@ -13,6 +16,12 @@ const mutations = {
 }
 
 const getters = {
+  pageTitle: (state, getters) => {
+    return state.pageTitle
+  },
+  serverData: (state, getters) => {
+    return state.serverData
+  }
 }
 
 const actions = {
