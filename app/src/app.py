@@ -2,6 +2,15 @@ from flask import Flask
 from api import app
 import signal
 
+#Development code required to allow all access
+# TODO make this dev only and runnable on an option
+@app.after_request
+def after_request(response):
+  response.headers.add('Access-Control-Allow-Origin', '*')
+  response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+  response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+  return response
+
 #Code required to ensure that container will exit when a signal is received
 class ServerTerminationError(Exception):
   def __init__(self):
