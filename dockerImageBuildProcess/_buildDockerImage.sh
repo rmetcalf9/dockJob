@@ -15,7 +15,7 @@ if [[ `git status --porcelain` ]]; then
   exit 1
 fi
 
-
+cd ${START_DIR}
 ./checkRequiredProgramsAreInstalled.sh
 RES=$?
 if [ ${RES} -ne 0 ]; then
@@ -23,6 +23,7 @@ if [ ${RES} -ne 0 ]; then
   exit 1
 fi
 
+cd ${START_DIR}
 ./runAllTests.sh
 RES=$?
 if [ ${RES} -ne 0 ]; then
