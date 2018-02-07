@@ -10,6 +10,6 @@ if [[ E${APP_DIR} == "E" ]]; then
 fi
 
 
-python3 ${APP_DIR}/app.py DOCKER DEVELOPMENT ${FRONTEND_APP_DIR}
+python3 -u ${APP_DIR}/app.py DOCKER DEVELOPMENT ${FRONTEND_APP_DIR}
 
 exit 0
