@@ -8,5 +8,5 @@ export CMD_NPM=npm
 export CMD_CODECEPTJS=codeceptjs
 export CMD_QUASAR=quasar
 export CMD_DOCKER=docker
-
+export CMD_GIT=git
 

@@ -30,6 +30,10 @@ if ! [ -x "$(command -v ${CMD_DOCKER})" ]; then
   exit 1
 fi
 
+if ! [ -x "$(command -v ${CMD_GIT})" ]; then
+  echo "Error: ${CMD_GIT} is not installed." >&2
+  exit 1
+fi
 
 exit 0
 
