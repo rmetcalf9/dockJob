@@ -25,7 +25,8 @@ COPY ./webfrontend/build ${FRONTEND_APP_DIR}
 RUN mkdir ${VAR_DIR}
 COPY ./VERSION ${VAR_DIR}/VERSION
 
+COPY ./app/run_app_docker.sh /run_app_docker.sh
 
-ENTRYPOINT ["python3"]
-CMD ["/app/app.py $(cat ${VAR_DIR}/VERSION) ${FRONTEND_APP_DIR}"]
+ENTRYPOINT ["run_app_docker.sh"]
+###CMD ["/app/app.py DOCKER $(cat ${VAR_DIR}/VERSION) ${FRONTEND_APP_DIR}"]
 
