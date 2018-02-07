@@ -10,6 +10,17 @@ if [[ E${APP_DIR} == "E" ]]; then
 fi
 
 
-python3 -u ${APP_DIR}/app.py DOCKER DEVELOPMENT ${FRONTEND_APP_DIR}
+_term() { 
+  echo "Caught SIGTERM signal!" 
+  kill -TERM "$child" 2>/dev/null
+}
+
+trap _term SIGTERM
+
+python3 -u ${APP_DIR}/app.py DOCKER DEVELOPMENT ${FRONTEND_APP_DIR} &
+
+child=$! 
+wait "$child"
+
 
 exit 0
