@@ -12,6 +12,7 @@ RUN apk add --no-cache bash python3 && \
 
 ENV APP_DIR /app
 ENV FRONTEND_APP_DIR /webfrontend
+ENV VAR_DIR /vars
 
 EXPOSE 80
 
@@ -21,5 +22,10 @@ COPY ./app/src ${APP_DIR}
 RUN mkdir ${FRONTEND_APP_DIR}
 COPY ./webfrontend/build ${FRONTEND_APP_DIR}
 
+RUN mkdir ${VAR_DIR}
+COPY ./VERSION ${VAR_DIR}/VERSION
+
+
 ENTRYPOINT ["python3"]
-CMD ["/app/app.py"]
+CMD ["/app/app.py $(cat ${VAR_DIR}/VERSION) ${FRONTEND_APP_DIR}"]
+
