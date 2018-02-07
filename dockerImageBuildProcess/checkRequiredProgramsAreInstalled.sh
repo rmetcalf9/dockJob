@@ -15,7 +15,20 @@ if ! [ -x "$(command -v ${CMD_NPM})" ]; then
   exit 1
 fi
 
+if ! [ -x "$(command -v ${CMD_CODECEPTJS})" ]; then
+  echo "Error: ${CMD_CODECEPTJS} is not installed." >&2
+  exit 1
+fi
 
+if ! [ -x "$(command -v ${CMD_QUASAR})" ]; then
+  echo "Error: ${CMD_QUASAR} is not installed." >&2
+  exit 1
+fi
+
+if ! [ -x "$(command -v ${CMD_DOCKER})" ]; then
+  echo "Error: ${CMD_DOCKER} is not installed." >&2
+  exit 1
+fi
 
 
 exit 0
