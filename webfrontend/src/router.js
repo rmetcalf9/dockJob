@@ -9,6 +9,17 @@ function defaultBeforeNavFn (to, from, next, pageTitle) {
   next()
 }
 
+function requireAuth (to, from, next) {
+  if (globalStore.getters.serverData.apiaccesssecurity.length === 0) {
+    next()
+    return
+  }
+  next({
+    path: '/login',
+    query: { redirect: to.fullPath }
+  })
+}
+
 function load (component) {
   // '@' is aliased to src/components
   return () => import(`@/${component}.vue`)
@@ -34,6 +45,7 @@ export default new VueRouter({
     {
       path: '/',
       component: load('Index'),
+      beforeEnter: requireAuth,
       children: [
         { path: '/', redirect: '/dashboard' },
         { path: 'dashboard', component: load('Dashboard'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Dashboard') } }

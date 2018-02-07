@@ -14,6 +14,10 @@ import Vue from 'vue'
 import Quasar from 'quasar'
 import router from './router'
 
+import globalStore from './stores/globalStore'
+import dockjobapiFn from './callDockjobAPI.js'
+globalStore.commit('SET_DOCKJOBAPIFN', dockjobapiFn)
+
 Vue.config.productionTip = false
 Vue.use(Quasar) // Install Quasar Framework
 

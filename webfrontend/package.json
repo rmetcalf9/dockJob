@@ -66,6 +66,7 @@
     "webpack-dev-middleware": "^1.12.0",
     "webpack-hot-middleware": "^2.19.1",
     "webpack-merge": "^4.1.0",
-    "jest": "^22.1.4"
+    "jest": "^22.1.4",
+    "axios": "^0.17.1"
   }
 }

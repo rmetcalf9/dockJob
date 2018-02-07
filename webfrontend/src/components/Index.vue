@@ -16,7 +16,6 @@
         {{ pageTitle }}
         <span slot="subtitle">dockJob - Scheduled Job Runner by RJM</span>
       </q-toolbar-title>
-
     </q-toolbar>
 
     <q-scroll-area slot="left" style="width: 100%; height: 100%">
@@ -58,7 +57,9 @@ import {
   QItemMain,
   QSideLink,
   QListHeader,
-  QScrollArea
+  QScrollArea,
+  Loading,
+  Toast
 } from 'quasar'
 import globalStore from '../stores/globalStore'
 
@@ -104,6 +105,19 @@ export default {
     }
   },
   methods: {
+  },
+  created () {
+    Loading.show()
+    var callback = {
+      ok: function (response) {
+        Loading.hide()
+      },
+      error: function (response) {
+        Loading.hide()
+        Toast.create(response.message)
+      }
+    }
+    globalStore.dispatch('getServerInfo', {callback: callback})
   }
 }
 </script>

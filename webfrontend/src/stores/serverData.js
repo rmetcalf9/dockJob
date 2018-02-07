@@ -4,5 +4,6 @@
 
 export default {
   version: 'Development', // Version show as 0 fom this file
-  apiurl: 'http://127.0.0.1:80/dockjobapi'
+  apiurl: 'http://localhost:80/dockjobapi',
+  apiaccesssecurity: [] // all supported auth types. Can be empty, or strings: basic-auth, jwt
 }

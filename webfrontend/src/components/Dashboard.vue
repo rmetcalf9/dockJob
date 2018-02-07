@@ -6,7 +6,11 @@
         <span slot="subtitle">Basic Server Information</span>
       </q-card-title>
       <q-card-main>
-        Total jobs setup, Number Scheduled, Number Manual
+        <table>
+          <tr><td align="right">Total jobs setup:</td><td>{{ serverInfo.Jobs.TotalJobs }}</td></tr>
+          <tr><td align="right">Number Scheduled:</td><td></td></tr>
+          <tr><td align="right">Number Manual:</td><td></td></tr>
+        </table>
       </q-card-main>
     </q-card>
 
@@ -39,6 +43,7 @@ import {
   QCardTitle,
   QCardMain
 } from 'quasar'
+import globalStore from '../stores/globalStore'
 
 export default {
   components: {
@@ -50,7 +55,12 @@ export default {
     return {
     }
   },
+  methods: {
+  },
   computed: {
+    serverInfo () {
+      return globalStore.getters.serverInfo
+    }
   }
 }
 </script>
