@@ -75,15 +75,16 @@ if [ ${RES} -ne 0 ]; then
   exit 1
 fi
 
-#git add -A
-#git commit -m "version $version"
-#git tag -a "$version" -m "version $version"
-#git push
-#git push --tags
-#docker tag $USERNAME/$IMAGE:latest $USERNAME/$IMAGE:$version
+${CMD_GIT} add -A
+${CMD_GIT} commit -m "version $version"
+${CMD_GIT} tag -a "$version" -m "version $version"
+${CMD_GIT} push
+${CMD_GIT} push --tags
+docker tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:$version
+
 # push it
-#docker push $USERNAME/$IMAGE:latest
-#docker push $USERNAME/$IMAGE:$version
+#${CMD_DOCKER} push ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest
+#${CMD_DOCKER} push ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:$version
 
 
 echo "Script Complete"
