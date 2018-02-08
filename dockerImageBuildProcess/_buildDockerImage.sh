@@ -80,7 +80,7 @@ ${CMD_GIT} commit -m "version $version"
 ${CMD_GIT} tag -a "$version" -m "version $version"
 ${CMD_GIT} push
 ${CMD_GIT} push --tags
-docker tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:$version
+${CMD_DOCKER} tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:$version
 
 # push it
 #${CMD_DOCKER} push ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest
