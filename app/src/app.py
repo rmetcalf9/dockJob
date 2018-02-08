@@ -2,6 +2,7 @@ from flask import Flask
 from api import app
 import signal
 import sys
+from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
 
 #Development code required to allow all access
 # TODO make this dev only and runnable on an option
@@ -32,10 +33,8 @@ try:
   arg_mode = sys.argv[1]
   arg_version = sys.argv[2]
   arg_frontend = sys.argv[3]
-  GlobalParamaters(arg_mode, arg_version, arg_frontend)
-  print("Mode:" + arg_mode)
-  print("Version:" + arg_version)
-  print("Frontend Location:" + arg_frontend)
+  GlobalParamaters = GlobalParamatersClass(arg_mode, arg_version, arg_frontend)
+  print(GlobalParamaters.getStartupOutput())
   app.run(host='0.0.0.0', port=80, debug=False)
 except ServerTerminationError as e:
   print("Stopped")

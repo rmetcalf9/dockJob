@@ -26,6 +26,10 @@ class GlobalParamatersClass():
     self.version = version
     self.webfrontendpath = webfrontendpath
 
-
+  def getStartupOutput(self):
+    r = 'Mode:' + self.mode + '\n'
+    r += 'Version:' + self.version + '\n'
+    r += 'Frontend Location:' + self.webfrontendpath + '\n'
+    return r
 
 GlobalParamaters = None

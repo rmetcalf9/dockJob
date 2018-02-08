@@ -23,3 +23,12 @@ class test_GlobalParamaters(testHelperSuperClass):
     with self.assertRaises(Exception) as context:
       gp = GlobalParamatersClass("DOCKER","","_")
     self.checkGotRightException(context,invalidVersionArgumentException)
+
+  def test_validWebFrontendDirectory(self):
+    gp = GlobalParamatersClass("DOCKER","TEST-1.2.3","../app")
+
+  def test_startupOutput(self):
+    gp = GlobalParamatersClass("DOCKER","TEST-1.2.3","../app")
+    self.assertEqual(gp.getStartupOutput(), 'Mode:DOCKER\nVersion:TEST-1.2.3\nFrontend Location:../app\n')
+
+
