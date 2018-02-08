@@ -2,7 +2,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import serverData from './serverData.js'
+import serverData from '../dynamic/webfrontendConnectionData.js'
 
 const state = {
   dockJobAPIFn: undefined,
