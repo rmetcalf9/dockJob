@@ -7,7 +7,7 @@ from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
 #Development code required to add CORS allowance in developer mode
 @app.after_request
 def after_request(response):
-  if (GlobalParamaters.getDeveloperMode()):
+  if (GlobalParamaters.get().getDeveloperMode()):
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
@@ -33,8 +33,8 @@ try:
   arg_mode = sys.argv[1]
   arg_version = sys.argv[2]
   arg_frontend = sys.argv[3]
-  GlobalParamaters = GlobalParamatersClass(arg_mode, arg_version, arg_frontend)
-  print(GlobalParamaters.getStartupOutput())
+  GlobalParamaters.set(GlobalParamatersClass(arg_mode, arg_version, arg_frontend))
+  print(GlobalParamaters.get().getStartupOutput())
   app.run(host='0.0.0.0', port=80, debug=False)
 except ServerTerminationError as e:
   print("Stopped")

@@ -35,4 +35,14 @@ class GlobalParamatersClass():
   def getDeveloperMode(self):
     return (self.mode == 'DEVELOPER')
 
-GlobalParamaters = None
+  def getWebFrontendPath(self):
+    return self.webfrontendpath
+
+class GlobalParamatersPointerClass():
+  obj = None
+  def set(self, obj):
+    self.obj = obj
+  def get(self):
+    return self.obj
+
+GlobalParamaters = GlobalParamatersPointerClass()
