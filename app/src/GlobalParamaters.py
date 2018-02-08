@@ -32,4 +32,7 @@ class GlobalParamatersClass():
     r += 'Frontend Location:' + self.webfrontendpath + '\n'
     return r
 
+  def getDeveloperMode(self):
+    return (self.mode == 'DEVELOPER')
+
 GlobalParamaters = None

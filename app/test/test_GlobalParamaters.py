@@ -31,4 +31,9 @@ class test_GlobalParamaters(testHelperSuperClass):
     gp = GlobalParamatersClass("DOCKER","TEST-1.2.3","../app")
     self.assertEqual(gp.getStartupOutput(), 'Mode:DOCKER\nVersion:TEST-1.2.3\nFrontend Location:../app\n')
 
+  def test_developerMode(self):
+    gp = GlobalParamatersClass("DOCKER","TEST-1.2.3","../app")
+    self.assertEqual(gp.getDeveloperMode(), False)
+    gp = GlobalParamatersClass("DEVELOPER","TEST-1.2.3","../app")
+    self.assertEqual(gp.getDeveloperMode(), True)
 
