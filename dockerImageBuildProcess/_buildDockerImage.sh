@@ -51,6 +51,19 @@ if [[ `${CMD_GIT} status --porcelain` ]]; then
   exit 1
 fi
 
+VERSIONFILE=${DOCKJOB_GITROOT}/VERSION
+cd ${START_DIR}
+./bumpVersion.sh ${VERSIONFILE}
+RES=$?
+if [ ${RES} -ne 0 ]; then
+  cd ${START_DIR}
+  echo ""
+  echo "Bump version failed"
+  exit 1
+fi
+VERSIONNUM=$(cat ${VERSIONFILE})
+
+# must build AFTER the version is bumped as the version file is imported to the image
 cd ${DOCKJOB_GITROOT}
 eval ${CMD_DOCKER} build . -t ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest
 RES=$?
@@ -61,29 +74,17 @@ if [ ${RES} -ne 0 ]; then
   exit 1
 fi
 
-cd ${START_DIR}
-./bumpVersion.sh ${DOCKJOB_GITROOT}/VERSION
-RES=$?
-if [ ${RES} -ne 0 ]; then
-  cd ${START_DIR}
-  echo ""
-  echo "Bump version failed"
-  exit 1
-fi
-version=`cat VERSION`
-
-
 cd ${DOCKJOB_GITROOT}
 ${CMD_GIT} add -A
-${CMD_GIT} commit -m "version $version"
-${CMD_GIT} tag -a "$version" -m "version $version"
+${CMD_GIT} commit -m "version ${VERSIONNUM}"
+${CMD_GIT} tag -a "${VERSIONNUM}" -m "version ${VERSIONNUM}"
 ${CMD_GIT} push
 ${CMD_GIT} push --tags
-${CMD_DOCKER} tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:$version
+${CMD_DOCKER} tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}
 
 # push it
 #${CMD_DOCKER} push ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest
-#${CMD_DOCKER} push ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:$version
+#${CMD_DOCKER} push ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}
 
 
 echo "Script Complete"
