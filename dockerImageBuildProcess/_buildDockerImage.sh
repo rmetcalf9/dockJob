@@ -1,7 +1,6 @@
 #!/bin/bash
 
 
-START_DIR=$(pwd)
 DOCKER_USERNAME=metcarob
 DOCKER_IMAGENAME=dockjob
 
