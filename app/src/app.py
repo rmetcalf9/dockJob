@@ -32,6 +32,7 @@ try:
   arg_mode = sys.argv[1]
   arg_version = sys.argv[2]
   arg_frontend = sys.argv[3]
+  GlobalParamaters(arg_mode, arg_version, arg_frontend)
   print("Mode:" + arg_mode)
   print("Version:" + arg_version)
   print("Frontend Location:" + arg_frontend)

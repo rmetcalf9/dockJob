@@ -17,7 +17,7 @@ _term() {
 
 trap _term SIGTERM
 
-python3 -u ${APP_DIR}/app.py DOCKER DEVELOPMENT ${FRONTEND_APP_DIR} &
+python3 -u ${APP_DIR}/app.py DOCKER $(cat ${APP_DIR}/../VERSION) ${FRONTEND_APP_DIR} &
 
 child=$! 
 wait "$child"
