@@ -52,20 +52,7 @@ if [[ `${CMD_GIT} status --porcelain` ]]; then
   exit 1
 fi
 
-echo "Bump version"
-${CMD_DOCKER} run --rm -v "$PWD":/app treeder/bump patch
-RES=$?
-if [ ${RES} -ne 0 ]; then
-  cd ${START_DIR}
-  echo ""
-  echo "Bump version failed"
-  exit 1
-fi
-version=`cat VERSION`
-echo "version: $version"
-
-
-
+cd ${DOCKJOB_GITROOT}
 eval ${CMD_DOCKER} build . -t ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest
 RES=$?
 if [ ${RES} -ne 0 ]; then
@@ -75,6 +62,19 @@ if [ ${RES} -ne 0 ]; then
   exit 1
 fi
 
+cd ${START_DIR}
+./bumpVersion.sh ${DOCKJOB_GITROOT}/VERSION
+RES=$?
+if [ ${RES} -ne 0 ]; then
+  cd ${START_DIR}
+  echo ""
+  echo "Bump version failed"
+  exit 1
+fi
+version=`cat VERSION`
+
+
+cd ${DOCKJOB_GITROOT}
 ${CMD_GIT} add -A
 ${CMD_GIT} commit -m "version $version"
 ${CMD_GIT} tag -a "$version" -m "version $version"
