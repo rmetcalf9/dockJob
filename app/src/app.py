@@ -27,13 +27,15 @@ def exit_gracefully(signum, frame):
 signal.signal(signal.SIGINT, exit_gracefully)
 signal.signal(signal.SIGTERM, exit_gracefully) #sigterm is sent by docker stop command
 try:
-  expectedNumberOfParams = 4
+  expectedNumberOfParams = 6
   if (len(sys.argv) != expectedNumberOfParams):
     raise Exception('Wrong number of paramaters passed (Got ' + str(len(sys.argv)) + " expected " + str(expectedNumberOfParams) + ")")
   arg_mode = sys.argv[1]
   arg_version = sys.argv[2]
   arg_frontend = sys.argv[3]
-  GlobalParamaters.set(GlobalParamatersClass(arg_mode, arg_version, arg_frontend))
+  arg_apiurl = sys.argv[4]
+  arg_apiaccesssecurity = sys.argv[5]
+  GlobalParamaters.set(GlobalParamatersClass(arg_mode, arg_version, arg_frontend, arg_apiurl, arg_apiaccesssecurity))
   print(GlobalParamaters.get().getStartupOutput())
   app.run(host='0.0.0.0', port=80, debug=False)
 except ServerTerminationError as e:

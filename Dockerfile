@@ -12,6 +12,7 @@ RUN apk add --no-cache bash python3 && \
 ENV APP_DIR /app
 ENV FRONTEND_APP_DIR /webfrontend
 ENV VAR_DIR /vars
+ENV API_URL http://localhost:80/dockjobapi
 
 EXPOSE 80
 

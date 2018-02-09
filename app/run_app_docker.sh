@@ -20,6 +20,10 @@ if [ E${VERSION} = 'E' ]; then
   echo 'Can not find version file in standard locations'
   exit 1
 fi
+if [ E${API_URL} = 'E' ]; then
+  echo 'Error - API_URL enviroment variable not set'
+  exit 1
+fi
 
 _term() { 
   echo "Caught SIGTERM signal!" 
@@ -28,7 +32,7 @@ _term() {
 
 trap _term SIGTERM
 
-python3 -u ${APP_DIR}/app.py DOCKER ${VERSION} ${FRONTEND_APP_DIR} &
+python3 -u ${APP_DIR}/app.py DOCKER ${VERSION} ${FRONTEND_APP_DIR} ${API_URL} '[]' &
 
 child=$! 
 wait "$child"

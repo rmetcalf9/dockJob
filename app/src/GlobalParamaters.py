@@ -1,4 +1,5 @@
 import os
+import json
 
 invalidModeArgumentException = Exception('Invalid Mode Argument')
 invalidFrontentPathArgumentException = Exception('Invalid Web Frontend Path Argument')
@@ -9,7 +10,9 @@ class GlobalParamatersClass():
   mode = None
   version = None
   webfrontendpath = None
-  def __init__(self, mode, version, webfrontendpath):
+  apiurl = None
+  apiaccesssecurity = None
+  def __init__(self, mode, version, webfrontendpath, apiurl, apiaccesssecurity):
     if (mode == 'DEVELOPER'):
       pass
     elif (mode == 'DOCKER'):
@@ -25,11 +28,15 @@ class GlobalParamatersClass():
     self.mode = mode
     self.version = version
     self.webfrontendpath = webfrontendpath
+    self.apiurl = apiurl
+    self.apiaccesssecurity = json.loads(apiaccesssecurity)
 
   def getStartupOutput(self):
     r = 'Mode:' + self.mode + '\n'
     r += 'Version:' + self.version + '\n'
     r += 'Frontend Location:' + self.webfrontendpath + '\n'
+    r += 'apiurl:' + self.apiurl + '\n'
+    r += 'apiaccesssecurity:' + json.dumps(self.apiaccesssecurity) + '\n'
     return r
 
   def getDeveloperMode(self):
@@ -37,6 +44,10 @@ class GlobalParamatersClass():
 
   def getWebFrontendPath(self):
     return self.webfrontendpath
+
+  def getWebServerInfoJSON(self):
+    print(self.apiaccesssecurity)
+    return json.dumps({'version': self.version,'apiurl': self.apiurl,'apiaccesssecurity': self.apiaccesssecurity})
 
 class GlobalParamatersPointerClass():
   obj = None
