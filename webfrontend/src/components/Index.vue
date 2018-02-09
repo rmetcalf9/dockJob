@@ -29,6 +29,11 @@
         <q-item-side icon="home" />
         <q-item-main label="Dashboard2" />
       </q-side-link>
+      <hr v-if="loginRequiredByServer">
+      <q-side-link item to="/logout" v-if="loginRequiredByServer">
+        <q-item-side icon="exit_to_app" />
+        <q-item-main label="Logout" />
+      </q-side-link>
 
     </q-scroll-area>
 
@@ -102,22 +107,27 @@ export default {
     },
     connectionData () {
       return globalStore.getters.connectionData
+    },
+    loginRequiredByServer () {
+      return globalStore.getters.loginRequiredByServer
     }
   },
   methods: {
   },
   created () {
-    Loading.show()
-    var callback = {
-      ok: function (response) {
-        Loading.hide()
-      },
-      error: function (response) {
-        Loading.hide()
-        Toast.create(response.message)
+    if (globalStore.getters.datastoreState !== 'LOGGED_IN_SERVERDATA_LOADED') {
+      Loading.show()
+      var callback = {
+        ok: function (response) {
+          Loading.hide()
+        },
+        error: function (response) {
+          Loading.hide()
+          Toast.create(response.message)
+        }
       }
+      globalStore.dispatch('getServerInfo', {callback: callback})
     }
-    globalStore.dispatch('getServerInfo', {callback: callback})
   }
 }
 </script>

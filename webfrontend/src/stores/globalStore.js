@@ -6,6 +6,7 @@ import webfrontendConnectionData from '../webfrontendConnectionData'
 
 const state = {
   datastoreState: 'INITIAL', // INITIAL, REQUIRE_LOGIN, LOGGED_IN, LOGGED_IN_SERVERDATA_LOADED
+  loginRequiredByServer: false,
   dockJobAPIFn: undefined,
   dockJobAccessCredentials: undefined,
   pageTitle: 'Default Page Title',
@@ -30,9 +31,11 @@ const mutations = {
     state.connectionData = connectionData
     if (state.connectionData.apiaccesssecurity.length === 0) {
       state.datastoreState = 'LOGGED_IN' // no login required
+      state.loginRequiredByServer = false
     }
     else {
       state.datastoreState = 'REQUIRE_LOGIN'
+      state.loginRequiredByServer = true
     }
   }
 
@@ -50,6 +53,9 @@ const getters = {
   },
   datastoreState: (state, getters) => {
     return state.datastoreState
+  },
+  loginRequiredByServer: (state, getters) => {
+    return state.loginRequiredByServer
   }
 }
 

@@ -27,28 +27,7 @@ export default function callDockjobAPI (apiurl, dockJobAccessCredentials, method
       callback.ok(response)
     },
     (response) => {
-      var rjmmsg = 'Error'
-
-      if (typeof (response.response) === 'undefined') {
-        if (typeof (response.message) === 'undefined') {
-          rjmmsg = 'Bad Response UNKNOWN'
-        }
-        else {
-          rjmmsg = 'Bad Response ' + response.message
-        }
-      }
-      else if (typeof (response.response.data) !== 'undefined') {
-        if (typeof (response.response.data.errorMessages) !== 'undefined') {
-          rjmmsg = 'Bad Response(' + response.response.data.errorMessages.length + ') ' + response.response.data.errorMessages
-        }
-        else {
-          rjmmsg = 'Data Bad Response ' + response.response.status
-        }
-      }
-      else {
-        rjmmsg = 'Nested Bad Response ' + response.response.status
-      }
-      callbackHelper.callbackHelper(callback, rjmmsg, response)
+      callbackHelper.webserviceError(callback, response)
     }
   )
 }
