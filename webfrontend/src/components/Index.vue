@@ -37,7 +37,7 @@
     <q-toolbar slot="footer">
         <table width="100%"><tr>
         <td><a href="https://github.com/rmetcalf9/dockJob">GitHub</a></td>
-        <td align="right">Version: {{serverData.version}}</td>
+        <td align="right">Version: {{connectionData.version}}</td>
         </tr></table>
     </q-toolbar>
   </q-layout>
@@ -100,8 +100,8 @@ export default {
     pageTitle () {
       return globalStore.getters.pageTitle
     },
-    serverData () {
-      return globalStore.getters.serverData
+    connectionData () {
+      return globalStore.getters.connectionData
     }
   },
   methods: {

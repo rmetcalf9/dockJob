@@ -1,6 +1,7 @@
 // function to wrap calls to dockjob API.
 // this function is used normally, for testing it is substituted with a different function
 import axios from 'axios'
+import callbackHelper from 'callbackHelper'
 
 function addAccessCredentials (config, dockJobAccessCredentials) {
   if (typeof (dockJobAccessCredentials) === 'undefined') {
@@ -47,13 +48,7 @@ export default function callDockjobAPI (apiurl, dockJobAccessCredentials, method
       else {
         rjmmsg = 'Nested Bad Response ' + response.response.status
       }
-
-      var retobj = {
-        message: rjmmsg,
-        orig: response
-      }
-      console.log(retobj)
-      callback.error(retobj)
+      callbackHelper.callbackHelper(callback, rjmmsg, response)
     }
   )
 }

@@ -9,8 +9,12 @@ function defaultBeforeNavFn (to, from, next, pageTitle) {
   next()
 }
 
-function requireAuth (to, from, next) {
-  if (globalStore.getters.serverData.apiaccesssecurity.length === 0) {
+// Function to implement a commonPreLoad depending on the dataStore state
+// INITIAL -> Go to login page, which will query server info and find out if login is required
+// REQUIRE_LOGIN -> Go to login page and prompt user to log in
+// LOGGED_IN -> Go to requested page
+function commonPreLoad (to, from, next) {
+  if ((globalStore.getters.datastoreState === 'LOGGED_IN') || (globalStore.getters.datastoreState === 'LOGGED_IN_SERVERDATA_LOADED')) {
     next()
     return
   }
@@ -45,12 +49,13 @@ export default new VueRouter({
     {
       path: '/',
       component: load('Index'),
-      beforeEnter: requireAuth,
+      beforeEnter: commonPreLoad,
       children: [
         { path: '/', redirect: '/dashboard' },
         { path: 'dashboard', component: load('Dashboard'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Dashboard') } }
       ]
     },
+    { path: '/login', component: load('Login') }, // Can't redirect to common preload or we will get endless loop
 
     // Always leave this last one
     { path: '*', component: load('Error404') } // Not found

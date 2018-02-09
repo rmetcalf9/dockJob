@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-padding card-examples row items-start">
+  <div class="layout-padding card-examples row items-start" v-if="datastoreState === 'LOGGED_IN_SERVERDATA_LOADED'">
     <q-card inline>
       <q-card-title>
         Server Info
@@ -60,6 +60,9 @@ export default {
   computed: {
     serverInfo () {
       return globalStore.getters.serverInfo
+    },
+    datastoreState () {
+      return globalStore.getters.datastoreState
     }
   }
 }
