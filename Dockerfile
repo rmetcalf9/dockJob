@@ -28,8 +28,7 @@ COPY ./app/run_app_docker.sh /run_app_docker.sh
 
 CMD ["/run_app_docker.sh"]
 
-#Do a healthcheck every 5 minutes.
-HEALTHCHECK --start-period=5s --interval=3m --timeout=3s \
+HEALTHCHECK --interval=3m --timeout=3s \
   CMD curl -f http://127.0.0.1:80/dockjobfrontend/index.html || exit 1
 
 ##docker run --name dockjob -p 80:80 -d metcarob/dockjob:latest
