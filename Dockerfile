@@ -2,7 +2,7 @@ FROM alpine
 
 MAINTAINER Robert Metcalf
 
-RUN apk add --no-cache bash python3 && \
+RUN apk add --no-cache bash python3 curl && \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \
     pip3 install --upgrade pip setuptools && \
