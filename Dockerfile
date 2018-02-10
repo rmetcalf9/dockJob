@@ -11,7 +11,6 @@ RUN apk add --no-cache bash python3 && \
 
 ENV APP_DIR /app
 ENV FRONTEND_APP_DIR /webfrontend
-ENV VAR_DIR /vars
 ENV API_URL http://localhost:80/dockjobapi
 
 EXPOSE 80
@@ -23,13 +22,10 @@ RUN pip3 install -r ${APP_DIR}/requirments.txt
 RUN mkdir ${FRONTEND_APP_DIR}
 COPY ./webfrontend/dist ${FRONTEND_APP_DIR}
 
-RUN mkdir ${VAR_DIR}
-COPY ./VERSION ${VAR_DIR}/VERSION
+COPY ./VERSION ${APP_DIR}/VERSION
 
 COPY ./app/run_app_docker.sh /run_app_docker.sh
 
 ENTRYPOINT ["/run_app_docker.sh"]
-###CMD ["/app/app.py DOCKER $(cat ${VAR_DIR}/VERSION) ${FRONTEND_APP_DIR}"]
-
 
 ##docker run --name dockjob -p 80:80 -d metcarob/dockjob:latest
