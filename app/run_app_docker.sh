@@ -1,5 +1,19 @@
 #!/bin/bash
 
+#Check the input paramaters are correct
+# Can be called with 0 params which runs the process
+# 1 param which must be HEALTHCHECK which runs a healthcheck
+if [[ $# != 0 ]]
+then
+  if [[ $# != 1 ]]
+  then
+    echo "ERROR - Must be called with one parameter"
+    exit 1
+  fi
+  echo "Healthcheck not implemented"
+  exit 0
+fi
+
 if [[ E${FRONTEND_APP_DIR} == "E" ]]; then
   echo "Error - FRONTEND_APP_DIR not specified"
   exit 1
