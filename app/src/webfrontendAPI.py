@@ -15,6 +15,7 @@ def normalfile(path):
 
 @webfrontendBP.route('/')
 def missingfile():
+  print("webfrontend acces with no file - returning index.html")
   return normalfile('index.html')
 
 @webfrontendBP.route('/webfrontendConnectionData')
