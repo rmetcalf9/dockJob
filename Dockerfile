@@ -26,8 +26,7 @@ COPY ./VERSION /VERSION
 
 COPY ./app/run_app_docker.sh /run_app_docker.sh
 
-ENTRYPOINT ["/bin/bash"]
-CND ["/run_app_docker.sh"]
+CMD ["/run_app_docker.sh"]
 
 HEALTHCHECK --interval=5m --timeout=3s \
   CMD curl -f http://127.0.0.1:80/dockjobfrontend/index.html || exit 1
