@@ -8,6 +8,10 @@ if [[ E${APP_DIR} == "E" ]]; then
   echo "Error - APP_DIR not specified"
   exit 1
 fi
+if [[ E${AUTH_OPTIONS} == "E" ]]; then
+  echo "Error - AUTH_OPTIONS not specified"
+  exit 1
+fi
 
 VERSION=
 if [ -f ${APP_DIR}/../VERSION ]; then
@@ -32,7 +36,7 @@ _term() {
 
 trap _term SIGTERM
 
-python3 -u ${APP_DIR}/app.py DOCKER ${VERSION} ${FRONTEND_APP_DIR} ${API_URL} '[]' &
+python3 -u ${APP_DIR}/app.py DOCKER ${VERSION} ${FRONTEND_APP_DIR} ${API_URL} ${AUTH_OPTIONS} &
 
 child=$! 
 wait "$child"

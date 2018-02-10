@@ -12,6 +12,7 @@ RUN apk add --no-cache bash python3 curl && \
 ENV APP_DIR /app
 ENV FRONTEND_APP_DIR /webfrontend
 ENV API_URL http://localhost:80/dockjobapi
+ENV AUTH_OPTIONS '[]'
 
 EXPOSE 80
 
