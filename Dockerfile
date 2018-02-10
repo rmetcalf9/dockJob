@@ -22,7 +22,7 @@ RUN pip3 install -r ${APP_DIR}/requirments.txt
 RUN mkdir ${FRONTEND_APP_DIR}
 COPY ./webfrontend/dist ${FRONTEND_APP_DIR}
 
-COPY ./VERSION ${APP_DIR}/VERSION
+COPY ./VERSION /VERSION
 
 COPY ./app/run_app_docker.sh /run_app_docker.sh
 
