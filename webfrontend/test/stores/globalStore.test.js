@@ -2,6 +2,7 @@
 import commonUtils from '../commonUtils.js'
 const store = require('../../src/stores/globalStore.js')
 const globalStore = store.default
+import callbackHelper from '../../src/callbackHelper'
 // import globalStore from '../../src/stores/globalStore.js'
 // import {getInitialState, mutations, actions} from '../../src/stores/globalStore.js'
 
@@ -44,21 +45,70 @@ test('Login basic-auth success', done => {
   expect(gsState.datastoreState).toBe('REQUIRE_LOGIN');
 
   // Mock the API function so we can control it's response
-  store.mutations.SET_APIFN(gsState, function () {console.log('TODO JEST Mock')})
+  //mocking callDockjobAPI (apiurl, dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callback)
+  const accessCredentials = {a: 'TEST'}
+  const sucessfulGetServerinfoCall = jest.fn(function (apiurl, dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callback) {
+    expect(method).toBe('GET');
+    expect(pathWithoutStartingSlash).toBe('serverinfo');
+    expect(dockJobAccessCredentials).toBe(accessCredentials);
+    callback.ok({
+      status: 200,
+      statusText: 'OK',
+      data: {
+        Jobs: {NextExecuteJob: undefined, TotalJobs: 0},
+        Server: {NextExecuteJob: 'Europe/London', ServerDatetime: '2018-02-12 18:29:31.554385+00:00'}
+      }
+    })
+  })
 
+  store.mutations.SET_APIFN(gsState, sucessfulGetServerinfoCall)
 
   var callback = {
     ok: function (response) {
-      expect(gsState.datastoreState).toBe('LOGGED_IN');
+      expect(gsState.datastoreState).toBe('LOGGED_IN_SERVERDATA_LOADED');
       done()
     },
     error: function (response) {
+      done.fail(new Error('Should not report failed login'))
     }
   }
-  store.actions.login({commit: commonUtils.getCommitFN(gsState, store.mutations), state: gsState}, {callback: callback})
+  store.actions.login({commit: commonUtils.getCommitFN(gsState, store.mutations), state: gsState}, {callback: callback, accessCredentials: accessCredentials})
 });
 
-//TODO Test login fail
+test('Login basic-auth fail', done => {
+  var gsState = store.getInitialState()
+  expect(gsState.datastoreState).toBe('INITIAL');
+  
+  store.mutations.SET_CONNECTIONDATA(gsState, {'version': 'TEST','apiurl': 'https://test','apiaccesssecurity': [{'type': 'basic-auth' }]})
+  expect(gsState.datastoreState).toBe('REQUIRE_LOGIN');
+
+  // Mock the API function so we can control it's response
+  //mocking callDockjobAPI (apiurl, dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callback)
+  const accessCredentials = {a: 'TEST'}
+  const sucessfulGetServerinfoCall = jest.fn(function (apiurl, dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callback) {
+    expect(method).toBe('GET')
+    expect(pathWithoutStartingSlash).toBe('serverinfo')
+    expect(dockJobAccessCredentials).toBe(accessCredentials)
+    callbackHelper.webserviceError(callback, {
+      status: 500,
+      statusText: 'ERROR',
+      message: 'TEST ERROR MSG'
+    })
+  })
+
+  store.mutations.SET_APIFN(gsState, sucessfulGetServerinfoCall)
+
+  var callback = {
+    ok: function (response) {
+      done.fail(new Error('Should not report sucessful login'))
+    },
+    error: function (response) {
+      expect(gsState.datastoreState).toBe('REQUIRE_LOGIN');
+      done()
+    }
+  }
+  store.actions.login({commit: commonUtils.getCommitFN(gsState, store.mutations), state: gsState}, {callback: callback, accessCredentials: accessCredentials})
+});
 
 //TODO Test logout
 

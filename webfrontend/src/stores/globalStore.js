@@ -44,7 +44,6 @@ export const mutations = {
   },
   SET_ACCESSCREDENTIALS (state, accessCredentials) {
     state.accessCredentials = accessCredentials
-    state.datastoreState = 'LOGGED_IN'
   }
 }
 
@@ -61,6 +60,19 @@ export const actions = {
     webfrontendConnectionData(callback)
   },
   getServerInfo ({commit, state}, params) {
+    var callback = {
+      ok: function (response) {
+        commit('SET_SERVERINFO', response.data)
+        params.callback.ok(response)
+      },
+      error: function (error) {
+        params.callback.error(error)
+      }
+    }
+    state.APIFn('GET', 'serverinfo', undefined, callback)
+  },
+  login ({commit, state}, params) {
+    commit('SET_ACCESSCREDENTIALS', params.accessCredentials)
     var callback = {
       ok: function (response) {
         commit('SET_SERVERINFO', response.data)
