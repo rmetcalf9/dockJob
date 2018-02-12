@@ -36,27 +36,29 @@ test('Setting connection data with basic-auth login mode changes state to REQUIR
   expect(gsState.datastoreState).toBe('REQUIRE_LOGIN');
 });
 
-// TODO Change this test to use action
-/*
-test('Log in with basic-auth login mode changes state to LOGGED_IN', () => {
+test('Login basic-auth success', done => {
   var gsState = store.getInitialState()
+  expect(gsState.datastoreState).toBe('INITIAL');
+  
   store.mutations.SET_CONNECTIONDATA(gsState, {'version': 'TEST','apiurl': 'https://test','apiaccesssecurity': [{'type': 'basic-auth' }]})
   expect(gsState.datastoreState).toBe('REQUIRE_LOGIN');
-  store.mutations.SET_CONNECTIONDATA(gsState, {'version': 'TEST','apiurl': 'https://test','apiaccesssecurity': [{'type': 'basic-auth' }]})
-  expect(gsState.datastoreState).toBe('LOGGED_IN');
-});
-*/
 
-  
-/*        var callback = {
-        ok: function (response) {
-          Loading.hide()
-          TTT.$router.replace(TTT.$route.query.redirect || '/')
-        },
-        error: function (response) {
-          Loading.hide()
-          Toast.create(response.message)
-        }
-      }
-      globalStore.dispatch('init', {callback: callback})
-  */
+  // Mock the API function so we can control it's response
+  store.mutations.SET_APIFN(gsState, function () {console.log('TODO JEST Mock')})
+
+
+  var callback = {
+    ok: function (response) {
+      expect(gsState.datastoreState).toBe('LOGGED_IN');
+      done()
+    },
+    error: function (response) {
+    }
+  }
+  store.actions.login({commit: commonUtils.getCommitFN(gsState, store.mutations), state: gsState}, {callback: callback})
+});
+
+//TODO Test login fail
+
+//TODO Test logout
+
