@@ -110,5 +110,52 @@ test('Login basic-auth fail', done => {
   store.actions.login({commit: commonUtils.getCommitFN(gsState, store.mutations), state: gsState}, {callback: callback, accessCredentials: accessCredentials})
 });
 
-//TODO Test logout
+test('Login and logout basic-auth success', done => {
+  var gsState = store.getInitialState()
+  expect(gsState.datastoreState).toBe('INITIAL');
+  
+  store.mutations.SET_CONNECTIONDATA(gsState, {'version': 'TEST','apiurl': 'https://test','apiaccesssecurity': [{'type': 'basic-auth' }]})
+  expect(gsState.datastoreState).toBe('REQUIRE_LOGIN');
+
+  // Mock the API function so we can control it's response
+  //mocking callDockjobAPI (apiurl, dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callback)
+  const accessCredentials = {a: 'TEST'}
+  const sucessfulGetServerinfoCall = jest.fn(function (apiurl, dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callback) {
+    expect(method).toBe('GET');
+    expect(pathWithoutStartingSlash).toBe('serverinfo');
+    expect(dockJobAccessCredentials).toBe(accessCredentials);
+    callback.ok({
+      status: 200,
+      statusText: 'OK',
+      data: {
+        Jobs: {NextExecuteJob: undefined, TotalJobs: 0},
+        Server: {NextExecuteJob: 'Europe/London', ServerDatetime: '2018-02-12 18:29:31.554385+00:00'}
+      }
+    })
+  })
+
+  store.mutations.SET_APIFN(gsState, sucessfulGetServerinfoCall)
+
+  var callback = {
+    ok: function (response) {
+      var callback2 = {
+        ok: function (response) {
+          expect(gsState.datastoreState).toBe('REQUIRE_LOGIN');
+          expect(gsState.accessCredentials).toBeUndefined();
+          done()
+        },
+        error: function (response) {
+          done.fail(new Error('Logout should not fail'))
+        }
+      }
+      expect(gsState.datastoreState).toBe('LOGGED_IN_SERVERDATA_LOADED')
+  
+      store.actions.logout({commit: commonUtils.getCommitFN(gsState, store.mutations), state: gsState}, {callback: callback2})
+    },
+    error: function (response) {
+      done.fail(new Error('Should not report failed login'))
+    }
+  }
+  store.actions.login({commit: commonUtils.getCommitFN(gsState, store.mutations), state: gsState}, {callback: callback, accessCredentials: accessCredentials})
+});
 

@@ -42,8 +42,13 @@ export const mutations = {
       state.loginRequiredByServer = true
     }
   },
+  // Only to be called from this file, use actions
   SET_ACCESSCREDENTIALS (state, accessCredentials) {
     state.accessCredentials = accessCredentials
+  },
+  // Only to be called from this file, use actions
+  SET_STORESTATE (state, value) {
+    state.datastoreState = value
   }
 }
 
@@ -83,6 +88,11 @@ export const actions = {
       }
     }
     state.APIFn('GET', 'serverinfo', undefined, callback)
+  },
+  logout ({commit, state}, params) {
+    commit('SET_ACCESSCREDENTIALS', undefined)
+    commit('SET_STORESTATE','REQUIRE_LOGIN')
+    params.callback.ok(undefined)
   }
 }
 
