@@ -4,23 +4,27 @@ import Vuex from 'vuex'
 // import callbackHelper from 'callbackHelper'
 import webfrontendConnectionData from '../webfrontendConnectionData'
 
-const state = {
-  datastoreState: 'INITIAL', // INITIAL, REQUIRE_LOGIN, LOGGED_IN, LOGGED_IN_SERVERDATA_LOADED
-  loginRequiredByServer: false,
-  dockJobAPIFn: undefined,
-  dockJobAccessCredentials: undefined,
-  pageTitle: 'Default Page Title',
-  connectionData: undefined, // Data retrieved from this server (no security)
-  serverInfo: undefined // Data retrieved from server info service call
+// Exports MUST be in sequence
+
+export const getInitialState = function () {
+  return {
+    datastoreState: 'INITIAL', // INITIAL, REQUIRE_LOGIN, LOGGED_IN, LOGGED_IN_SERVERDATA_LOADED
+    loginRequiredByServer: false,
+    APIFn: undefined,
+    accessCredentials: undefined,
+    pageTitle: 'Default Page Title',
+    connectionData: undefined, // Data retrieved from this server (no security)
+    serverInfo: undefined // Data retrieved from server info service call
+  }
 }
 
-const mutations = {
+export const mutations = {
   SET_PAGE_TITLE (state, link) {
     state.pageTitle = link
   },
-  SET_DOCKJOBAPIFN (state, dockjobapifn) {
-    state.dockJobAPIFn = function (method, pathWithoutStartingSlash, postdata, callbackfn) {
-      return dockjobapifn(state.connectionData.apiurl, state.dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callbackfn)
+  SET_APIFN (state, apifn) {
+    state.APIFn = function (method, pathWithoutStartingSlash, postdata, callbackfn) {
+      return apifn(state.connectionData.apiurl, state.accessCredentials, method, pathWithoutStartingSlash, postdata, callbackfn)
     }
   },
   SET_SERVERINFO (state, serverinfo) {
@@ -37,29 +41,14 @@ const mutations = {
       state.datastoreState = 'REQUIRE_LOGIN'
       state.loginRequiredByServer = true
     }
-  }
-
-}
-
-const getters = {
-  pageTitle: (state, getters) => {
-    return state.pageTitle
   },
-  connectionData: (state, getters) => {
-    return state.connectionData
-  },
-  serverInfo: (state, getters) => {
-    return state.serverInfo
-  },
-  datastoreState: (state, getters) => {
-    return state.datastoreState
-  },
-  loginRequiredByServer: (state, getters) => {
-    return state.loginRequiredByServer
+  SET_ACCESSCREDENTIALS (state, accessCredentials) {
+    state.accessCredentials = accessCredentials
+    state.datastoreState = 'LOGGED_IN'
   }
 }
 
-const actions = {
+export const actions = {
   init ({commit, state}, params) {
     // init means we must load connection data
     var callback = {
@@ -81,7 +70,27 @@ const actions = {
         params.callback.error(error)
       }
     }
-    state.dockJobAPIFn('GET', 'serverinfo', undefined, callback)
+    state.APIFn('GET', 'serverinfo', undefined, callback)
+  }
+}
+
+const state = getInitialState()
+
+const getters = {
+  pageTitle: (state, getters) => {
+    return state.pageTitle
+  },
+  connectionData: (state, getters) => {
+    return state.connectionData
+  },
+  serverInfo: (state, getters) => {
+    return state.serverInfo
+  },
+  datastoreState: (state, getters) => {
+    return state.datastoreState
+  },
+  loginRequiredByServer: (state, getters) => {
+    return state.loginRequiredByServer
   }
 }
 
