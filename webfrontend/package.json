@@ -67,6 +67,26 @@
     "webpack-hot-middleware": "^2.19.1",
     "webpack-merge": "^4.1.0",
     "jest": "^22.1.4",
+    "jest-vue-preprocessor": "^1.0.1",
+    "babel-preset-env": "^1.6.0",
     "axios": "^0.17.1"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "src/components/([^\\.]*).vue$": "<rootDir>/src/components/$1.vue",
+      "src/components/([^\\.]*)$": "<rootDir>/src/components/$1.js",
+      "^vue$": "vue/dist/vue.common.js",
+      "src/([^\\.]*)$": "<rootDir>/src/$1.js",
+      "src/([^\\.]*).vue$": "<rootDir>/src/$1.vue",
+      "(.*)/(.*).vue$": "$1/$2.vue"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "vue"
+    ],
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/babel-jest",
+      ".*\\.(vue)$": "<rootDir>/node_modules/jest-vue-preprocessor"
+    }
   }
 }
