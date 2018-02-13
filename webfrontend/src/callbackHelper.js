@@ -41,9 +41,22 @@ function webserviceError (callback, response) {
   callbackWithError(callback, rjmmsg, response)
 }
 
+function getDoNothingCallback () {
+  var callback = {
+    ok: function (response) {
+      // return
+    },
+    error: function (response) {
+      // return
+    }
+  }
+  return callback
+}
+
 export default {
   callbackWithError: callbackWithError,
   callbackWithSimpleError: callbackWithSimpleError,
   callbackWithNotImplemented: callbackWithNotImplemented,
-  webserviceError: webserviceError
+  webserviceError: webserviceError,
+  getDoNothingCallback: getDoNothingCallback
 }

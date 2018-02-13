@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import globalStore from './stores/globalStore'
+// import callbackHelper from 'callbackHelper'
 
 Vue.use(VueRouter)
 
@@ -56,7 +57,20 @@ export default new VueRouter({
       ]
     },
     { path: '/login', component: load('Login') }, // Can't redirect to common preload or we will get endless loop
-
+    { path: '/logout',
+      beforeEnter (to, from, next) {
+        var callback = {
+          ok: function (response) {
+            console.log(globalStore.getters.datastoreState)
+            next('/login')
+          },
+          error: function (response) {
+            console.log(response.message)
+          }
+        }
+        globalStore.dispatch('logout', {callback: callback})
+      }
+    },
     // Always leave this last one
     { path: '*', component: load('Error404') } // Not found
   ]
