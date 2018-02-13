@@ -63,6 +63,26 @@ services:
       interval: 5s
       retries: 10
 
+  kong-configure:
+    image: byrnedo/alpine-curl
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 6s
+    entrypoint: "/bin/sh"
+    command:    "-c \" \
+                 (curl -i -X POST \
+                   --url http://kong:8001/consumers/ \
+                   --data 'username=sampleuser' ) && \
+                 (curl -i -X POST \
+                   --url http://kong:8001/consumers/admin/basic-auth \
+                   --data 'username=sampleuser'  \
+                   --data 'password=sampleuser' ) && \
+                 (curl -i -X POST \
+                   --url http://kong:8001/consumers/admin/acls \
+                   --data 'group=samplegroup' ) \
+                \""
+
   dockjob:
     image: metcarob/dockjob:latest
     environment:
@@ -73,6 +93,7 @@ services:
         condition: any
 
   #Add API's to kong to forward requests to dockjob
+  # also configure basic-auth so that only users in group samplegroup can access
   kong-addapis-dockjob:
     image: byrnedo/alpine-curl
     deploy:
@@ -87,6 +108,15 @@ services:
                      --data 'uris=/dockjobapi' \
                      --data 'upstream_url=http://dockjob:80/dockjobapi' \
                      --data 'https_only=true') && \
+                   (curl -i -X POST \
+                     --url http://kong:8001/apis/dockjobapi/plugins \
+                     --data 'name=acl' \
+                     --data 'config.whitelist=samplegroup' \
+                    ) && \
+                   (curl -i -X POST \
+                     --url http://kong:8001/apis/dockjobapi/plugins/ \
+                     --data 'name=basic-auth' \
+                     --data 'config.hide_credentials=true') && \
                    (curl -i -X POST \
                      --url http://kong:8001/apis/ \
                      --data 'name=dockjob' \

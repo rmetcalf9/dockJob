@@ -8,7 +8,11 @@ function addAccessCredentials (config, dockJobAccessCredentials) {
     return config
   }
   if (dockJobAccessCredentials.type === 'basic-auth') {
-    config.headers.Authorization = 'Basic ' + btoa(dockJobAccessCredentials.username + ':' + dockJobAccessCredentials.password)
+    // config.headers.Authorization = 'Basic ' + btoa(dockJobAccessCredentials.username + ':' + dockJobAccessCredentials.password)
+    config.auth = {
+      username: dockJobAccessCredentials.username,
+      password: dockJobAccessCredentials.password
+    }
     return config
   }
   return config
