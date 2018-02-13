@@ -119,6 +119,11 @@ export default {
         }
         return
       }
+      // If there is no auth the state jumps direct from INITIAL to LOGGED_IN and dosen't revisit router page
+      if (globalStore.getters.datastoreState === 'LOGGED_IN') {
+        TTT.$router.replace(TTT.$route.query.redirect || '/')
+        return
+      }
       Toast.create('Invalid state ' + globalStore.getters.datastoreState)
       console.log('TODO deal with state ' + globalStore.getters.datastoreState)
     },
