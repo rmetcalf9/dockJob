@@ -5,12 +5,14 @@
     </div>
     <div>
       <div class="error-card shadow-4 bg-white column items-center justify-center no-wrap">
-        <q-tabs align="justify" v-if="numTabsVisible > 0">
-          <q-tab name="usernamePass" slot="title"label="User Details" v-if="tabs.usernamePass"/>
+        <q-tabs align="justify" v-if="numTabsVisible > 0" v-model="selectedTab">
+          <q-tab name="usernamePass" slot="title"label="Basic Auth" v-if="tabs.usernamePass"/>
           <q-tab name="xxx" slot="title" label="XXX" v-if="tabs.xxx"/>
 
           <q-tab-pane name="usernamePass">
-            Username pass icons TODO tab
+      	    <q-input v-model="usernamePass.username" placeholder="Username" />
+      	    <br>
+      	    <q-input type="password" v-model="usernamePass.password" placeholder="Password" />
             <p class="text-center group">
               <q-btn
                 color="primary"
@@ -36,6 +38,7 @@ import {
   QTabs,
   QTab,
   QTabPane,
+  QInput,
   Loading,
   Toast
 } from 'quasar'
@@ -47,13 +50,20 @@ export default {
     QIcon,
     QTabs,
     QTab,
-    QTabPane
+    QTabPane,
+    QInput
   },
   data () {
     return {
       tabs: {
+        // JSON tag names must match tab name
         usernamePass: false,
         xxx: false
+      },
+      selectedTab: undefined,
+      usernamePass: {
+        username: '',
+        password: ''
       }
     }
   },
@@ -98,10 +108,14 @@ export default {
       if (globalStore.getters.datastoreState === 'REQUIRE_LOGIN') {
         this.tabs.usernamePass = false
         this.tabs.xxx = false
-        console.log(globalStore.getters.connectionData.apiaccesssecurity)
         for (var i = 0; i < globalStore.getters.connectionData.apiaccesssecurity.length; i++) {
           var curAuthMethod = globalStore.getters.connectionData.apiaccesssecurity[i]
           if (curAuthMethod.type === 'basic-auth') this.tabs.usernamePass = true
+        }
+        for (var tab in this.tabs) {
+          if (this.tabs[tab]) {
+            this.selectedTab = tab
+          }
         }
         return
       }
@@ -109,7 +123,16 @@ export default {
       console.log('TODO deal with state ' + globalStore.getters.datastoreState)
     },
     usernamePassLogin () {
-      console.log('TODO')
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          TTT.$router.replace(TTT.$route.query.redirect || '/')
+        },
+        error: function (response) {
+          Toast.create(response.message)
+        }
+      }
+      globalStore.dispatch('login', {callback: callback, accessCredentials: this.usernamePass})
     }
   },
   created () {
