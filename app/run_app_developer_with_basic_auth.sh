@@ -15,5 +15,5 @@ if [ E${VERSION} = 'E' ]; then
 fi
 
 
-python3 ./src/app.py "DEVELOPER" "DEVELOPMENT-${VERSION}" "_" "apirul_dosent_matter" "[\{'type': 'basic-auth' \}]" 
+python3 ./src/app.py "DEVELOPER" "DEVELOPMENT-${VERSION}" "_" "apirul_dosent_matter" "[{\"type\": \"basic-auth\" }]" 
 exit 0

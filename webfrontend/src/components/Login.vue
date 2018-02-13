@@ -5,27 +5,25 @@
     </div>
     <div>
       <div class="error-card shadow-4 bg-white column items-center justify-center no-wrap">
-        <q-icon name="error_outline" color="grey-5" />
-        <p class="caption text-center">Login page not implemented - Oops. Nothing here...</p>
-        <p class="text-center group">
-          <q-btn
-            v-if="canGoBack"
-            color="primary"
-            push
-            @click="goBack"
-            icon="keyboard_arrow_left"
-          >
-            Go back
-          </q-btn>
-          <q-btn
-            color="primary"
-            push
-            @click="$router.replace('/')"
-            icon-right="home"
-          >
-            Go home
-          </q-btn>
-        </p>
+        <q-tabs align="justify" v-if="numTabsVisible > 0">
+          <q-tab name="usernamePass" slot="title"label="User Details" v-if="tabs.usernamePass"/>
+          <q-tab name="xxx" slot="title" label="XXX" v-if="tabs.xxx"/>
+
+          <q-tab-pane name="usernamePass">
+            Username pass icons TODO tab
+            <p class="text-center group">
+              <q-btn
+                color="primary"
+                push
+                @click="usernamePassLogin"
+              >
+                Login
+              </q-btn>
+            </p>
+          </q-tab-pane>
+          <q-tab-pane name="xxx">TODO Next Tab</q-tab-pane>
+        </q-tabs>
+
       </div>
     </div>
   </div>
@@ -35,6 +33,9 @@
 import {
   QBtn,
   QIcon,
+  QTabs,
+  QTab,
+  QTabPane,
   Loading,
   Toast
 } from 'quasar'
@@ -43,36 +44,76 @@ import globalStore from '../stores/globalStore'
 export default {
   components: {
     QBtn,
-    QIcon
+    QIcon,
+    QTabs,
+    QTab,
+    QTabPane
   },
   data () {
     return {
-      canGoBack: window.history.length > 1
+      tabs: {
+        usernamePass: false,
+        xxx: false
+      }
+    }
+  },
+  computed: {
+    numTabsVisible () {
+      var a = 0
+      for (var k in this.tabs) {
+        if (this.tabs.hasOwnProperty(k)) {
+          if (this.tabs[k]) {
+            a++
+          }
+        }
+      }
+      return a
     }
   },
   methods: {
-    goBack () {
-      window.history.go(-1)
+    creationHandler () {
+      var TTT = this
+      if (globalStore.getters.datastoreState === 'INITIAL') {
+        Loading.show()
+        var callback = {
+          ok: function (response) {
+            Loading.hide()
+            if (globalStore.getters.datastoreState === 'INITIAL') {
+              console.log('Error state STILL initial - stopping infinite loop')
+            }
+            else {
+              // TTT.$router.replace(TTT.$route.query.redirect || '/')
+              TTT.creationHandler()
+            }
+          },
+          error: function (response) {
+            Loading.hide()
+            console.log('Error frontend connection data state: ' + response.message)
+            Toast.create(response.message)
+          }
+        }
+        globalStore.dispatch('init', {callback: callback})
+        return
+      }
+      if (globalStore.getters.datastoreState === 'REQUIRE_LOGIN') {
+        this.tabs.usernamePass = false
+        this.tabs.xxx = false
+        console.log(globalStore.getters.connectionData.apiaccesssecurity)
+        for (var i = 0; i < globalStore.getters.connectionData.apiaccesssecurity.length; i++) {
+          var curAuthMethod = globalStore.getters.connectionData.apiaccesssecurity[i]
+          if (curAuthMethod.type === 'basic-auth') this.tabs.usernamePass = true
+        }
+        return
+      }
+      Toast.create('Invalid state ' + globalStore.getters.datastoreState)
+      console.log('TODO deal with state ' + globalStore.getters.datastoreState)
+    },
+    usernamePassLogin () {
+      console.log('TODO')
     }
   },
   created () {
-    Loading.show()
-    var TTT = this
-    if (globalStore.getters.datastoreState === 'INITIAL') {
-      var callback = {
-        ok: function (response) {
-          Loading.hide()
-          TTT.$router.replace(TTT.$route.query.redirect || '/')
-        },
-        error: function (response) {
-          Loading.hide()
-          Toast.create(response.message)
-        }
-      }
-      globalStore.dispatch('init', {callback: callback})
-      return
-    }
-    console.log('TODO deal with state ' + globalStore.getters.datastoreState)
+    this.creationHandler()
   }
 }
 </script>

@@ -91,7 +91,7 @@ export const actions = {
   },
   logout ({commit, state}, params) {
     commit('SET_ACCESSCREDENTIALS', undefined)
-    commit('SET_STORESTATE','REQUIRE_LOGIN')
+    commit('SET_STORESTATE', 'REQUIRE_LOGIN')
     params.callback.ok(undefined)
   }
 }
