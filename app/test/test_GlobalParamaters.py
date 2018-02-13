@@ -1,5 +1,5 @@
 from TestHelperSuperClass import testHelperSuperClass
-from GlobalParamaters import GlobalParamatersClass, invalidModeArgumentException, invalidFrontentPathArgumentException, invalidVersionArgumentException
+from GlobalParamaters import GlobalParamatersClass, invalidModeArgumentException, invalidFrontentPathArgumentException, invalidVersionArgumentException, invalidInvalidApiaccesssecurityException
 import json
 
 class test_GlobalParamaters(testHelperSuperClass):
@@ -62,4 +62,8 @@ class test_GlobalParamaters(testHelperSuperClass):
     gp = GlobalParamatersClass("DOCKER","TEST-3.3.3","../app",'http://apiurlxxx','[{ "type": "basic-auth" }]')
     self.assertJSONStringsEqual(gp.getWebServerInfoJSON(), expRes);
 
+  def test_invalidAPISecurityJSON(self):
+    with self.assertRaises(Exception) as context:
+      gp = GlobalParamatersClass("DOCKER","TEST-3.3.3","../app",'http://apiurlxxx','Some invalid JSON String')
+    self.checkGotRightException(context,invalidInvalidApiaccesssecurityException)
 

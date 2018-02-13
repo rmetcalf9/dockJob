@@ -4,6 +4,7 @@ import json
 invalidModeArgumentException = Exception('Invalid Mode Argument')
 invalidFrontentPathArgumentException = Exception('Invalid Web Frontend Path Argument')
 invalidVersionArgumentException = Exception('Invalid Version Argument')
+invalidInvalidApiaccesssecurityException = Exception('Invalid API Access Security Argument')
 
 # class to store GlobalParmaters
 class GlobalParamatersClass():
@@ -29,7 +30,11 @@ class GlobalParamatersClass():
     self.version = version
     self.webfrontendpath = webfrontendpath
     self.apiurl = apiurl
-    self.apiaccesssecurity = json.loads(apiaccesssecurity)
+    try:
+      self.apiaccesssecurity = json.loads(apiaccesssecurity)
+    except json.decoder.JSONDecodeError:
+      print('Invalid JSON for apiaccesssecurity - ' + apiaccesssecurity)
+      raise invalidInvalidApiaccesssecurityException
 
   def getStartupOutput(self):
     r = 'Mode:' + self.mode + '\n'
