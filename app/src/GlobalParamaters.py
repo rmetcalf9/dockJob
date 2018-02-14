@@ -51,7 +51,6 @@ class GlobalParamatersClass():
     return self.webfrontendpath
 
   def getWebServerInfoJSON(self):
-    print(self.apiaccesssecurity)
     return json.dumps({'version': self.version,'apiurl': self.apiurl,'apiaccesssecurity': self.apiaccesssecurity})
 
 class GlobalParamatersPointerClass():
