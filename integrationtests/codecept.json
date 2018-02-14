@@ -4,6 +4,7 @@
   "output": "./output",
   "helpers": {
     "WebDriverIO": {
+      "smartWait": 5000,
       "url": "http://localhost:8080",
       "browser": "chrome"
     }
