@@ -4,6 +4,8 @@
 #
 #note: it is recomended you change :latest to a spercific version number
 
+#TODO Change to reading hostname as a docker secret
+
 version: "3.1"
 
 secrets:
@@ -57,15 +59,12 @@ services:
       - KONG_SSL_CERT_KEY=/run/secrets/webservices_key
       - KONG_ADMIN_LISTEN=0.0.0.0:8001
     ports:
-      - 80:8000 
+      # - 80:8000 Activate for debugging
       - 443:8443
     healthcheck:
       test: ["CMD-SHELL", "curl -I -s -L http://127.0.0.1:8000 || exit 1"]
       interval: 5s
       retries: 10
-
-
-#TODO Remove port 80
 
   kong-configure:
     image: byrnedo/alpine-curl
@@ -84,19 +83,21 @@ services:
                    --data 'password=sampleuser' ) && \
                  (curl -i -X POST \
                    --url http://kong:8001/consumers/sampleuser/acls \
-                   --data 'group=samplegroup' ) \
+                   --data 'group=samplegroup' ) && \
+                 (curl -i -X POST \
+                   --url http://kong:8001/plugins/ \
+                   --data 'name=cors' \
+                   --data 'config.origins=*' )
                 \""
 
   dockjob:
     image: metcarob/dockjob:latest
     environment:
-      - API_URL=http://somefunnyhostname.com:5080/dockjobapi
+      - API_URL=https://somefunnyhostname.com:5443/dockjobapi
       - "AUTH_OPTIONS=[{ \"type\": \"basic-auth\" }]"
     deploy:
       restart_policy:
         condition: any
-
-#TODO change url back to https://somefunnyhostname.com:5443/dockjobapi
 
   kong-addapis-dockjob:
     #Add API's to kong to forward requests to dockjob
@@ -113,7 +114,7 @@ services:
                      --data 'name=dockjobapi' \
                      --data 'uris=/dockjobapi' \
                      --data 'upstream_url=http://dockjob:80/dockjobapi' \
-                     --data 'https_only=false') && \
+                     --data 'https_only=true') && \
                    (curl -i -X POST \
                      --url http://kong:8001/apis/dockjobapi/plugins \
                      --data 'name=acl' \
@@ -128,18 +129,16 @@ services:
                      --data 'name=dockjob' \
                      --data 'uris=/dockjob' \
                      --data 'upstream_url=http://dockjob:80/dockjobfrontend' \
-                     --data 'https_only=false') \
-               \""
-#TODO https_only back to true x 2
+                     --data 'https_only=true') \
+                \""
 
-
-#The next section starts a UI for kong called konga. 
-#We only need a ui for development experimentation and can be removed if no UI is required
-# when it is running it can be accessed on port 1337
-  konga:
-    image: pantsel/konga
-    deploy:
-      restart_policy:
-        condition: on-failure
-    ports:
-     - 1337:1337
+##The next section starts a UI for kong called konga. 
+##We only need a ui for development experimentation and can be removed if no UI is required
+## when it is running it can be accessed on port 1337
+#  konga:
+#    image: pantsel/konga
+#    deploy:
+#      restart_policy:
+#        condition: on-failure
+#    ports:
+#     - 1337:1337
