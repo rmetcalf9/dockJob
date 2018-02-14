@@ -31,7 +31,7 @@ function getData (callback) {
         console.log(devBoxData)
         console.log(basicAuthData)
       }
-      callback.ok({data: basicAuthData})
+      callback.ok({data: devBoxData})
     }
   )
 }
