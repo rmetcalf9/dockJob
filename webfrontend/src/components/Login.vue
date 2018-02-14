@@ -25,8 +25,8 @@
           </q-tab-pane>
           <q-tab-pane name="xxx">TODO Next Tab</q-tab-pane>
         </q-tabs>
-
       </div>
+      Version: {{connectionData.version}}
     </div>
   </div>
 </template>
@@ -68,6 +68,9 @@ export default {
     }
   },
   computed: {
+    connectionData () {
+      return globalStore.getters.connectionData
+    },
     numTabsVisible () {
       var a = 0
       for (var k in this.tabs) {
