@@ -25,7 +25,8 @@ export default function callDockjobAPI (apiurl, dockJobAccessCredentials, method
     data: postdata
   }
   config = addAccessCredentials(config, dockJobAccessCredentials)
-  // console.log(config)
+  console.log('Calling dockjobAPI with')
+  console.log(config)
   axios(config).then(
     (response) => {
       callback.ok(response)

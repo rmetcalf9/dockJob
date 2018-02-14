@@ -137,7 +137,12 @@ export default {
           Toast.create(response.message)
         }
       }
-      globalStore.dispatch('login', {callback: callback, accessCredentials: this.usernamePass})
+      var accessCredentials = {
+        type: 'basic-auth',
+        username: this.usernamePass.username,
+        password: this.usernamePass.password
+      }
+      globalStore.dispatch('login', {callback: callback, accessCredentials: accessCredentials})
     }
   },
   created () {

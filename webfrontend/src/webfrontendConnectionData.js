@@ -15,8 +15,9 @@ function getData (callback) {
     (response) => {
       callback.ok({ data: {
         version: 'Development', // Version show as 0 fom this file
-        apiurl: 'http://localhost:80/dockjobapi',
-        apiaccesssecurity: [] // all supported auth types. Can be empty, or JSON: basic-auth, jwt
+        // TODO PUT BACK apiurl: 'http://localhost:80/dockjobapi',
+        apiurl: 'http://somefunnyhostname.com:5080/dockjobapi',
+        apiaccesssecurity: [{ type: 'basic-auth' }] // all supported auth types. Can be empty, or JSON: basic-auth, jwt
         // Empty list means no auth type
         //  { type: 'basic-auth' } - webfrontend will prompt user for username and password
         //  ...
