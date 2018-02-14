@@ -79,11 +79,11 @@ services:
                    --url http://kong:8001/consumers/ \
                    --data 'username=sampleuser' ) && \
                  (curl -i -X POST \
-                   --url http://kong:8001/consumers/admin/basic-auth \
+                   --url http://kong:8001/consumers/sampleuser/basic-auth \
                    --data 'username=sampleuser'  \
                    --data 'password=sampleuser' ) && \
                  (curl -i -X POST \
-                   --url http://kong:8001/consumers/admin/acls \
+                   --url http://kong:8001/consumers/sampleuser/acls \
                    --data 'group=samplegroup' ) \
                 \""
 
