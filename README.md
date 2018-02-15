@@ -32,13 +32,13 @@ TODO Notes on how to run
 A high level [description of the architecture is here](ARCHITECTURE.md).
 
 I have tried to organize the project logically into sub directories and README.md files explain each component:
-| Component         | Location                  | Description                                                                                                                                              |
-|-------------------|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Application](./app/README.md)       | ./app                     | DockJob Application that runs continuously. This provides a RESTFUL API and executes the Jobs as scheduled, or on receiptof an API call.                 |
-| [Webfrontend](./webfrontend/README.md)       | ./webfrontend             | Web application that is run on browsers and will talk to the Application to provide a graphical UI.                                                      |
-| [Integration tests](./integrationtests/README.md) | ./integrationtests        | Set of tests which test both the Application and Webfrontend                                                                                             |
-| [Build Process](./dockerImageBuildProcess/README.md)     | ./dockerImageBuildProcess | Bash scripts which run all tests (both unit and integration) and then versions and builds the docker image                                               |
-| [Compose Examples](./composeExamples/README.md)  | ./composeExamples         | The image is designed to work in a docker swarm with Kong as a reverse proxy to provide security. This directory provides some examples of deploying it. |
+ | Component         | Location                  | Description                                                                                                                                              |
+ |-------------------|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+ | [Application](./app/README.md)       | ./app                     | DockJob Application that runs continuously. This provides a RESTFUL API and executes the Jobs as scheduled, or on receiptof an API call.                 |
+ | [Webfrontend](./webfrontend/README.md)       | ./webfrontend             | Web application that is run on browsers and will talk to the Application to provide a graphical UI.                                                      |
+ | [Integration tests](./integrationtests/README.md) | ./integrationtests        | Set of tests which test both the Application and Webfrontend                                                                                             |
+ | [Build Process](./dockerImageBuildProcess/README.md)     | ./dockerImageBuildProcess | Bash scripts which run all tests (both unit and integration) and then versions and builds the docker image                                               |
+ | [Compose Examples](./composeExamples/README.md)  | ./composeExamples         | The image is designed to work in a docker swarm with Kong as a reverse proxy to provide security. This directory provides some examples of deploying it. |
 
 # TODO Running instructions (docker compose file)
 
