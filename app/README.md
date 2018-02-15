@@ -12,7 +12,7 @@ This is a python application based on Flask. It provides an API which can be use
 python3 must be installed (with pip).
 Requirements are listed in [./src/requirments.txt](./src/requirments.txt) to install these run the following from the app directory:
 ````
-pip install -r ./src/requirements.txt
+sudo pip3 install -r ./src/requirements.txt
 ````
 
 ## Developing

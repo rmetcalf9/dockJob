@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, Blueprint, jsonify, request
+from flasgger import Swagger
 from api import app
 import signal
 import sys
@@ -37,6 +38,48 @@ try:
   arg_apiaccesssecurity = sys.argv[5]
   GlobalParamaters.set(GlobalParamatersClass(arg_mode, arg_version, arg_frontend, arg_apiurl, arg_apiaccesssecurity))
   print(GlobalParamaters.get().getStartupOutput())
+
+  # Make app support /apidocs for swaggerUI
+  swaggerTemplate = {
+    "swagger": "2.0",
+    "info": {
+      "title": "DockJob API",
+      "description": "API for DockJob",
+      "contact": {
+        "responsibleOrganization": "ME",
+        "responsibleDeveloper": "Me",
+        # "email": "rmetcalf9@googlemail.com",
+        "url": "https://github.com/rmetcalf9/dockJob",
+      },
+      "termsOfService": "http://me.com/terms",
+      "version": arg_version
+    },
+    "host": arg_apiurl,  # overrides localhost:500
+    "basePath": "",  # base bash for blueprint registration
+    "schemes": [
+      "http",
+      "https"
+    ]
+  }
+  swaggerConfig = {
+    "headers": [
+    ],
+    "specs": [
+        {
+            "endpoint": 'apispec_1',
+            "route": '/apispec_1.json',
+            "rule_filter": lambda rule: True,  # all in
+            "model_filter": lambda tag: True,  # all in
+        }
+    ],
+    "static_url_path": "/flasgger_static",
+    # "static_folder": "static",  # must be set by user
+    "swagger_ui": True,
+    "specs_route": "/apidocs/"
+  }
+
+  swagger = Swagger(app, template=swaggerTemplate, config=swaggerConfig)
+
   app.run(host='0.0.0.0', port=80, debug=False)
 except ServerTerminationError as e:
   print("Stopped")

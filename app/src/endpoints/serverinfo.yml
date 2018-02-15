@@ -1,0 +1,11 @@
+serverinfo API
+serverinfo API returns info for the webfrontend 
+---
+tags: 
+ - General Functions
+summary: Returns info for the webfrontend
+description: Webfrontend uses this to find out how to communicate with the server.
+responses:
+  '200':    # status code
+    description: Response variables
+
