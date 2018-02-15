@@ -32,6 +32,7 @@ TODO Notes on how to run
 A high level [description of the architecture is here](ARCHITECTURE.md).
 
 I have tried to organize the project logically into sub directories and README.md files explain each component:
+
  | Component         | Location                  | Description                                                                                                                                              |
  |-------------------|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
  | [Application](./app/README.md)       | ./app                     | DockJob Application that runs continuously. This provides a RESTFUL API and executes the Jobs as scheduled, or on receiptof an API call.                 |
