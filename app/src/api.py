@@ -31,7 +31,12 @@ class SubclassRestPlusAPI(Api):
       self.abort(HTTPStatus.NOT_FOUND)
     res = apidoc.ui_for(self)
     if (GlobalParamaters.get().overrideAPIDOCSPath()):
+      print("About to replace")
+      print(res)
       res = res.replace('/apidocs/',GlobalParamaters.get().getAPIDOCSPath() + '/')
+      print("Replaced")
+      print(res)
+      print("End")
     return res
 
 api = SubclassRestPlusAPI(app, version='1.0', title='TodoMVC API',
