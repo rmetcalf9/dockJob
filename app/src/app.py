@@ -3,6 +3,7 @@ from flasgger import Swagger
 from api import app
 import signal
 import sys
+import os
 from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
 
 #Development code required to add CORS allowance in developer mode
@@ -28,15 +29,10 @@ def exit_gracefully(signum, frame):
 signal.signal(signal.SIGINT, exit_gracefully)
 signal.signal(signal.SIGTERM, exit_gracefully) #sigterm is sent by docker stop command
 try:
-  expectedNumberOfParams = 6
-  if (len(sys.argv) != expectedNumberOfParams):
-    raise Exception('Wrong number of paramaters passed (Got ' + str(len(sys.argv)) + " expected " + str(expectedNumberOfParams) + ")")
-  arg_mode = sys.argv[1]
-  arg_version = sys.argv[2]
-  arg_frontend = sys.argv[3]
-  arg_apiurl = sys.argv[4]
-  arg_apiaccesssecurity = sys.argv[5]
-  GlobalParamaters.set(GlobalParamatersClass(arg_mode, arg_version, arg_frontend, arg_apiurl, arg_apiaccesssecurity))
+  expectedNumberOfParams = 0
+  if ((len(sys.argv)-1) != expectedNumberOfParams):
+    raise Exception('Wrong number of paramaters passed (Got ' + str((len(sys.argv)-1)) + " expected " + str(expectedNumberOfParams) + ")")
+  GlobalParamaters.set(GlobalParamatersClass(os.environ))
   print(GlobalParamaters.get().getStartupOutput())
 
   # Make app support /apidocs for swaggerUI
@@ -52,9 +48,9 @@ try:
         "url": "https://github.com/rmetcalf9/dockJob",
       },
       "termsOfService": "http://me.com/terms",
-      "version": arg_version
+      "version": GlobalParamaters.get().version
     },
-    "host": arg_apiurl,  # overrides localhost:500
+    "host": GlobalParamaters.get().apiurl,  # overrides localhost:500
     "basePath": "",  # base bash for blueprint registration
     "schemes": [
       "http",

@@ -2,17 +2,20 @@
 
 APP_DIR=.
 
-VERSION=
+export APIAPP_MODE=DEVELOPER
+export APIAPP_FRONTEND=_
+export APIAPP_APIURL=localhost
+export APIAPP_APIACCESSSECURITY=[]
+
+
+export APIAPP_VERSION=
 if [ -f ${APP_DIR}/../VERSION ]; then
-  VERSION=$(cat ${APP_DIR}/../VERSION)
+  APIAPP_VERSION=$(cat ${APP_DIR}/../VERSION)
 fi
 if [ -f ${APP_DIR}/../../VERSION ]; then
-  VERSION=$(cat ${APP_DIR}/../../VERSION)
-fi
-if [ E${VERSION} = 'E' ]; then
-  echo 'Can not find version file in standard locations'
-  exit 1
+  APIAPP_VERSION=$(cat ${APP_DIR}/../../VERSION)
 fi
 
 
-python3 ./src/app.py "DEVELOPER" "DEVELOPMENT-${VERSION}" "_" "localhost" "[]" 
+#Python app reads parameters from environment variables
+python3 ./src/app.py

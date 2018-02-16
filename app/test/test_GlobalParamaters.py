@@ -5,40 +5,110 @@ import json
 class test_GlobalParamaters(testHelperSuperClass):
 
   def test_acceptDEVELOPERMode(self):
-    gp = GlobalParamatersClass("DEVELOPER","TEST-1.2.3","_",'http://apiurl','[]')
+    env = {
+      'APIAPP_MODE': 'DEVELOPER',
+      'APIAPP_VERSION': 'TEST-1.2.3',
+      'APIAPP_FRONTEND': '_',
+      'APIAPP_APIURL': 'http://apiurl',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
+    gp = GlobalParamatersClass(env)
 
   def test_acceptDOCKERMode(self):
-    gp = GlobalParamatersClass("DOCKER","TEST-1.2.3","_",'http://apiurl','[]')
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-1.2.3',
+      'APIAPP_FRONTEND': '_',
+      'APIAPP_APIURL': 'http://apiurl',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
+    gp = GlobalParamatersClass(env)
 
   def test_dontAcceptInvalidModeThrowsException(self):
+    env = {
+      'APIAPP_MODE': 'InvalidMode',
+      'APIAPP_VERSION': 'TEST-1.2.3',
+      'APIAPP_FRONTEND': '_',
+      'APIAPP_APIURL': 'http://apiurl',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
     with self.assertRaises(Exception) as context:
-      gp = GlobalParamatersClass("InvalidMode","TEST-1.2.3","_",'http://apiurl','[]')
+      gp = GlobalParamatersClass(env)
     self.checkGotRightException(context,invalidModeArgumentException)
 
   def test_webservicepathDosentExistThrowsException(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-1.2.3',
+      'APIAPP_FRONTEND': '/a/b/c',
+      'APIAPP_APIURL': 'http://apiurl',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
     with self.assertRaises(Exception) as context:
-      gp = GlobalParamatersClass("DOCKER","TEST-1.2.3","/a/b/c",'http://apiurl','[]')
+      gp = GlobalParamatersClass(env)
     self.checkGotRightException(context,invalidFrontentPathArgumentException)
 
   def test_missingVersionThrowsException(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': '',
+      'APIAPP_FRONTEND': '_',
+      'APIAPP_APIURL': 'http://apiurl',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
     with self.assertRaises(Exception) as context:
-      gp = GlobalParamatersClass("DOCKER","","_",'http://apiurl','[]')
+      gp = GlobalParamatersClass(env)
     self.checkGotRightException(context,invalidVersionArgumentException)
 
   def test_validWebFrontendDirectory(self):
-    gp = GlobalParamatersClass("DOCKER","TEST-1.2.3","../app",'http://apiurl','[]')
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-1.2.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurl',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
+    gp = GlobalParamatersClass(env)
 
   def test_startupOutput(self):
-    gp = GlobalParamatersClass("DOCKER","TEST-1.2.3","../app",'http://apiurl','[]')
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-1.2.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurl',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
+    gp = GlobalParamatersClass(env)
     self.assertEqual(gp.getStartupOutput(), 'Mode:DOCKER\nVersion:TEST-1.2.3\nFrontend Location:../app\napiurl:http://apiurl\napiaccesssecurity:[]\n')
 
   def test_developerMode(self):
-    gp = GlobalParamatersClass("DOCKER","TEST-1.2.3","../app",'http://apiurl','[]')
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-1.2.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurl',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
+    gp = GlobalParamatersClass(env)
     self.assertEqual(gp.getDeveloperMode(), False)
-    gp = GlobalParamatersClass("DEVELOPER","TEST-1.2.3","../app",'http://apiurl','[]')
+    env = {
+      'APIAPP_MODE': 'DEVELOPER',
+      'APIAPP_VERSION': 'TEST-1.2.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurl',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
+    gp = GlobalParamatersClass(env)
     self.assertEqual(gp.getDeveloperMode(), True)
 
   def test_getWebServerInfoNoAuth(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-3.3.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurlxxx',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
     expRes = json.dumps({
         'version': 'TEST-3.3.3', #// Version show as 0 fom this file
         'apiurl': 'http://apiurlxxx',
@@ -47,10 +117,17 @@ class test_GlobalParamaters(testHelperSuperClass):
         #//  { type: basic-auth } - webfrontend will prompt user for username and password
         #//  ...
       })
-    gp = GlobalParamatersClass("DOCKER","TEST-3.3.3","../app",'http://apiurlxxx','[]')
+    gp = GlobalParamatersClass(env)
     self.assertJSONStringsEqual(gp.getWebServerInfoJSON(), expRes);
 
   def test_getWebServerInfoBasicAuth(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-3.3.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurlxxx',
+      'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]',
+    }
     expRes = json.dumps({
         'version': 'TEST-3.3.3', #// Version show as 0 fom this file
         'apiurl': 'http://apiurlxxx',
@@ -59,11 +136,18 @@ class test_GlobalParamaters(testHelperSuperClass):
         #//  { type: basic-auth } - webfrontend will prompt user for username and password
         #//  ...
       })
-    gp = GlobalParamatersClass("DOCKER","TEST-3.3.3","../app",'http://apiurlxxx','[{ "type": "basic-auth" }]')
+    gp = GlobalParamatersClass(env)
     self.assertJSONStringsEqual(gp.getWebServerInfoJSON(), expRes);
 
   def test_invalidAPISecurityJSON(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-3.3.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurlxxx',
+      'APIAPP_APIACCESSSECURITY': 'Some invalid JSON String',
+    }
     with self.assertRaises(Exception) as context:
-      gp = GlobalParamatersClass("DOCKER","TEST-3.3.3","../app",'http://apiurlxxx','Some invalid JSON String')
+      gp = GlobalParamatersClass(env)
     self.checkGotRightException(context,invalidInvalidApiaccesssecurityException)
 

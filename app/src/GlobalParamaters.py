@@ -5,6 +5,7 @@ invalidModeArgumentException = Exception('Invalid Mode Argument')
 invalidFrontentPathArgumentException = Exception('Invalid Web Frontend Path Argument')
 invalidVersionArgumentException = Exception('Invalid Version Argument')
 invalidInvalidApiaccesssecurityException = Exception('Invalid API Access Security Argument')
+invalidInvalidApiURLException = Exception('Invalid API URL Argument')
 
 # class to store GlobalParmaters
 class GlobalParamatersClass():
@@ -13,27 +14,37 @@ class GlobalParamatersClass():
   webfrontendpath = None
   apiurl = None
   apiaccesssecurity = None
-  def __init__(self, mode, version, webfrontendpath, apiurl, apiaccesssecurity):
-    if (mode == 'DEVELOPER'):
-      pass
-    elif (mode == 'DOCKER'):
-      pass
-    else:
-      raise invalidModeArgumentException
-    if (webfrontendpath != '_'):
-      if (not os.path.isdir(webfrontendpath)):
+  
+  #Read environment variable or raise an exception if it is missing and there is no default
+  def readFromEnviroment(self, env, envVarName, defaultValue, exceptionToRaiseIfInvalid, acceptableValues):
+    try:
+      val = env[envVarName]
+      if (acceptableValues != None):
+        if (val not in acceptableValues):
+          raise exceptionToRaiseIfInvalid
+      return val
+    except KeyError:
+      if (defaultValue == None):
+        raise exceptionToRaiseIfInvalid
+      return defaultValue
+  
+  def __init__(self, env):
+    self.mode = self.readFromEnviroment(env, 'APIAPP_MODE', None, invalidModeArgumentException, ['DEVELOPER','DOCKER'])
+    self.version = self.readFromEnviroment(env, 'APIAPP_VERSION', None, invalidVersionArgumentException, None)
+    self.webfrontendpath = self.readFromEnviroment(env, 'APIAPP_FRONTEND', None, invalidFrontentPathArgumentException, None)
+    self.apiurl = self.readFromEnviroment(env, 'APIAPP_APIURL', None, invalidInvalidApiURLException, None)
+    apiaccesssecuritySTR = self.readFromEnviroment(env, 'APIAPP_APIACCESSSECURITY', None, invalidInvalidApiaccesssecurityException, None)
+
+    if (self.webfrontendpath != '_'):
+      if (not os.path.isdir(self.webfrontendpath)):
         raise invalidFrontentPathArgumentException
-    if (len(version) == 0):
+    if (len(self.version) == 0):
       raise invalidVersionArgumentException
 
-    self.mode = mode
-    self.version = version
-    self.webfrontendpath = webfrontendpath
-    self.apiurl = apiurl
     try:
-      self.apiaccesssecurity = json.loads(apiaccesssecurity)
+      self.apiaccesssecurity = json.loads(apiaccesssecuritySTR)
     except json.decoder.JSONDecodeError:
-      print('Invalid JSON for apiaccesssecurity - ' + apiaccesssecurity)
+      print('Invalid JSON for apiaccesssecurity - ' + apiaccesssecuritySTR)
       raise invalidInvalidApiaccesssecurityException
 
   def getStartupOutput(self):
