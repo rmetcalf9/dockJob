@@ -14,6 +14,7 @@ class GlobalParamatersClass():
   version = None
   webfrontendpath = None
   apiurl = None
+  apidocsurl = None
   apiaccesssecurity = None
   
   #Read environment variable or raise an exception if it is missing and there is no default
@@ -34,6 +35,7 @@ class GlobalParamatersClass():
     self.version = self.readFromEnviroment(env, 'APIAPP_VERSION', None, invalidVersionArgumentException, None)
     self.webfrontendpath = self.readFromEnviroment(env, 'APIAPP_FRONTEND', None, invalidFrontentPathArgumentException, None)
     self.apiurl = self.readFromEnviroment(env, 'APIAPP_APIURL', None, invalidInvalidApiURLException, None)
+    self.apidocsurl = self.readFromEnviroment(env, 'APIAPP_APIDOCSURL', '_', invalidInvalidApiURLException, None)
     apiaccesssecuritySTR = self.readFromEnviroment(env, 'APIAPP_APIACCESSSECURITY', None, invalidInvalidApiaccesssecurityException, None)
 
     if (self.webfrontendpath != '_'):
@@ -53,6 +55,7 @@ class GlobalParamatersClass():
     r += 'Version:' + self.version + '\n'
     r += 'Frontend Location:' + self.webfrontendpath + '\n'
     r += 'apiurl:' + self.apiurl + '\n'
+    r += 'apidocsurl:' + self.apidocsurl + '\n'
     r += 'apiaccesssecurity:' + json.dumps(self.apiaccesssecurity) + '\n'
     return r
 
@@ -63,7 +66,7 @@ class GlobalParamatersClass():
     return self.webfrontendpath
 
   def getWebServerInfoJSON(self):
-    return json.dumps({'version': self.version,'apiurl': self.apiurl,'apiaccesssecurity': self.apiaccesssecurity})
+    return json.dumps({'version': self.version,'apiurl': self.apiurl,'apidocsurl': self.apidocsurl,'apiaccesssecurity': self.apiaccesssecurity})
 
   def getAPIHost(self):
     return urlparse(self.apiurl).netloc

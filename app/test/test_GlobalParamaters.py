@@ -79,7 +79,19 @@ class test_GlobalParamaters(testHelperSuperClass):
       'APIAPP_APIACCESSSECURITY': '[]',
     }
     gp = GlobalParamatersClass(env)
-    self.assertEqual(gp.getStartupOutput(), 'Mode:DOCKER\nVersion:TEST-1.2.3\nFrontend Location:../app\napiurl:http://apiurl\napiaccesssecurity:[]\n')
+    self.assertEqual(gp.getStartupOutput(), 'Mode:DOCKER\nVersion:TEST-1.2.3\nFrontend Location:../app\napiurl:http://apiurl\napidocsurl:_\napiaccesssecurity:[]\n')
+
+  def test_startupOutputWithAPIDOCSURL(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-1.2.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurl',
+      'APIAPP_APIDOCSURL': 'http://apidocsurl',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
+    gp = GlobalParamatersClass(env)
+    self.assertEqual(gp.getStartupOutput(), 'Mode:DOCKER\nVersion:TEST-1.2.3\nFrontend Location:../app\napiurl:http://apiurl\napidocsurl:http://apidocsurl\napiaccesssecurity:[]\n')
 
   def test_developerMode(self):
     env = {
@@ -112,6 +124,7 @@ class test_GlobalParamaters(testHelperSuperClass):
     expRes = json.dumps({
         'version': 'TEST-3.3.3', #// Version show as 0 fom this file
         'apiurl': 'http://apiurlxxx',
+        'apidocsurl': '_',
         'apiaccesssecurity': [] #// all supported auth types. Can be empty, or strings: basic-auth, jwt
         #// Empty list means no auth type
         #//  { type: basic-auth } - webfrontend will prompt user for username and password
@@ -131,6 +144,7 @@ class test_GlobalParamaters(testHelperSuperClass):
     expRes = json.dumps({
         'version': 'TEST-3.3.3', #// Version show as 0 fom this file
         'apiurl': 'http://apiurlxxx',
+        'apidocsurl': '_',
         'apiaccesssecurity': [{'type':'basic-auth'}] #// all supported auth types. Can be empty, or strings: basic-auth, jwt
         #// Empty list means no auth type
         #//  { type: basic-auth } - webfrontend will prompt user for username and password
