@@ -93,8 +93,8 @@ services:
   dockjob:
     image: metcarob/dockjob:latest
     environment:
-      - API_URL=https://cat-sdts.metcarob-home.com/dockjobapi
-      - "AUTH_OPTIONS=[{ \"type\": \"basic-auth\" }]"
+      - APIAPP_APIURL=https://cat-sdts.metcarob-home.com/dockjobapi
+      - "APIAPP_APIACCESSSECURITY=[{ \"type\": \"basic-auth\" }]"
     deploy:
       restart_policy:
         condition: any

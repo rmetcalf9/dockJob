@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#Hardcoded here
 export APIAPP_MODE=DOCKER
 
 export APIAPP_VERSION=
@@ -21,7 +22,7 @@ _term() {
 
 trap _term SIGTERM
 
-python3 -u "${APP_DIR}/app.py" "DOCKER" "${APIAPP_VERSION}" "${FRONTEND_APP_DIR}" "${API_URL}" "${AUTH_OPTIONS}" &
+python3 -u "${APP_DIR}/app.py" &
 
 child=$! 
 wait "$child"

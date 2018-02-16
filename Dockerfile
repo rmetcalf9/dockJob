@@ -14,6 +14,9 @@ ENV APIAPP_FRONTEND /webfrontend
 ENV APIAPP_APIURL http://localhost:80/dockjobapi
 ENV APIAPP_APIACCESSSECURITY '[]'
 
+# APIAPP_MODE is not definable here as it is hardcoded to DOCKER in the shell script
+# APIAPP_VERSION is not definable here as it is read from the VERSION file inside the image
+
 EXPOSE 80
 
 RUN mkdir ${APP_DIR}

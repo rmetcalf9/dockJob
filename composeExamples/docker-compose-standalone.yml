@@ -12,7 +12,7 @@ services:
     ports:
       - 80:80
     environment:
-      - API_URL=http://cat-sdts.metcarob-home.com:80/dockjobapi
+      - APIAPP_APIURL=http://cat-sdts.metcarob-home.com:80/dockjobapi
     deploy:
       restart_policy:
         condition: any
