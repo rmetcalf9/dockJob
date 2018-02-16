@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ E${APP_DIR} = 'E' ]; then
+  APP_DIR=.
+fi
+
 START_DIR=$(pwd)
 cd ../webfrontend/dist
 WEBFRONTEND_DIR=$(pwd)
