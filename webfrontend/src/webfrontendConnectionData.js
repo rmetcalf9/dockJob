@@ -29,14 +29,16 @@ function getData (callback) {
       var workLoginConnectionData = {
         version: 'Development-basicAuthData',
         apiurl: 'http://somefunnyhostname.com:5080/dockjobapi',
+        apidocsurl: 'http://somefunnyhostname.com:5080/apidocs',
         apiaccesssecurity: []
       }
       var a = false
       if (a) {
         console.log(devBoxData)
         console.log(basicAuthData)
+        console.log(workLoginConnectionData)
       }
-      callback.ok({data: workLoginConnectionData})
+      callback.ok({data: devBoxData})
     }
   )
 }

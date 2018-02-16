@@ -12,6 +12,7 @@ RUN apk add --no-cache bash python3 curl && \
 ENV APP_DIR /app
 ENV APIAPP_FRONTEND /webfrontend
 ENV APIAPP_APIURL http://localhost:80/dockjobapi
+ENV APIAPP_APIDOCSURL http://localhost:80/apidocs
 ENV APIAPP_APIACCESSSECURITY '[]'
 
 # APIAPP_MODE is not definable here as it is hardcoded to DOCKER in the shell script
