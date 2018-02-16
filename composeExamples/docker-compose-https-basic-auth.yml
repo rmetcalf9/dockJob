@@ -2,7 +2,7 @@
 # this shows how to run dockjob using kong to make it https and have basic-auth provided by kong
 # execute it with the command "docker stack deploy --compose-file=docker-compose-https-basic-auth.yml dockjob-https-basic-auth"
 #
-#note: it is recomended you change :latest to a spercific version number
+#note: it is recommended you change :latest to a specific version number
 
 #TODO Change to reading hostname as a docker secret
 
@@ -93,7 +93,8 @@ services:
   dockjob:
     image: metcarob/dockjob:latest
     environment:
-      - APIAPP_APIURL=https://cat-sdts.metcarob-home.com/dockjobapi
+      #- APIAPP_APIURL=https://cat-sdts.metcarob-home.com/dockjobapi
+      - APIAPP_APIURL=https://somefunnyhostname.com:5443/dockjobapi
       - "APIAPP_APIACCESSSECURITY=[{ \"type\": \"basic-auth\" }]"
     deploy:
       restart_policy:

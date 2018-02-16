@@ -3,7 +3,7 @@
 #  dock job itself isn't exposed, instead kong is exposed and passes requests to dockjob
 # execute it with the command "docker stack deploy --compose-file=docker-compose-https.yml dockjob-https"
 #
-#note: it is recomended you change :latest to a spercific version number
+#note: it is recommended you change :latest to a specific version number
 
 version: "3.1"
 
@@ -67,7 +67,8 @@ services:
   dockjob:
     image: metcarob/dockjob:latest
     environment:
-      - APIAPP_APIURL=https://cat-sdts.metcarob-home.com:443/dockjobapi
+#      - APIAPP_APIURL=https://cat-sdts.metcarob-home.com:443/dockjobapi
+      - APIAPP_APIURL=https://somefunnyhostname.com:5443/dockjobapi
     deploy:
       restart_policy:
         condition: any

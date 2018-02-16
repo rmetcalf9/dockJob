@@ -2,7 +2,7 @@
 # this shows how to run it stand-alone
 # execute it with the command "docker stack deploy --compose-file=docker-compose-standalone.yml dockjob-standalone"
 #
-#note: it is recomended you change :latest to a spercific version number
+#note: it is recommended you change :latest to a specific version number
 
 version: "3.1"
 
