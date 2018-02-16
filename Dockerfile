@@ -10,9 +10,9 @@ RUN apk add --no-cache bash python3 curl && \
     pip3 install --upgrade pip
 
 ENV APP_DIR /app
-ENV FRONTEND_APP_DIR /webfrontend
-ENV API_URL http://localhost:80/dockjobapi
-ENV AUTH_OPTIONS '[]'
+ENV APIAPP_FRONTEND /webfrontend
+ENV APIAPP_APIURL http://localhost:80/dockjobapi
+ENV APIAPP_APIACCESSSECURITY '[]'
 
 EXPOSE 80
 
