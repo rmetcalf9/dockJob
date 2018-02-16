@@ -71,8 +71,20 @@ class GlobalParamatersClass():
   def getAPIHost(self):
     return urlparse(self.apiurl).netloc
 
+  def getSanitizedPath(self, url):
+    a = urlparse(url).path.strip()
+    if (a[-1:] == '/'):
+      a = a[:-1]
+    return a
+
   def getAPIPath(self):
-    return urlparse(self.apiurl).path
+    return self.getSanitizedPath(self.apiurl)
+
+  def overrideAPIDOCSPath(self):
+    return (self.getAPIDOCSPath() != '')
+
+  def getAPIDOCSPath(self):
+    return self.getSanitizedPath(self.apidocsurl)
 
 class GlobalParamatersPointerClass():
   obj = None

@@ -4,8 +4,8 @@ APP_DIR=.
 
 export APIAPP_MODE=DEVELOPER
 export APIAPP_FRONTEND=_
-export APIAPP_APIURL=localhost
-export APIAPP_APIDOCSURL=localhost
+export APIAPP_APIURL=http://localhost
+export APIAPP_APIDOCSURL=http://localhost
 export APIAPP_APIACCESSSECURITY=[]
 
 

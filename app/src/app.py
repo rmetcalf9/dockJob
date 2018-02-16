@@ -35,6 +35,7 @@ try:
   GlobalParamaters.set(GlobalParamatersClass(os.environ))
   print(GlobalParamaters.get().getStartupOutput())
 
+  app.config['APPLICATION_ROOT'] = '/abc/123'
   app.run(host='0.0.0.0', port=80, debug=False)
 except ServerTerminationError as e:
   print("Stopped")
