@@ -175,6 +175,7 @@ class test_GlobalParamaters(testHelperSuperClass):
     }
     gp = GlobalParamatersClass(env)
     self.assertEqual(gp.getAPIHost(), 'apiurlxxx')
+    self.assertEqual(gp.getAPIPath(), '/aa/bb/cc')
 
   def test_getAPIHostWithPort(self):
     env = {
@@ -186,5 +187,6 @@ class test_GlobalParamaters(testHelperSuperClass):
     }
     gp = GlobalParamatersClass(env)
     self.assertEqual(gp.getAPIHost(), 'apiurlxxx:45')
+    self.assertEqual(gp.getAPIPath(), '/aa/bb/cc')
   
 

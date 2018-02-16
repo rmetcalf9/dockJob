@@ -71,6 +71,9 @@ class GlobalParamatersClass():
   def getAPIHost(self):
     return urlparse(self.apiurl).netloc
 
+  def getAPIPath(self):
+    return urlparse(self.apiurl).path
+
 class GlobalParamatersPointerClass():
   obj = None
   def set(self, obj):

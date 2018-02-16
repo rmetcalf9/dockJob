@@ -51,7 +51,8 @@ try:
       "version": GlobalParamaters.get().version
     },
     "host": GlobalParamaters.get().getAPIHost(),  # overrides localhost:500
-    "basePath": "",  # base bash for blueprint registration
+    #basePath dosen't seem to be used for registering the blueprint, but it is used for internal links
+    "basePath": GlobalParamaters.get().getAPIPath(),  # base bash for blueprint registration
     "schemes": [
       "http",
       "https"

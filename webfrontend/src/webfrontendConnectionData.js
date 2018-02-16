@@ -34,7 +34,7 @@ function getData (callback) {
       }
       var a = false
       if (a) {
-        console.log(devBoxData)
+        console.log(devBoxData) // This is the one to use for localhost testing
         console.log(basicAuthData)
         console.log(workLoginConnectionData)
       }
