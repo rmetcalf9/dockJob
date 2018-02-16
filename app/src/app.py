@@ -50,7 +50,7 @@ try:
       "termsOfService": "http://me.com/terms",
       "version": GlobalParamaters.get().version
     },
-    "host": GlobalParamaters.get().apiurl,  # overrides localhost:500
+    "host": GlobalParamaters.get().getAPIHost(),  # overrides localhost:500
     "basePath": "",  # base bash for blueprint registration
     "schemes": [
       "http",

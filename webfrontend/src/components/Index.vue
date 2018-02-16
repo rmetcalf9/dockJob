@@ -41,7 +41,7 @@
 
     <q-toolbar slot="footer">
         <table width="100%"><tr>
-        <td><a href="https://github.com/rmetcalf9/dockJob">GitHub</a></td>
+        <td><a href="https://github.com/rmetcalf9/dockJob" target="_blank">GitHub</a></td>
         <td align="right">Version: {{connectionData.version}}</td>
         </tr></table>
     </q-toolbar>

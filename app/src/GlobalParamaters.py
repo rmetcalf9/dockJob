@@ -1,5 +1,6 @@
 import os
 import json
+from urllib.parse import urlparse
 
 invalidModeArgumentException = Exception('Invalid Mode Argument')
 invalidFrontentPathArgumentException = Exception('Invalid Web Frontend Path Argument')
@@ -63,6 +64,9 @@ class GlobalParamatersClass():
 
   def getWebServerInfoJSON(self):
     return json.dumps({'version': self.version,'apiurl': self.apiurl,'apiaccesssecurity': self.apiaccesssecurity})
+
+  def getAPIHost(self):
+    return urlparse(self.apiurl).netloc
 
 class GlobalParamatersPointerClass():
   obj = None

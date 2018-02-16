@@ -151,3 +151,26 @@ class test_GlobalParamaters(testHelperSuperClass):
       gp = GlobalParamatersClass(env)
     self.checkGotRightException(context,invalidInvalidApiaccesssecurityException)
 
+  def test_getAPIHost(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-3.3.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurlxxx/aa/bb/cc',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
+    gp = GlobalParamatersClass(env)
+    self.assertEqual(gp.getAPIHost(), 'apiurlxxx')
+
+  def test_getAPIHostWithPort(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-3.3.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurlxxx:45/aa/bb/cc',
+      'APIAPP_APIACCESSSECURITY': '[]',
+    }
+    gp = GlobalParamatersClass(env)
+    self.assertEqual(gp.getAPIHost(), 'apiurlxxx:45')
+  
+
