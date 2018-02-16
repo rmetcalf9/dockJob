@@ -20,8 +20,8 @@ RUN mkdir ${APP_DIR}
 COPY ./app/src ${APP_DIR}
 RUN pip3 install -r ${APP_DIR}/requirments.txt
 
-RUN mkdir ${FRONTEND_APP_DIR}
-COPY ./webfrontend/dist ${FRONTEND_APP_DIR}
+RUN mkdir ${APIAPP_FRONTEND}
+COPY ./webfrontend/dist ${APIAPP_FRONTEND}
 
 COPY ./VERSION /VERSION
 
