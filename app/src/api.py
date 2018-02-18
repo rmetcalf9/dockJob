@@ -1,9 +1,11 @@
 from flask import Flask, Blueprint
 from appObj import appObjClass
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, apidoc
 from FlaskRestSubclass import FlaskRestSubclass
 import datetime
 import pytz
+import json
+from http import HTTPStatus
 
 appObj = appObjClass()
 appObj.setFlaskAppOgject(Flask(__name__))
@@ -14,6 +16,16 @@ from webfrontendAPI import webfrontendBP
 # https://flask-restplus.readthedocs.io/en/stable/
 # https://github.com/noirbizarre/flask-restplus
 
+#By default swagger.json is registered as /api/swagger.json
+# as this is security protected I need this to be accessed in /apidocs/swagger.json as well
+
+#Adding a new route. Must be done before initing restplus object
+@apidoc.apidoc.route('/swagger.json')
+def FunctionToPutSwaggerInAPIDocsDir():
+  schema = appObj.flastRestPlusAPIObject.__schema__
+  return json.dumps(schema)
+  #return schema, HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK
+
 appObj.setFlastRestPlusAPIObject(
   FlaskRestSubclass(appObj.flaskAppObject, 
     version='UNSET', 
@@ -23,6 +35,8 @@ appObj.setFlastRestPlusAPIObject(
     default_mediatype='application/json'
   )
 )
+
+
 
 '''
 app=None, version='1.0', title=None, description=None,
@@ -35,10 +49,10 @@ app=None, version='1.0', title=None, description=None,
             catch_all_404s=False, serve_challenge_on_401=False, format_checker=None
 '''
 
-apidocs_blueprint = Blueprint('api', __name__)
-appObj.flastRestPlusAPIObject.init_app(apidocs_blueprint)  
+api_blueprint = Blueprint('api', __name__)
+appObj.flastRestPlusAPIObject.init_app(api_blueprint)  
 
-appObj.flaskAppObject.register_blueprint(apidocs_blueprint, url_prefix='/api')
+appObj.flaskAppObject.register_blueprint(api_blueprint, url_prefix='/api')
 
 
 ns = appObj.flastRestPlusAPIObject.namespace('serverinfo', description='General Server Operations')
