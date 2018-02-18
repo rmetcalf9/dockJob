@@ -68,8 +68,9 @@ services:
     image: metcarob/dockjob:latest
     environment:
       - APIAPP_APIURL=https://cat-sdts.metcarob-home.com:443/dockjobapi
-      - APIAPP_APIDOCSURL=https://cat-sdts.metcarob-home.com:443/dockjobapi
-#      - APIAPP_APIURL=https://somefunnyhostname.com:5443/dockjobapi
+      - APIAPP_APIDOCSURL=https://cat-sdts.metcarob-home.com:443/dockjobapidocs/
+      #- APIAPP_APIURL=https://somefunnyhostname.com:5443/dockjobapi
+      #- APIAPP_APIDOCSURL=https://somefunnyhostname.com:5443/dockjobapidocs/
     deploy:
       restart_policy:
         condition: any
@@ -102,4 +103,15 @@ services:
                      --data 'upstream_url=http://dockjob:80/frontend' \
                      --data 'https_only=true') \
                \""
+
+##The next section starts a UI for kong called konga. 
+##We only need a ui for development experimentation and can be removed if no UI is required
+## when it is running it can be accessed on port 1337
+#  konga:
+#    image: pantsel/konga
+#    deploy:
+#      restart_policy:
+#        condition: on-failure
+#    ports:
+#     - 1337:1337
 

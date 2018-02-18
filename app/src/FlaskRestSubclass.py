@@ -5,6 +5,8 @@ import re
 # I need to subclass this in order to change the url_prefix for swaggerui
 #  so I can reverse proxy everything under /apidocs
 class FlaskRestSubclass(Api):
+  internalAPIPath = '/api'
+
   def __init__(self, *args, reverse=False, **kwargs):
       super().__init__(*args, **kwargs)
   def _register_apidoc(self, app):
@@ -16,7 +18,7 @@ class FlaskRestSubclass(Api):
   def reaplcements(self, res):
     #res = res.replace('/apidocs/',GlobalParamaters.get().getAPIDOCSPath() + '/')
     #regexp="\"https?:\/\/[a-zA-Z0\-9._]*(:[0-9]*)?/apidocs/swagger.json\""
-    regexp="\"https?:\/\/[a-zA-Z0\-9._]*(:[0-9]*)?\/apidocs/swagger.json\""
+    regexp="\"https?:\/\/[a-zA-Z0\-9._]*(:[0-9]*)?" + self.internalAPIPath.replace("/","\/") + "\/swagger.json\""
     p = re.compile(regexp)
     res = p.sub("\"" + GlobalParamaters.get().apidocsurl + "swagger.json\"", res)
     regexp="src=\"/apidocs/swaggerui/"
