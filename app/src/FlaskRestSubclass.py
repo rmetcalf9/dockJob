@@ -4,6 +4,11 @@ import re
 import json
 from http import HTTPStatus
 
+# http://michal.karzynski.pl/blog/2016/06/19/building-beautiful-restful-apis-using-flask-swagger-ui-flask-restplus/
+# https://flask-restplus.readthedocs.io/en/stable/
+# https://github.com/noirbizarre/flask-restplus
+
+
 
 # I need to subclass this in order to change the url_prefix for swaggerui
 #  so I can reverse proxy everything under /apidocs
@@ -58,5 +63,15 @@ class FlaskRestSubclass(Api):
     schema = self.__schema__
     return json.dumps(schema), HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK, {'Content-Type': 'application/json'}
     #return schema, HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK
+
+  #Override the basepath given in the swagger file
+  # I need to give out a different one from where the endpoint is registered
+  @property
+  def base_path(self):
+    '''
+    The API path
+    :rtype: str
+    '''
+    return GlobalParamaters.get().getAPIPath()
 
 

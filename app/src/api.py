@@ -10,10 +10,6 @@ appObj.setFlaskAppOgject(Flask(__name__))
 
 from webfrontendAPI import webfrontendBP
 
-# http://michal.karzynski.pl/blog/2016/06/19/building-beautiful-restful-apis-using-flask-swagger-ui-flask-restplus/
-# https://flask-restplus.readthedocs.io/en/stable/
-# https://github.com/noirbizarre/flask-restplus
-
 appObj.setFlastRestPlusAPIObject(
   FlaskRestSubclass(appObj.flaskAppObject, 
     version='UNSET', 
