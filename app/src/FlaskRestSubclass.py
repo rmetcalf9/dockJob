@@ -1,6 +1,9 @@
 from flask_restplus import Api, apidoc
 from GlobalParamaters import GlobalParamaters
 import re
+import json
+from http import HTTPStatus
+
 
 # I need to subclass this in order to change the url_prefix for swaggerui
 #  so I can reverse proxy everything under /apidocs
@@ -12,6 +15,7 @@ class FlaskRestSubclass(Api):
   def _register_apidoc(self, app):
     conf = app.extensions.setdefault('restplus', {})
     if not conf.get('apidoc_registered', False):
+      apidoc.apidoc.add_url_rule('/swagger.json', None, self.getSwaggerJSON)
       app.register_blueprint(apidoc.apidoc, url_prefix='/apidocs')
     conf['apidoc_registered'] = True
 
@@ -47,5 +51,12 @@ class FlaskRestSubclass(Api):
       print(res)
       print("End")
     return res
+
+  #By default swagger.json is registered as /api/swagger.json
+  # as this is security protected I need this to be accessed in /apidocs/swagger.json as well
+  def getSwaggerJSON(self):
+    schema = self.__schema__
+    return json.dumps(schema), HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK, {'Content-Type': 'application/json'}
+    #return schema, HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK
 
 

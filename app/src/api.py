@@ -4,8 +4,6 @@ from flask_restplus import Resource, fields, apidoc
 from FlaskRestSubclass import FlaskRestSubclass
 import datetime
 import pytz
-import json
-from http import HTTPStatus
 
 appObj = appObjClass()
 appObj.setFlaskAppOgject(Flask(__name__))
@@ -15,16 +13,6 @@ from webfrontendAPI import webfrontendBP
 # http://michal.karzynski.pl/blog/2016/06/19/building-beautiful-restful-apis-using-flask-swagger-ui-flask-restplus/
 # https://flask-restplus.readthedocs.io/en/stable/
 # https://github.com/noirbizarre/flask-restplus
-
-#By default swagger.json is registered as /api/swagger.json
-# as this is security protected I need this to be accessed in /apidocs/swagger.json as well
-
-#Adding a new route. Must be done before initing restplus object
-@apidoc.apidoc.route('/swagger.json')
-def FunctionToPutSwaggerInAPIDocsDir():
-  schema = appObj.flastRestPlusAPIObject.__schema__
-  return json.dumps(schema), HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK, {'Content-Type': 'application/json'}
-  #return schema, HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK
 
 appObj.setFlastRestPlusAPIObject(
   FlaskRestSubclass(appObj.flaskAppObject, 
