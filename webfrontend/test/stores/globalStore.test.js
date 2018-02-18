@@ -49,7 +49,7 @@ test('Login basic-auth success', done => {
   const accessCredentials = {a: 'TEST'}
   const sucessfulGetServerinfoCall = jest.fn(function (apiurl, dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callback) {
     expect(method).toBe('GET');
-    expect(pathWithoutStartingSlash).toBe('serverinfo');
+    expect(pathWithoutStartingSlash).toBe('serverinfo/');
     expect(dockJobAccessCredentials).toBe(accessCredentials);
     callback.ok({
       status: 200,
@@ -87,7 +87,7 @@ test('Login basic-auth fail', done => {
   const accessCredentials = {a: 'TEST'}
   const sucessfulGetServerinfoCall = jest.fn(function (apiurl, dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callback) {
     expect(method).toBe('GET')
-    expect(pathWithoutStartingSlash).toBe('serverinfo')
+    expect(pathWithoutStartingSlash).toBe('serverinfo/')
     expect(dockJobAccessCredentials).toBe(accessCredentials)
     callbackHelper.webserviceError(callback, {
       status: 500,
@@ -122,7 +122,7 @@ test('Login and logout basic-auth success', done => {
   const accessCredentials = {a: 'TEST'}
   const sucessfulGetServerinfoCall = jest.fn(function (apiurl, dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callback) {
     expect(method).toBe('GET');
-    expect(pathWithoutStartingSlash).toBe('serverinfo');
+    expect(pathWithoutStartingSlash).toBe('serverinfo/');
     expect(dockJobAccessCredentials).toBe(accessCredentials);
     callback.ok({
       status: 200,
