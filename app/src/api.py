@@ -23,7 +23,7 @@ from webfrontendAPI import webfrontendBP
 @apidoc.apidoc.route('/swagger.json')
 def FunctionToPutSwaggerInAPIDocsDir():
   schema = appObj.flastRestPlusAPIObject.__schema__
-  return json.dumps(schema)
+  return json.dumps(schema), HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK, {'Content-Type': 'application/json'}
   #return schema, HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK
 
 appObj.setFlastRestPlusAPIObject(
