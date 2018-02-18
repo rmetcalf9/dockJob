@@ -11,7 +11,7 @@ cd ${START_DIR}
 
 export APIAPP_MODE=DEVELOPER
 export APIAPP_FRONTEND=${WEBFRONTEND_DIR}
-export APIAPP_APIURL=http://localhost:80/dockjobapi
+export APIAPP_APIURL=http://localhost:80/api
 export APIAPP_APIACCESSSECURITY=[]
 
 
