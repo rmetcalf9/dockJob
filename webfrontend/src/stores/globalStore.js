@@ -74,7 +74,7 @@ export const actions = {
         params.callback.error(error)
       }
     }
-    state.APIFn('GET', 'serverinfo', undefined, callback)
+    state.APIFn('GET', 'serverinfo/', undefined, callback)
   },
   login ({commit, state}, params) {
     commit('SET_ACCESSCREDENTIALS', params.accessCredentials)
@@ -87,7 +87,7 @@ export const actions = {
         params.callback.error(error)
       }
     }
-    state.APIFn('GET', 'serverinfo', undefined, callback)
+    state.APIFn('GET', 'serverinfo/', undefined, callback)
   },
   logout ({commit, state}, params) {
     commit('SET_ACCESSCREDENTIALS', undefined)

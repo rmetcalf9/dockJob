@@ -6,6 +6,12 @@ import sys
 import os
 from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
 
+##App will host content in the following paths:
+## /api        API
+## /apidocs    API Documentation including swagger.json and swaggerUI
+## /frontend   Frontend for this application
+##
+
 #Development code required to add CORS allowance in developer mode
 @appObj.flaskAppObject.after_request
 def after_request(response):

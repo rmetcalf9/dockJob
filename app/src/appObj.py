@@ -31,7 +31,8 @@ class appObjClass():
       'TotalJobs': len(self.jobs),
       'NextExecuteJob': None
     }
-    return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
+    return {'Server': self.serverObj, 'Jobs': jobsObj}
+    #return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
 
   def setFlaskAppOgject(self,app):
     self.flaskAppObject = app

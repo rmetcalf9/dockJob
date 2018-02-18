@@ -15,7 +15,7 @@ function getData (callback) {
     (response) => {
       var devBoxData = {
         version: 'Development-devBoxData', // Version show as 0 from this file
-        apiurl: 'http://localhost:80/dockjobapi',
+        apiurl: 'http://localhost:80/api',
         apiaccesssecurity: [] // all supported auth types. Can be empty, or JSON: basic-auth, jwt
         // Empty list means no auth type
         //  { type: 'basic-auth' } - webfrontend will prompt user for username and password
@@ -23,12 +23,12 @@ function getData (callback) {
       }
       var basicAuthData = {
         version: 'Development-basicAuthData',
-        apiurl: 'http://localhost:80/dockjobapi',
+        apiurl: 'http://localhost:80/api',
         apiaccesssecurity: [{type: 'basic-auth'}]
       }
       var workLoginConnectionData = {
         version: 'Development-basicAuthData',
-        apiurl: 'http://somefunnyhostname.com:5080/dockjobapi',
+        apiurl: 'http://somefunnyhostname.com:5080/api',
         apidocsurl: 'http://somefunnyhostname.com:5080/apidocs',
         apiaccesssecurity: []
       }

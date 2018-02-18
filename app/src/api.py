@@ -7,7 +7,6 @@ import pytz
 
 appObj = appObjClass()
 appObj.setFlaskAppOgject(Flask(__name__))
-bp = Blueprint('dockjobapi', __name__, template_folder='dockjobapi')
 
 from webfrontendAPI import webfrontendBP
 
@@ -54,7 +53,5 @@ class servceInfo(Resource):
     return appObj.getServerInfoJSON(curDatetime)
 
 
-#Must register blueprints after the routes are declared
-appObj.flaskAppObject.register_blueprint(bp, url_prefix='/dockjobapi')
-appObj.flaskAppObject.register_blueprint(webfrontendBP, url_prefix='/dockjobfrontend')
+appObj.flaskAppObject.register_blueprint(webfrontendBP, url_prefix='/frontend')
 
