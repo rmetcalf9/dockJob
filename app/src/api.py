@@ -1,29 +1,60 @@
 from flask import Flask, Blueprint
 from appObj import appObjClass
-from flask_restplus import Api, Resource, fields, apidoc
+from flask_restplus import Resource, fields
 from FlaskRestSubclass import FlaskRestSubclass
 import datetime
 import pytz
-app = Flask(__name__)
+
+appObj = appObjClass()
+appObj.setFlaskAppOgject(Flask(__name__))
 bp = Blueprint('dockjobapi', __name__, template_folder='dockjobapi')
 
 from webfrontendAPI import webfrontendBP
 
-appObj = appObjClass()
+# http://michal.karzynski.pl/blog/2016/06/19/building-beautiful-restful-apis-using-flask-swagger-ui-flask-restplus/
+# https://flask-restplus.readthedocs.io/en/stable/
+# https://github.com/noirbizarre/flask-restplus
 
-api = FlaskRestSubclass(app, version='1.0', title='TodoMVC API',
-    description='A simple TodoMVC API', doc='/'
+appObj.setFlastRestPlusAPIObject(
+  FlaskRestSubclass(appObj.flaskAppObject, 
+    version='UNSET', 
+    title='DocJob Scheduling Server API',
+    description='API for the DockJob scheduling server', 
+    doc='/apidocs/',
+    default_mediatype='application/json'
+  )
 )
-apidocs_blueprint = Blueprint('api', __name__)
-api.init_app(apidocs_blueprint)  
-app.register_blueprint(apidocs_blueprint, url_prefix='/apidocs')
 
-@bp.route('/serverinfo')
-def serverinfo():
-  curDatetime = datetime.datetime.now(pytz.utc)
-  return appObj.getServerInfoJSON(curDatetime)
+'''
+app=None, version='1.0', title=None, description=None,
+            terms_url=None, license=None, license_url=None,
+            contact=None, contact_url=None, contact_email=None,
+            authorizations=None, security=None, doc='/', default_id=default_id,
+            default='default', default_label='Default namespace', validate=None,
+            tags=None, prefix='',
+            default_mediatype='application/json', decorators=None,
+            catch_all_404s=False, serve_challenge_on_401=False, format_checker=None
+'''
+
+apidocs_blueprint = Blueprint('api', __name__)
+appObj.flastRestPlusAPIObject.init_app(apidocs_blueprint)  
+
+appObj.flaskAppObject.register_blueprint(apidocs_blueprint, url_prefix='/api')
+
+
+ns = appObj.flastRestPlusAPIObject.namespace('serverinfo', description='General Server Operations')
+@ns.route('/')
+class servceInfo(Resource):
+  '''Genaral Server Opeations XXXXX'''
+  @ns.doc('getserverinfo')
+  # @ns.marshal_list_with(todo)
+  def get(self):
+    '''Get general inforpmation about the dockjob server'''
+    curDatetime = datetime.datetime.now(pytz.utc)
+    return appObj.getServerInfoJSON(curDatetime)
+
 
 #Must register blueprints after the routes are declared
-app.register_blueprint(bp, url_prefix='/dockjobapi')
-app.register_blueprint(webfrontendBP, url_prefix='/dockjobfrontend')
+appObj.flaskAppObject.register_blueprint(bp, url_prefix='/dockjobapi')
+appObj.flaskAppObject.register_blueprint(webfrontendBP, url_prefix='/dockjobfrontend')
 

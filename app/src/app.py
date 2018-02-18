@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint, jsonify, request
-from api import app
+from api import appObj
 from flask_restplus import Api, Resource, fields
 import signal
 import sys
@@ -7,7 +7,7 @@ import os
 from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
 
 #Development code required to add CORS allowance in developer mode
-@app.after_request
+@appObj.flaskAppObject.after_request
 def after_request(response):
   if (GlobalParamaters.get().getDeveloperMode()):
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -33,10 +33,8 @@ try:
   if ((len(sys.argv)-1) != expectedNumberOfParams):
     raise Exception('Wrong number of paramaters passed (Got ' + str((len(sys.argv)-1)) + " expected " + str(expectedNumberOfParams) + ")")
   GlobalParamaters.set(GlobalParamatersClass(os.environ))
-  print(GlobalParamaters.get().getStartupOutput())
 
-  #app.config['SERVER_NAME'] = 'servername:123'
-  app.run(host='0.0.0.0', port=80, debug=False)
+  appObj.run()
 except ServerTerminationError as e:
   print("Stopped")
 

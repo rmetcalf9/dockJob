@@ -7,6 +7,8 @@
 
 import json
 import pytz
+from GlobalParamaters import GlobalParamaters
+
 
 NotUTCException = Exception('Must be given UTC time')
 
@@ -16,6 +18,9 @@ class appObjClass():
     'DefaultUserTimezone': 'Europe/London'
   }
   jobs = []
+  flaskAppObject = None
+  flastRestPlusAPIObject = None
+  globalParamObject = None
 
   #curDateTime must be in UTC
   def getServerInfoJSON(self, curDateTime):
@@ -27,5 +32,19 @@ class appObjClass():
       'NextExecuteJob': None
     }
     return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
+
+  def setFlaskAppOgject(self,app):
+    self.flaskAppObject = app
+
+  def setFlastRestPlusAPIObject(self,api):
+    self.flastRestPlusAPIObject = api
+
+  # called by app.py to run the application
+  def run(self):
+    print(GlobalParamaters.get().getStartupOutput())
+    self.flastRestPlusAPIObject.version = GlobalParamaters.get().version
+
+    #appObj.flaskAppObject.config['SERVER_NAME'] = 'servername:123'
+    self.flaskAppObject.run(host='0.0.0.0', port=80, debug=False)
 
 
