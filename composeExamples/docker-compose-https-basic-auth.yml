@@ -116,7 +116,7 @@ services:
                      --url http://kong:8001/apis/ \
                      --data 'name=dockjobapi' \
                      --data 'uris=/dockjobapi' \
-                     --data 'upstream_url=http://dockjob:80/dockjobapi' \
+                     --data 'upstream_url=http://dockjob:80/api' \
                      --data 'https_only=true') && \
                    (curl -i -X POST \
                      --url http://kong:8001/apis/ \
@@ -137,7 +137,7 @@ services:
                      --url http://kong:8001/apis/ \
                      --data 'name=dockjob' \
                      --data 'uris=/dockjob' \
-                     --data 'upstream_url=http://dockjob:80/dockjobfrontend' \
+                     --data 'upstream_url=http://dockjob:80/frontend' \
                      --data 'https_only=true') \
                 \""
 

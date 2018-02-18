@@ -67,8 +67,9 @@ services:
   dockjob:
     image: metcarob/dockjob:latest
     environment:
-#      - APIAPP_APIURL=https://cat-sdts.metcarob-home.com:443/dockjobapi
-      - APIAPP_APIURL=https://somefunnyhostname.com:5443/dockjobapi
+      - APIAPP_APIURL=https://cat-sdts.metcarob-home.com:443/dockjobapi
+      - APIAPP_APIDOCSURL=https://cat-sdts.metcarob-home.com:443/dockjobapi
+#      - APIAPP_APIURL=https://somefunnyhostname.com:5443/dockjobapi
     deploy:
       restart_policy:
         condition: any
@@ -86,13 +87,19 @@ services:
                      --url http://kong:8001/apis/ \
                      --data 'name=dockjobapi' \
                      --data 'uris=/dockjobapi' \
-                     --data 'upstream_url=http://dockjob:80/dockjobapi' \
+                     --data 'upstream_url=http://dockjob:80/api' \
+                     --data 'https_only=true') && \
+                   (curl -i -X POST \
+                     --url http://kong:8001/apis/ \
+                     --data 'name=dockjobapidocs' \
+                     --data 'uris=/dockjobapidocs' \
+                     --data 'upstream_url=http://dockjob:80/apidocs' \
                      --data 'https_only=true') && \
                    (curl -i -X POST \
                      --url http://kong:8001/apis/ \
                      --data 'name=dockjob' \
                      --data 'uris=/dockjob' \
-                     --data 'upstream_url=http://dockjob:80/dockjobfrontend' \
+                     --data 'upstream_url=http://dockjob:80/frontend' \
                      --data 'https_only=true') \
                \""
 
