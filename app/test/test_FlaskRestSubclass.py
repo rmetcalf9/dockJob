@@ -103,5 +103,15 @@ class test_FlaskRestSubclass(unittest.TestCase):
       res = api.reaplcements(initial)
       self.assertEqual(expected, res)
 
+    def test_cssJSONReplaceFromContainer(self):
+      mockGP = mockGlobalPamaters()
+      GlobalParamaters.set(mockGP)
+      api = FlaskRestSubclass(None, version='1.0', title='TodoMVC API',
+        description='A simple TodoMVC API', doc='/'
+      )
+      initial = "<link media=\"screen\" rel=\"stylesheet\" type=\"text/css\"    href=\"/apidocs/swaggerui/bower/swagger-ui/dist/css/reset.css\" />\n<link media=\"screen\" rel=\"stylesheet\" type=\"text/css\"    href=\"/apidocs/swaggerui/bower/swagger-ui/dist/css/screen.css\" />"
+      expected = "<link media=\"screen\" rel=\"stylesheet\" type=\"text/css\"    href=\"/dockjobapidocs/swaggerui/bower/swagger-ui/dist/css/reset.css\" />\n<link media=\"screen\" rel=\"stylesheet\" type=\"text/css\"    href=\"/dockjobapidocs/swaggerui/bower/swagger-ui/dist/css/screen.css\" />"
+      res = api.reaplcements(initial)
+      self.assertEqual(expected, res)
 
 

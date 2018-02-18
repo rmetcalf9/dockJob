@@ -21,9 +21,13 @@ class FlaskRestSubclass(Api):
     regexp="\"https?:\/\/[a-zA-Z0\-9._]*(:[0-9]*)?" + self.internalAPIPath.replace("/","\/") + "\/swagger.json\""
     p = re.compile(regexp)
     res = p.sub("\"" + GlobalParamaters.get().apidocsurl + "swagger.json\"", res)
+
     regexp="src=\"/apidocs/swaggerui/"
     p = re.compile(regexp)
     res = p.sub("src=\"" + GlobalParamaters.get().getAPIDOCSPath() + "/swaggerui/", res)
+    regexp="href=\"/apidocs/swaggerui/"
+    p = re.compile(regexp)
+    res = p.sub("href=\"" + GlobalParamaters.get().getAPIDOCSPath() + "/swaggerui/", res)
     return res
 
   # Flask will serve the files with the url pointing at /apidocs.
