@@ -1,6 +1,6 @@
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, request
 from appObj import appObjClass
-from flask_restplus import Resource, fields, apidoc
+from flask_restplus import Resource, fields, apidoc, reqparse
 from FlaskRestSubclass import FlaskRestSubclass
 import datetime
 import pytz
@@ -39,16 +39,47 @@ appObj.flastRestPlusAPIObject.init_app(api_blueprint)
 appObj.flaskAppObject.register_blueprint(api_blueprint, url_prefix='/api')
 
 
-ns = appObj.flastRestPlusAPIObject.namespace('serverinfo', description='General Server Operations')
-@ns.route('/')
+nsServerinfo = appObj.flastRestPlusAPIObject.namespace('serverinfo', description='General Server Operations')
+@nsServerinfo.route('/')
 class servceInfo(Resource):
   '''Genaral Server Opeations XXXXX'''
-  @ns.doc('getserverinfo')
+  @nsServerinfo.doc('getserverinfo')
   # @ns.marshal_list_with(todo)
   def get(self):
-    '''Get general inforpmation about the dockjob server'''
+    '''Get general information about the dockjob server'''
     curDatetime = datetime.datetime.now(pytz.utc)
     return appObj.getServerInfoJSON(curDatetime)
+
+jobModel = appObj.flastRestPlusAPIObject.model('Job', {
+    'name': fields.String,
+    'name2': fields.String(),
+    'name3': fields.String()
+})
+
+nsJobs = appObj.flastRestPlusAPIObject.namespace('jobs', description='Job Operations')
+@nsJobs.route('/')
+class servceInfo(Resource):
+  '''Operations relating to jobs'''
+
+  @nsJobs.doc('getjobs')
+  # @ns.marshal_list_with(todo)
+  def get(self):
+    '''Get Jobs'''
+    return []
+
+  @nsJobs.doc('putjobs')
+  @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+  @appObj.flastRestPlusAPIObject.marshal_with(jobModel, code=201, description='Job created')
+  @nsJobs.expect(jobModel, validate=True)
+  def put(self):
+    '''Create Job'''
+    a = {
+      'name': 'string',
+      'name2': 'aa',
+      'name3': 'string'
+    }
+    return a
+
 
 
 appObj.flaskAppObject.register_blueprint(webfrontendBP, url_prefix='/frontend')
