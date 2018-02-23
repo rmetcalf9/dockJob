@@ -31,9 +31,6 @@ app=None, version='1.0', title=None, description=None,
             catch_all_404s=False, serve_challenge_on_401=False, format_checker=None
 '''
 
-from jobsData import jobCreationModel, jobModel, jobsData
-
-
 api_blueprint = Blueprint('api', __name__)
 appObj.flastRestPlusAPIObject.init_app(api_blueprint)  
 
@@ -51,26 +48,7 @@ class servceInfo(Resource):
     curDatetime = datetime.datetime.now(pytz.utc)
     return appObj.getServerInfoJSON(curDatetime)
 
-nsJobs = appObj.flastRestPlusAPIObject.namespace('jobs', description='Job Operations')
-@nsJobs.route('/')
-class jobs(Resource):
-  '''Operations relating to jobs'''
-
-  @nsJobs.doc('getjobs')
-  # @ns.marshal_list_with(todo)
-  def get(self):
-    '''Get Jobs'''
-    return []
-
-  @nsJobs.doc('postjob')
-  @nsJobs.expect(jobCreationModel, validate=True)
-  @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
-  @appObj.flastRestPlusAPIObject.response(200, 'Success')
-  @appObj.flastRestPlusAPIObject.marshal_with(jobModel, code=200, description='Job created')
-  def post(self):
-    '''Create Job'''
-    return jobsData.createJob(request)
-
+from jobsData import t
 
 
 appObj.flaskAppObject.register_blueprint(webfrontendBP, url_prefix='/frontend')

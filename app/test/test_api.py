@@ -1,28 +1,11 @@
-from TestHelperSuperClass import testHelperSuperClass
+from TestHelperSuperClass import testHelperAPIClient
 import unittest
 from appObj import appObj
 appObj.init()
 import api
 import json
-from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
 
-env = {
-  'APIAPP_MODE': 'DOCKER',
-  'APIAPP_VERSION': 'TEST-3.3.3',
-  'APIAPP_FRONTEND': '../app',
-  'APIAPP_APIURL': 'http://apiurlxxx',
-  'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]',
-}
-
-
-class test_api(testHelperSuperClass):
-  testClient = None
-  def setUp(self):
-    GlobalParamaters.set(GlobalParamatersClass(env))
-    self.testClient = appObj.flaskAppObject.test_client()
-    self.testClient.testing = True 
-  def tearDown(self):
-    self.testClient = None
+class test_api(testHelperAPIClient):
 
   def test_getServceInfo(self):
     expRes = json.dumps({
@@ -41,4 +24,10 @@ class test_api(testHelperSuperClass):
     resultJSON['Server']['ServerDatetime'] = 'IGNORE'
     self.assertJSONStringsEqual(resultJSON, json.loads(expRes));
     pass
+
+  def test_swaggerJSONProperlyShared(self):
+    result = self.testClient.get('/api/swagger.json')
+    self.assertEqual(result.status_code, 200)
+    result = self.testClient.get('/apidocs/swagger.json')
+    self.assertEqual(result.status_code, 200)
 

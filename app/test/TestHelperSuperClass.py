@@ -3,6 +3,21 @@
 # https://docs.python.org/3/library/unittest.html
 import unittest
 import json
+from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
+from appObj import appObj
+appObj.init()
+
+import datetime
+import pytz
+
+
+env = {
+  'APIAPP_MODE': 'DOCKER',
+  'APIAPP_VERSION': 'TEST-3.3.3',
+  'APIAPP_FRONTEND': '../app',
+  'APIAPP_APIURL': 'http://apiurlxxx',
+  'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]',
+}
 
 class testHelperSuperClass(unittest.TestCase):
   def checkGotRightException(self, context, ExpectedException):
@@ -30,3 +45,20 @@ class testHelperSuperClass(unittest.TestCase):
     print(b)
     self.assertTrue(False)
 
+  def assertTimeCloseToCurrentAndUTC(self, time):
+    curTime = datetime.datetime.now(pytz.timezone("UTC"))
+    time_diff = (curTime - time).total_seconds()
+    self.assertTrue(time_diff < 3, msg='Creation time is more than 3 seconds adrift')
+    print(curTime.tzinfo)
+    print(time.tzinfo)
+    self.assertTrue(False, msg='TODO Check time is in UTC format')
+    
+#helper class with setup for an APIClient
+class testHelperAPIClient(testHelperSuperClass):
+  testClient = None
+  def setUp(self):
+    GlobalParamaters.set(GlobalParamatersClass(env))
+    self.testClient = appObj.flaskAppObject.test_client()
+    self.testClient.testing = True 
+  def tearDown(self):
+    self.testClient = None
