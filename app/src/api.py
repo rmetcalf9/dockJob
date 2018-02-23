@@ -1,14 +1,13 @@
 from flask import Flask, Blueprint, request
-from appObj import appObjClass
+from appObj import appObj
 from flask_restplus import Resource, fields, apidoc, reqparse
 from FlaskRestSubclass import FlaskRestSubclass
 import datetime
 import pytz
 
-appObj = appObjClass()
-appObj.setFlaskAppOgject(Flask(__name__))
-
 from webfrontendAPI import webfrontendBP
+
+t = 't'
 
 appObj.setFlastRestPlusAPIObject(
   FlaskRestSubclass(appObj.flaskAppObject, 
@@ -19,7 +18,6 @@ appObj.setFlastRestPlusAPIObject(
     default_mediatype='application/json'
   )
 )
-
 
 
 '''
@@ -33,6 +31,9 @@ app=None, version='1.0', title=None, description=None,
             catch_all_404s=False, serve_challenge_on_401=False, format_checker=None
 '''
 
+from jobsData import jobCreationModel, jobModel, jobsData
+
+
 api_blueprint = Blueprint('api', __name__)
 appObj.flastRestPlusAPIObject.init_app(api_blueprint)  
 
@@ -42,7 +43,7 @@ appObj.flaskAppObject.register_blueprint(api_blueprint, url_prefix='/api')
 nsServerinfo = appObj.flastRestPlusAPIObject.namespace('serverinfo', description='General Server Operations')
 @nsServerinfo.route('/')
 class servceInfo(Resource):
-  '''Genaral Server Opeations XXXXX'''
+  '''General Server Operations XXXXX'''
   @nsServerinfo.doc('getserverinfo')
   # @ns.marshal_list_with(todo)
   def get(self):
@@ -50,15 +51,9 @@ class servceInfo(Resource):
     curDatetime = datetime.datetime.now(pytz.utc)
     return appObj.getServerInfoJSON(curDatetime)
 
-jobModel = appObj.flastRestPlusAPIObject.model('Job', {
-    'name': fields.String,
-    'name2': fields.String(),
-    'name3': fields.String()
-})
-
 nsJobs = appObj.flastRestPlusAPIObject.namespace('jobs', description='Job Operations')
 @nsJobs.route('/')
-class servceInfo(Resource):
+class jobs(Resource):
   '''Operations relating to jobs'''
 
   @nsJobs.doc('getjobs')
@@ -67,18 +62,14 @@ class servceInfo(Resource):
     '''Get Jobs'''
     return []
 
-  @nsJobs.doc('putjobs')
+  @nsJobs.doc('postjob')
+  @nsJobs.expect(jobCreationModel, validate=True)
   @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
-  @appObj.flastRestPlusAPIObject.marshal_with(jobModel, code=201, description='Job created')
-  @nsJobs.expect(jobModel, validate=True)
-  def put(self):
+  @appObj.flastRestPlusAPIObject.response(200, 'Success')
+  @appObj.flastRestPlusAPIObject.marshal_with(jobModel, code=200, description='Job created')
+  def post(self):
     '''Create Job'''
-    a = {
-      'name': 'string',
-      'name2': 'aa',
-      'name3': 'string'
-    }
-    return a
+    return jobsData.createJob(request)
 
 
 

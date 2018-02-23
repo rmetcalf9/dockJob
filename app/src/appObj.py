@@ -8,6 +8,7 @@
 import json
 import pytz
 from GlobalParamaters import GlobalParamaters
+from flask import Flask
 
 
 NotUTCException = Exception('Must be given UTC time')
@@ -34,7 +35,7 @@ class appObjClass():
     return {'Server': self.serverObj, 'Jobs': jobsObj}
     #return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
 
-  def setFlaskAppOgject(self,app):
+  def setFlaskAppObject(self,app):
     self.flaskAppObject = app
 
   def setFlastRestPlusAPIObject(self,api):
@@ -48,4 +49,18 @@ class appObjClass():
     #appObj.flaskAppObject.config['SERVER_NAME'] = 'servername:123'
     self.flaskAppObject.run(host='0.0.0.0', port=80, debug=False)
 
+  def init(self):
+    appObj.setFlaskAppObject(Flask(__name__))
+
+    #Development code required to add CORS allowance in developer mode
+    @self.flaskAppObject.after_request
+    def after_request(response):
+      if (GlobalParamaters.get().getDeveloperMode()):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+      return response
+  
+
+appObj = appObjClass()
 

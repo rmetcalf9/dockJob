@@ -1,5 +1,9 @@
 from flask import Flask, Blueprint, jsonify, request
-from api import appObj
+from appObj import appObj
+appObj.init()
+
+from api import t
+
 from flask_restplus import Api, Resource, fields
 import signal
 import sys
@@ -11,15 +15,6 @@ from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
 ## /apidocs    API Documentation including swagger.json and swaggerUI
 ## /frontend   Frontend for this application
 ##
-
-#Development code required to add CORS allowance in developer mode
-@appObj.flaskAppObject.after_request
-def after_request(response):
-  if (GlobalParamaters.get().getDeveloperMode()):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-  return response
 
 #Code required to ensure that container will exit when a signal is received
 class ServerTerminationError(Exception):

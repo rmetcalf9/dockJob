@@ -4,8 +4,8 @@ APP_DIR=.
 
 export APIAPP_MODE=DEVELOPER
 export APIAPP_FRONTEND=_
-export APIAPP_APIURL=http://somefunnyhostname.com:5080/api
-export APIAPP_APIDOCSURL=http://somefunnyhostname.com:5080/apidocs/
+export APIAPP_APIURL=http://somefunnyhostname.com:5080/dockjobapi
+export APIAPP_APIDOCSURL=http://somefunnyhostname.com:5080/dockjobapidocs/
 export APIAPP_APIACCESSSECURITY=[]
 
 
