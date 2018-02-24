@@ -1,6 +1,5 @@
 from TestHelperSuperClass import testHelperAPIClient
 
-from jobsData import t
 import json
 from utils import from_iso8601
 import api

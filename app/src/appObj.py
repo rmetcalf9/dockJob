@@ -7,9 +7,10 @@
 
 import json
 import pytz
-from GlobalParamaters import GlobalParamaters
+from GlobalParamaters import GlobalParamatersClass
 from flask import Flask
 import signal
+from FlaskRestSubclass import FlaskRestSubclass
 
 
 NotUTCException = Exception('Must be given UTC time')
@@ -52,8 +53,8 @@ class appObjClass():
     self.flastRestPlusAPIObject = api
 
   # called by app.py to run the application
-  def run(self):
-    print(GlobalParamaters.get().getStartupOutput())
+  def run(self, envirom):
+    print(self.globalParamObject.getStartupOutput())
     self.flastRestPlusAPIObject.version = GlobalParamaters.get().version
 
     #appObj.flaskAppObject.config['SERVER_NAME'] = 'servername:123'
@@ -62,7 +63,8 @@ class appObjClass():
     except ServerTerminationError as e:
       print("Stopped")
 
-  def init(self):
+  def init(self, envirom):
+    self.globalParamObject = GlobalParamatersClass(envirom)
     appObj.setFlaskAppObject(Flask(__name__))
 
     #Development code required to add CORS allowance in developer mode
@@ -73,6 +75,16 @@ class appObjClass():
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
       return response
+
+    self.setFlastRestPlusAPIObject(
+      FlaskRestSubclass(appObj.flaskAppObject, 
+        version='UNSET', 
+        title='DocJob Scheduling Server API',
+        description='API for the DockJob scheduling server', 
+        doc='/apidocs/',
+        default_mediatype='application/json'
+      )
+    )
 
   def exit_gracefully(self, signum, frame):
     print("Exit Gracefully called")

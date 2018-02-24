@@ -4,10 +4,8 @@ appObj.init()
 
 from api import t
 
-from flask_restplus import Api, Resource, fields
 import sys
 import os
-from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
 
 ##App will host content in the following paths:
 ## /api        API
@@ -18,7 +16,6 @@ from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
 expectedNumberOfParams = 0
 if ((len(sys.argv)-1) != expectedNumberOfParams):
   raise Exception('Wrong number of paramaters passed (Got ' + str((len(sys.argv)-1)) + " expected " + str(expectedNumberOfParams) + ")")
-GlobalParamaters.set(GlobalParamatersClass(os.environ))
 
-appObj.run()
+appObj.run(os.environ)
 

@@ -3,9 +3,7 @@
 # https://docs.python.org/3/library/unittest.html
 import unittest
 import json
-from GlobalParamaters import GlobalParamaters, GlobalParamatersClass
 from appObj import appObj
-appObj.init()
 
 import datetime
 import pytz
@@ -54,7 +52,7 @@ class testHelperSuperClass(unittest.TestCase):
 class testHelperAPIClient(testHelperSuperClass):
   testClient = None
   def setUp(self):
-    GlobalParamaters.set(GlobalParamatersClass(env))
+    appObj.init(env)
     self.testClient = appObj.flaskAppObject.test_client()
     self.testClient.testing = True 
   def tearDown(self):

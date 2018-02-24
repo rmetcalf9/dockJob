@@ -1,7 +1,5 @@
 from TestHelperSuperClass import testHelperAPIClient
 import unittest
-from appObj import appObj
-appObj.init()
 import api
 import json
 

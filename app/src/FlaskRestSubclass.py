@@ -1,5 +1,4 @@
 from flask_restplus import Api, apidoc
-from GlobalParamaters import GlobalParamaters
 import re
 import json
 from http import HTTPStatus
@@ -15,6 +14,18 @@ from http import HTTPStatus
 class FlaskRestSubclass(Api):
   internalAPIPath = '/api'
 
+  # Extra params inited manually
+  apidocsurl = None 
+  APIDOCSPath = None
+  overrideAPIDOCSPath = None
+  APIPath = None
+  def setExtraParams(self, apidocsurl, APIDOCSPath, overrideAPIDOCSPath, APIPath):
+    self.apidocsurl = apidocsurl
+    self.APIDOCSPath = APIDOCSPath
+    self.overrideAPIDOCSPath = overrideAPIDOCSPath
+    self.APIPath = APIPath
+
+
   def __init__(self, *args, reverse=False, **kwargs):
       super().__init__(*args, **kwargs)
   def _register_apidoc(self, app):
@@ -25,18 +36,16 @@ class FlaskRestSubclass(Api):
     conf['apidoc_registered'] = True
 
   def reaplcements(self, res):
-    #res = res.replace('/apidocs/',GlobalParamaters.get().getAPIDOCSPath() + '/')
-    #regexp="\"https?:\/\/[a-zA-Z0\-9._]*(:[0-9]*)?/apidocs/swagger.json\""
     regexp="\"https?:\/\/[a-zA-Z0\-9._]*(:[0-9]*)?" + self.internalAPIPath.replace("/","\/") + "\/swagger.json\""
     p = re.compile(regexp)
-    res = p.sub("\"" + GlobalParamaters.get().apidocsurl + "swagger.json\"", res)
+    res = p.sub("\"" + self.apidocsurl + "swagger.json\"", res)
 
     regexp="src=\"/apidocs/swaggerui/"
     p = re.compile(regexp)
-    res = p.sub("src=\"" + GlobalParamaters.get().getAPIDOCSPath() + "/swaggerui/", res)
+    res = p.sub("src=\"" + self.APIDOCSPath + "/swaggerui/", res)
     regexp="href=\"/apidocs/swaggerui/"
     p = re.compile(regexp)
-    res = p.sub("href=\"" + GlobalParamaters.get().getAPIDOCSPath() + "/swaggerui/", res)
+    res = p.sub("href=\"" + self.APIDOCSPath + "/swaggerui/", res)
     return res
 
   # Flask will serve the files with the url pointing at /apidocs.
@@ -48,7 +57,7 @@ class FlaskRestSubclass(Api):
     elif not self._doc:
       self.abort(HTTPStatus.NOT_FOUND)
     res = apidoc.ui_for(self)
-    if (GlobalParamaters.get().overrideAPIDOCSPath()):
+    if (self.overrideAPIDOCSPath()):
       print("About to replace")
       print(res)
       res = self.reaplcements(res)
@@ -72,6 +81,6 @@ class FlaskRestSubclass(Api):
     The API path
     :rtype: str
     '''
-    return GlobalParamaters.get().getAPIPath()
+    return self.getAPIPath()
 
 

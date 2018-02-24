@@ -86,11 +86,4 @@ class GlobalParamatersClass():
   def getAPIDOCSPath(self):
     return self.getSanitizedPath(self.apidocsurl)
 
-class GlobalParamatersPointerClass():
-  obj = None
-  def set(self, obj):
-    self.obj = obj
-  def get(self):
-    return self.obj
 
-GlobalParamaters = GlobalParamatersPointerClass()
