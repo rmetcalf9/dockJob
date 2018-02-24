@@ -9,9 +9,18 @@ import json
 import pytz
 from GlobalParamaters import GlobalParamaters
 from flask import Flask
+import signal
 
 
 NotUTCException = Exception('Must be given UTC time')
+
+#Code required to ensure that container will exit when a signal is received
+class ServerTerminationError(Exception):
+  def __init__(self):
+    pass
+  def __str__(self):
+    return "Server Terminate Error"
+
 
 class appObjClass():
   serverObj = {
@@ -47,7 +56,10 @@ class appObjClass():
     self.flastRestPlusAPIObject.version = GlobalParamaters.get().version
 
     #appObj.flaskAppObject.config['SERVER_NAME'] = 'servername:123'
-    self.flaskAppObject.run(host='0.0.0.0', port=80, debug=False)
+    try:
+      self.flaskAppObject.run(host='0.0.0.0', port=80, debug=False)
+    except ServerTerminationError as e:
+      print("Stopped")
 
   def init(self):
     appObj.setFlaskAppObject(Flask(__name__))
@@ -60,7 +72,13 @@ class appObjClass():
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
       return response
-  
+
+  def exit_gracefully(self, signum, frame):
+    print("Exit Gracefully called")
+    raise ServerTerminationError()
+
 
 appObj = appObjClass()
+signal.signal(signal.SIGINT, appObj.exit_gracefully)
+signal.signal(signal.SIGTERM, appObj.exit_gracefully) #sigterm is sent by docker stop command
 
