@@ -12,8 +12,10 @@ class test_jobsData(testHelperAPIClient):
   def from_iso8601(self, when=None, tz=pytz.timezone("UTC")):
     _when = dateutil.parser.parse(when)
     if not _when.tzinfo:
-      print('AA')
       _when = tz.localize(_when)
+    print(_when.tzinfo)
+    if (str(_when.tzinfo) != 'tzutc()'):
+      raise Exception('Error - Only conversion of utc times from iso8601 is supported')
     return _when
 
   def test_JobCreate(self):
@@ -39,7 +41,7 @@ class test_jobsData(testHelperAPIClient):
     self.assertTrue(len(resultJSON['guid']) == 36, msg='Invalid GUID - must be 36 chars')
     self.assertTrue(resultJSON['creationDate'] == resultJSON['lastUpdateDate'], msg='Creation date dosen''t match last update')
     tim = self.from_iso8601(resultJSON['creationDate'])
-    self.assertTimeCloseToCurrentAndUTC(tim)
+    self.assertTimeCloseToCurrent(tim)
     resultJSON['guid'] = expRes['guid']
     resultJSON['creationDate'] = expRes['creationDate']
     resultJSON['lastUpdateDate'] = expRes['lastUpdateDate']

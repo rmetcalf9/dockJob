@@ -22,6 +22,7 @@ class ServerTerminationError(Exception):
     return "Server Terminate Error"
 
 
+
 class appObjClass():
   serverObj = {
     'ServerDatetime': '01-Jan-2018 13:46', #Real value never held here
