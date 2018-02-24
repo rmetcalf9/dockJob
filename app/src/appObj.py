@@ -6,8 +6,8 @@
 
 
 from APIBackendWithSwaggerAppObj import APIBackendWithSwaggerAppObj
-from api import registerAPI as registerMainApi
-from jobsData import registerAPI as registerJobsApi
+from serverInfoAPI import registerAPI as registerMainApi
+from jobsDataAPI import registerAPI as registerJobsApi
 
 class appObjClass(APIBackendWithSwaggerAppObj):
   def initOnce(self):

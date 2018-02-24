@@ -2,8 +2,6 @@ from TestHelperSuperClass import testHelperAPIClient
 
 import json
 from utils import from_iso8601
-import api
-
 
 class test_jobsData(testHelperAPIClient):
   def test_JobCreate(self):
