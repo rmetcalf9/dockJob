@@ -1,4 +1,4 @@
-from flask_restplus import Api, apidoc
+from flask_restplus import Api, apidoc, Swagger
 import re
 import json
 from http import HTTPStatus
@@ -58,20 +58,28 @@ class FlaskRestSubclass(Api):
       self.abort(HTTPStatus.NOT_FOUND)
     res = apidoc.ui_for(self)
     if (self.overrideAPIDOCSPath()):
-      print("About to replace")
-      print(res)
+      #print("About to replace")
+      #print(res)
       res = self.reaplcements(res)
-      print("Replaced")
-      print(res)
-      print("End")
+      #print("Replaced")
+      #print(res)
+      #print("End")
     return res
 
   #By default swagger.json is registered as /api/swagger.json
   # as this is security protected I need this to be accessed in /apidocs/swagger.json as well
   def getSwaggerJSON(self):
+    print('AAA')
+    print(self)
+    print('BBB')
+    if not self._schema:
+      #aaa = Swagger(self).as_dict()
+      pass
+    else:
+      print('self._schema')
+    print('CCC')
     schema = self.__schema__
     return json.dumps(schema), HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK, {'Content-Type': 'application/json'}
-    #return schema, HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK
 
   #Override the basepath given in the swagger file
   # I need to give out a different one from where the endpoint is registered
@@ -81,6 +89,6 @@ class FlaskRestSubclass(Api):
     The API path
     :rtype: str
     '''
-    return self.getAPIPath()
+    return self.APIPath
 
 

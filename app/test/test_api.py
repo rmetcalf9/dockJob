@@ -1,6 +1,5 @@
 from TestHelperSuperClass import testHelperAPIClient
 import unittest
-import api
 import json
 
 class test_api(testHelperAPIClient):

@@ -53,6 +53,10 @@ class testHelperAPIClient(testHelperSuperClass):
   testClient = None
   def setUp(self):
     appObj.init(env)
+    from api import registerAPI
+    registerAPI(appObj)
+    from jobsData import registerAPI
+    registerAPI(appObj)
     self.testClient = appObj.flaskAppObject.test_client()
     self.testClient.testing = True 
   def tearDown(self):

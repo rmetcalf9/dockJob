@@ -8,10 +8,12 @@
 import json
 import pytz
 from GlobalParamaters import GlobalParamatersClass
-from flask import Flask
+from flask import Flask, Blueprint
 import signal
 from FlaskRestSubclass import FlaskRestSubclass
+from webfrontendAPI import webfrontendBP
 
+from flask_restplus import Api
 
 NotUTCException = Exception('Must be given UTC time')
 
@@ -46,16 +48,12 @@ class appObjClass():
     return {'Server': self.serverObj, 'Jobs': jobsObj}
     #return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
 
-  def setFlaskAppObject(self,app):
-    self.flaskAppObject = app
-
-  def setFlastRestPlusAPIObject(self,api):
-    self.flastRestPlusAPIObject = api
-
   # called by app.py to run the application
-  def run(self, envirom):
+  def run(self):
+    if (self.isInitOnce == False):
+      raise Exception('Trying to run app without initing')
     print(self.globalParamObject.getStartupOutput())
-    self.flastRestPlusAPIObject.version = GlobalParamaters.get().version
+    self.flastRestPlusAPIObject.version = self.globalParamObject.version
 
     #appObj.flaskAppObject.config['SERVER_NAME'] = 'servername:123'
     try:
@@ -65,26 +63,45 @@ class appObjClass():
 
   def init(self, envirom):
     self.globalParamObject = GlobalParamatersClass(envirom)
-    appObj.setFlaskAppObject(Flask(__name__))
+    self.initOnce()
+
+  isInitOnce = False
+  def initOnce(self):
+    if (self.isInitOnce):
+      return
+    self.isInitOnce = True
+
+    self.flaskAppObject = Flask(__name__)
 
     #Development code required to add CORS allowance in developer mode
     @self.flaskAppObject.after_request
     def after_request(response):
-      if (GlobalParamaters.get().getDeveloperMode()):
+      if (self.globalParamObject.getDeveloperMode()):
         response.headers.add('Access-Control-Allow-Origin', '*')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
       return response
 
-    self.setFlastRestPlusAPIObject(
-      FlaskRestSubclass(appObj.flaskAppObject, 
-        version='UNSET', 
-        title='DocJob Scheduling Server API',
-        description='API for the DockJob scheduling server', 
-        doc='/apidocs/',
-        default_mediatype='application/json'
-      )
+    self.flastRestPlusAPIObject = FlaskRestSubclass(self.flaskAppObject, 
+      version='UNSET', 
+      title='DocJob Scheduling Server API',
+      description='API for the DockJob scheduling server', 
+      doc='/apidocs/',
+      default_mediatype='application/json'
     )
+    self.flastRestPlusAPIObject.setExtraParams(
+      self.globalParamObject.apidocsurl, 
+      self.globalParamObject.getAPIDOCSPath(), 
+      self.globalParamObject.overrideAPIDOCSPath, 
+      self.globalParamObject.getAPIPath()
+    )
+
+    api_blueprint = Blueprint('api', __name__)
+    self.flastRestPlusAPIObject.init_app(api_blueprint)  
+
+    self.flaskAppObject.register_blueprint(api_blueprint, url_prefix='/api')
+    self.flaskAppObject.register_blueprint(webfrontendBP, url_prefix='/frontend')
+
 
   def exit_gracefully(self, signum, frame):
     print("Exit Gracefully called")
