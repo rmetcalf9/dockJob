@@ -12,11 +12,6 @@ import os
 
 appObj.init(os.environ)
 
-from api import registerAPI
-registerAPI(appObj)
-from jobsData import registerAPI
-registerAPI(appObj)
-
 expectedNumberOfParams = 0
 if ((len(sys.argv)-1) != expectedNumberOfParams):
   raise Exception('Wrong number of paramaters passed (Got ' + str((len(sys.argv)-1)) + " expected " + str(expectedNumberOfParams) + ")")

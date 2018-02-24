@@ -1,4 +1,3 @@
-from appObj import appObj
 from flask import request
 from flask_restplus import Resource, fields, apidoc
 import uuid

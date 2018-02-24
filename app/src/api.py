@@ -1,7 +1,6 @@
 from flask_restplus import Resource, fields, apidoc, reqparse
 import datetime
 import pytz
-from appObj import appObj
 
 def registerAPI(appObj):
 
