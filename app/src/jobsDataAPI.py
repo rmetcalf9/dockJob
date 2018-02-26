@@ -6,6 +6,7 @@ import json
 import datetime
 # from pytz import timezone
 import pytz
+from RepetitionInterval import RepetitionIntervalClass
 
 class jobsDataClass():
   # map of guid to Job
@@ -25,13 +26,18 @@ class jobsDataClass():
     
   # return GUID or error
   def addJob(self, job):
-    print('add job start')
-    print(self.jobs)
     uniqueJobName = self.nameUniqunessFn(job['name'])
     if (str(job['guid']) in self.jobs):
       return {'msg': 'GUID already in use', 'guid':''}
     if (uniqueJobName in self.jobs_name_lookup):
       return {'msg': 'Job Name already in use', 'guid':''}
+    if (job['repetitionInterval'] != None):
+      if (job['repetitionInterval'] != ''):
+        try:
+          ri = RepetitionIntervalClass(job['repetitionInterval'])
+        except:
+          return {'msg': 'Invalid Repetition Interval', 'guid':''}
+        job['nextScheduledRun'] = ri.getNextOccuranceDatetime(datetime.datetime.now(pytz.timezone("UTC")))
     self.jobs[str(job['guid'])] = job
     self.jobs_name_lookup[uniqueJobName] = uniqueJobName
     return {'msg': 'OK', 'guid':job['guid']}
@@ -53,6 +59,7 @@ def registerAPI(appObj):
     'command': fields.String(default=''),
     'enabled': fields.Boolean(default=False,description='Is the job currently enabled'),
     'repetitionInterval': fields.String(default='',description='How the job is scheduled to run'),
+    'nextScheduledRun': fields.String(default='',description='Next scheudled run'),
     'guid': fields.String(default='',description='Unique identifier for this job'),
     'creationDate': fields.DateTime(dt_format=u'iso8601', description='Time job record was created'),
     'lastUpdateDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was changed (excluding runs)'),
