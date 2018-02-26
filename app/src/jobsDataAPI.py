@@ -1,10 +1,43 @@
 from flask import request
 from flask_restplus import Resource, fields, apidoc
+from werkzeug.exceptions import BadRequest
 import uuid
 import json
 import datetime
 # from pytz import timezone
 import pytz
+
+class jobsDataClass():
+  # map of guid to Job
+  jobs = {}
+  # map of Job name to guid
+  jobs_name_lookup = {}
+  def __init__(self):
+    self.jobs = {}
+    self.jobs_name_lookup = {}
+    pass
+
+  def getJob(self, guid):
+    return self.jobs[str(guid)]
+
+  def nameUniqunessFn(self, name):
+    return name.strip().upper()
+    
+  # return GUID or error
+  def addJob(self, job):
+    print('add job start')
+    print(self.jobs)
+    uniqueJobName = self.nameUniqunessFn(job['name'])
+    if (str(job['guid']) in self.jobs):
+      return {'msg': 'GUID already in use', 'guid':''}
+    if (uniqueJobName in self.jobs_name_lookup):
+      return {'msg': 'Job Name already in use', 'guid':''}
+    self.jobs[str(job['guid'])] = job
+    self.jobs_name_lookup[uniqueJobName] = uniqueJobName
+    return {'msg': 'OK', 'guid':job['guid']}
+
+def resetData(appObj):
+  appObj.appData['jobsData']=jobsDataClass()
 
 def registerAPI(appObj):
   # Fields required to create a Job
@@ -27,6 +60,7 @@ def registerAPI(appObj):
     # TODO Add runs to this model
   })
 
+    
   nsJobs = appObj.flastRestPlusAPIObject.namespace('jobs', description='Job Operations')
   @nsJobs.route('/')
   class jobs(Resource):
@@ -56,5 +90,8 @@ def registerAPI(appObj):
         'creationDate': curTime.isoformat(),
         'lastUpdateDate': curTime.isoformat()
       }
-      return newJob
+      res = appObj.appData['jobsData'].addJob(newJob)
+      if res['msg']!='OK':
+        raise BadRequest(res['msg'])
+      return appObj.appData['jobsData'].getJob(res['guid'])
 
