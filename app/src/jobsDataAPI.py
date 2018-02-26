@@ -8,6 +8,17 @@ import datetime
 import pytz
 from RepetitionInterval import RepetitionIntervalClass
 
+# When passed a list will returned a paginated result for that list
+def getPaginatedResult(listRes, offset, pagesize):
+  return {
+    'pagination': {
+      'offset': 0,
+      'pagesize': 20,
+      'total': len(listRes)
+    },
+    'result': listRes
+  }
+
 class jobsDataClass():
   # map of guid to Job
   jobs = {}
@@ -32,14 +43,14 @@ class jobsDataClass():
     if (str(job['guid']) in self.jobs):
       return {'msg': 'GUID already in use', 'guid':''}
     if (uniqueJobName in self.jobs_name_lookup):
-      return {'msg': 'Job Name already in use', 'guid':''}
+      return {'msg': 'Job Name already in use - ' + uniqueJobName, 'guid':''}
     if (job['repetitionInterval'] != None):
       if (job['repetitionInterval'] != ''):
         try:
           ri = RepetitionIntervalClass(job['repetitionInterval'])
         except:
           return {'msg': 'Invalid Repetition Interval', 'guid':''}
-        job['nextScheduledRun'] = ri.getNextOccuranceDatetime(datetime.datetime.now(pytz.timezone("UTC")))
+        job['nextScheduledRun'] = ri.getNextOccuranceDatetime(datetime.datetime.now(pytz.timezone("UTC"))).isoformat()
     self.jobs[str(job['guid'])] = job
     self.jobs_name_lookup[uniqueJobName] = job['guid']
     return {'msg': 'OK', 'guid':job['guid']}
@@ -79,7 +90,10 @@ def registerAPI(appObj):
     # @ns.marshal_list_with(todo)
     def get(self):
       '''Get Jobs'''
-      return []
+      ret = []
+      for curJob in appObj.appData['jobsData'].jobs:
+        ret.append(appObj.appData['jobsData'].jobs[curJob])
+      return getPaginatedResult(ret, 0, 20)
 
     @nsJobs.doc('postjob')
     @nsJobs.expect(jobCreationModel, validate=True)
@@ -91,13 +105,14 @@ def registerAPI(appObj):
       content = request.get_json()
       curTime = datetime.datetime.now(pytz.timezone("UTC"))
       newJob = {
-        'guid': uuid.uuid4(),
+        'guid': str(uuid.uuid4()),
         'name': content['name'],
         'command': content['command'],
         'enabled': content['enabled'],
         'repetitionInterval': content['repetitionInterval'],
         'creationDate': curTime.isoformat(),
-        'lastUpdateDate': curTime.isoformat()
+        'lastUpdateDate': curTime.isoformat(),
+        'lastRunDate': None
       }
       res = appObj.appData['jobsData'].addJob(newJob)
       if res['msg']!='OK':
