@@ -7,6 +7,11 @@ from webfrontendAPI import webfrontendBP
 
 
 class APIBackendWithSwaggerAppObj():
+  appData = {}
+  # Implemented in my own init
+  #def __init__(self):
+  #  self.appData = {}
+
   NotUTCException = Exception('Must be given UTC time')
   class ServerTerminationError(Exception):
     def __init__(self):
@@ -50,6 +55,7 @@ class APIBackendWithSwaggerAppObj():
 
   isInitOnce = False
   def init(self, envirom):
+    self.appData = {}
     self.globalParamObject = GlobalParamatersClass(envirom)
     if (self.isInitOnce):
       return

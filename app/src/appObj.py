@@ -10,11 +10,8 @@ from serverInfoAPI import registerAPI as registerMainApi
 from jobsDataAPI import registerAPI as registerJobsApi, resetData as resetJobsData
 
 class appObjClass(APIBackendWithSwaggerAppObj):
-  appData = {}
-
   def init(self, env):
     super(appObjClass, self).init(env)
-    self.appData.clear()
     resetJobsData(self)
 
   def initOnce(self):
