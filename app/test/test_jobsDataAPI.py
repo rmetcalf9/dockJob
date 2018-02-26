@@ -71,6 +71,37 @@ class test_jobsData(testHelperAPIClient):
     result = self.testClient.post('/api/jobs/', data=json.dumps(params), content_type='application/json')
     self.assertEqual(result.status_code, 200, msg='Empty repitition interval not accepted')
 
+  def test_jobCreateAndQueryBackByGUID(self):
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    resultJSON = json.loads(result.get_data(as_text=True))
+    self.assertEqual(result.status_code, 200, msg='First job creation should have worked')
+    result2 = self.testClient.get('/api/jobs/' + resultJSON['guid'])
+    self.assertEqual(result2.status_code, 200, msg='Read back record')
+    result2JSON = json.loads(result2.get_data(as_text=True))
+    resultJSON['guid'] = data_simpleJobCreateExpRes['guid']
+    resultJSON['nextScheduledRun'] = data_simpleJobCreateExpRes['nextScheduledRun']
+    resultJSON['creationDate'] = data_simpleJobCreateExpRes['creationDate']
+    resultJSON['lastUpdateDate'] = data_simpleJobCreateExpRes['lastUpdateDate']
+    self.assertJSONStringsEqual(resultJSON, data_simpleJobCreateExpRes);
+
+  def test_jobGetInvalid(self):
+    result = self.testClient.get('/api/jobs/INVALID_KEY')
+    self.assertEqual(result.status_code, 400, msg='Didn''t return not found job')
+
+  def test_jobCreateAndQueryBackByName(self):
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    resultJSON = json.loads(result.get_data(as_text=True))
+    self.assertEqual(result.status_code, 200, msg='First job creation should have worked')
+    result2 = self.testClient.get('/api/jobs/' + resultJSON['name'])
+    self.assertEqual(result2.status_code, 200, msg='Read back record')
+    result2JSON = json.loads(result2.get_data(as_text=True))
+    resultJSON['guid'] = data_simpleJobCreateExpRes['guid']
+    resultJSON['nextScheduledRun'] = data_simpleJobCreateExpRes['nextScheduledRun']
+    resultJSON['creationDate'] = data_simpleJobCreateExpRes['creationDate']
+    resultJSON['lastUpdateDate'] = data_simpleJobCreateExpRes['lastUpdateDate']
+    self.assertJSONStringsEqual(resultJSON, data_simpleJobCreateExpRes);
+
+
 #Create and query back same record
 #Query back 5 jobs
 #Delete job by GUID

@@ -20,6 +20,8 @@ class jobsDataClass():
 
   def getJob(self, guid):
     return self.jobs[str(guid)]
+  def getJobByName(self, name):
+    return self.jobs[str(self.jobs_name_lookup[self.nameUniqunessFn(name)])]
 
   def nameUniqunessFn(self, name):
     return name.strip().upper()
@@ -39,7 +41,7 @@ class jobsDataClass():
           return {'msg': 'Invalid Repetition Interval', 'guid':''}
         job['nextScheduledRun'] = ri.getNextOccuranceDatetime(datetime.datetime.now(pytz.timezone("UTC")))
     self.jobs[str(job['guid'])] = job
-    self.jobs_name_lookup[uniqueJobName] = uniqueJobName
+    self.jobs_name_lookup[uniqueJobName] = job['guid']
     return {'msg': 'OK', 'guid':job['guid']}
 
 def resetData(appObj):
@@ -70,7 +72,7 @@ def registerAPI(appObj):
     
   nsJobs = appObj.flastRestPlusAPIObject.namespace('jobs', description='Job Operations')
   @nsJobs.route('/')
-  class jobs(Resource):
+  class jobList(Resource):
     '''Operations relating to jobs'''
 
     @nsJobs.doc('getjobs')
@@ -101,4 +103,22 @@ def registerAPI(appObj):
       if res['msg']!='OK':
         raise BadRequest(res['msg'])
       return appObj.appData['jobsData'].getJob(res['guid'])
+
+  @nsJobs.route('/<string:guid>')
+  @nsJobs.response(404, 'Job found')
+  @nsJobs.param('guid', 'Job identifier (or name)')
+  class job(Resource):
+    '''Show a single Job'''
+    @nsJobs.doc('get_job')
+    @nsJobs.marshal_with(jobModel)
+    def get(self, guid):
+      '''Fetch a given resource'''
+      try:
+        return appObj.appData['jobsData'].getJob(guid)
+      except:
+        try:
+          return appObj.appData['jobsData'].getJobByName(guid)
+        except:
+          raise BadRequest('Invalid Job Identifier')
+      return None
 
