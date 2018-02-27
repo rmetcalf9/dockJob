@@ -31,6 +31,8 @@ class jobsDataClass():
     
   # return GUID or error
   def addJob(self, job):
+    if (len(job['name'])<2):
+      return {'msg': 'Job name must be more than 2 characters', 'guid':''}
     uniqueJobName = self.nameUniqunessFn(job['name'])
     if (str(job['guid']) in self.jobs):
       return {'msg': 'GUID already in use', 'guid':''}
