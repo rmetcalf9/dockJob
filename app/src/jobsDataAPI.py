@@ -49,6 +49,11 @@ class jobsDataClass():
     self.jobs_name_lookup[uniqueJobName] = job['guid']
     return {'msg': 'OK', 'guid':job['guid']}
 
+  def deleteJob(self, jobObj):
+    uniqueJobName = self.nameUniqunessFn(jobObj['name'])
+    self.jobs_name_lookup.pop(uniqueJobName)
+    self.jobs.pop(jobObj['guid'])
+
 def resetData(appObj):
   appObj.appData['jobsData']=jobsDataClass()
 
@@ -117,7 +122,7 @@ def registerAPI(appObj):
       return appObj.appData['jobsData'].getJob(res['guid'])
 
   @nsJobs.route('/<string:guid>')
-  @nsJobs.response(404, 'Job found')
+  @nsJobs.response(400, 'Job not found')
   @nsJobs.param('guid', 'Job identifier (or name)')
   class job(Resource):
     '''Show a single Job'''
@@ -134,3 +139,18 @@ def registerAPI(appObj):
           raise BadRequest('Invalid Job Identifier')
       return None
 
+    @nsJobs.doc('delete_job')
+    @nsJobs.response(200, 'Job deleted')
+    @nsJobs.response(400, 'Job not found')
+    def delete(self, guid):
+      '''Delete job'''
+      deletedJob = None
+      try:
+        deletedJob = appObj.appData['jobsData'].getJob(guid)
+      except:
+        try:
+          deletedJob = appObj.appData['jobsData'].getJobByName(guid)
+        except:
+          raise BadRequest('Invalid Job Identifier')
+      appObj.appData['jobsData'].deleteJob(deletedJob)
+      return deletedJob

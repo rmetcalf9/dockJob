@@ -117,7 +117,7 @@ class test_jobsData(testHelperAPIClient):
     expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': numTestRecords}
     self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
     self.assertEqual(len(result2JSON["result"]),numTestRecords,msg="Wrong number of returned results")
-    exp = data_simpleJobCreateExpRes
+    exp = dict(data_simpleJobCreateExpRes)
     for cur in range(0,numTestRecords):
       thisParam = self.findRecord(param, result2JSON["result"][cur]['name'])
       exp['name'] = thisParam['name']
@@ -169,13 +169,35 @@ class test_jobsData(testHelperAPIClient):
       exp['name'] = param[cur + offset]['name']
       self.assertJSONJobStringsEqual(result2JSON["result"][cur], exp);
 
+  def test_jobDeleteByGUID(self):
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    resultJSON = json.loads(result.get_data(as_text=True))
+    self.assertEqual(result.status_code, 200, msg='First job creation should have worked')
+    result2 = self.testClient.delete('/api/jobs/' + resultJSON['guid'])
+    self.assertEqual(result2.status_code, 200, msg='Didn''t delete record')
+    result2JSON = json.loads(result2.get_data(as_text=True))
+    self.assertJSONJobStringsEqual(result2JSON, data_simpleJobCreateExpRes);
+    result3 = self.testClient.get('/api/jobs/' + resultJSON['name'])
+    self.assertEqual(result3.status_code, 400, msg='Managed to retrieve deleted job by name')
+    result4 = self.testClient.get('/api/jobs/' + resultJSON['guid'])
+    self.assertEqual(result4.status_code, 400, msg='Managed to retrieve deleted job by guid')
 
+  def test_jobDeleteByName(self):
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    resultJSON = json.loads(result.get_data(as_text=True))
+    self.assertEqual(result.status_code, 200, msg='First job creation should have worked')
+    result2 = self.testClient.delete('/api/jobs/' + resultJSON['name'])
+    self.assertEqual(result2.status_code, 200, msg='Didn''t delete record')
+    result2JSON = json.loads(result2.get_data(as_text=True))
+    self.assertJSONJobStringsEqual(result2JSON, data_simpleJobCreateExpRes);
+    result3 = self.testClient.get('/api/jobs/' + resultJSON['name'])
+    self.assertEqual(result3.status_code, 400, msg='Managed to retrieve deleted job by name')
+    result4 = self.testClient.get('/api/jobs/' + resultJSON['guid'])
+    self.assertEqual(result4.status_code, 400, msg='Managed to retrieve deleted job by guid')
 
-#Delete job by GUID
-#Delete job by GUID error not exist
-#Delete job by name
-#Delete job by name error not exist
-
+  def test_jobDeleteByGUIDNotExist(self):
+    result2 = self.testClient.delete('/api/jobs/' + 'BAD-GUID-OR-NAME')
+    self.assertEqual(result2.status_code, 400, msg='Deleted a record')
 
 #Filter - query back particular jobs
 
