@@ -6,6 +6,8 @@ from FlaskRestSubclass import FlaskRestSubclass
 from flask_restplus import fields
 from webfrontendAPI import webfrontendBP
 
+#I need jobs to be stored in order so pagination works
+from sortedcontainers import SortedDict
 
 class APIBackendWithSwaggerAppObj():
   appData = {}
@@ -118,7 +120,17 @@ class APIBackendWithSwaggerAppObj():
       pagesize = int(pagesize)
     output = []
     if request.args.get('query') is not None:
-      list = []
+      origList = dict(list)
+      list = SortedDict()
+      where_clauses = request.args.get('query').strip().upper().split(" ")
+      def includeItem(item):
+        for curClause in where_clauses:
+          if not filterFN(item, curClause):
+            return False
+        return True
+      for cur in origList:
+        if includeItem(origList[cur]):
+          list[cur]=origList[cur]
     for cur in range(offset, (pagesize + offset)):
       if (cur<len(list)):
         output.append(outputFN(list[list.keys()[cur]]))

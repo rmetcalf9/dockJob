@@ -94,10 +94,17 @@ def registerAPI(appObj):
       '''Get Jobs'''
       def outputJob(item):
         return appObj.appData['jobsData'].jobs[item]
+      def filterJob(item, whereClauseText): #if mutiple seperated by spaces each is passed individually and anded together
+        if appObj.appData['jobsData'].jobs[item]['name'].upper().find(whereClauseText) != -1:
+          return True
+        if appObj.appData['jobsData'].jobs[item]['command'].upper().find(whereClauseText) != -1:
+          return True
+        return False
       return appObj.getPaginatedResult(
         appObj.appData['jobsData'].jobs_name_lookup,
         outputJob,
-        request
+        request,
+        filterJob
       )
 
     @nsJobs.doc('postjob')
