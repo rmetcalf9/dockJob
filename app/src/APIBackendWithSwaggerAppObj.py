@@ -132,7 +132,7 @@ class APIBackendWithSwaggerAppObj():
   def getResultModel(self, recordModel):
     paginationModel = self.flastRestPlusAPIObject.model('paginationList', {
       'offset': fields.Integer(default='0',description='Number to start from'),
-      'pagesize': fields.Integer(default='',description='Pagesize for pagination'),
+      'pagesize': fields.Integer(default='',description='Results per page'),
       'total': fields.Integer(default='0',description='Total number of records in output')
     })
     return self.flastRestPlusAPIObject.model('resultList', {

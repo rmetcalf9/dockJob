@@ -87,6 +87,8 @@ def registerAPI(appObj):
     @nsJobs.doc('getjobs')
     @nsJobs.marshal_with(appObj.getResultModel(jobModel))
     @appObj.flastRestPlusAPIObject.response(200, 'Success')
+    @nsJobs.param('offset', 'Number to start from')
+    @nsJobs.param('pagesize', 'Results per page')
     def get(self):
       '''Get Jobs'''
       def outputJob(item):
