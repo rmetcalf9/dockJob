@@ -8,25 +8,42 @@ import datetime
 import pytz
 from RepetitionInterval import RepetitionIntervalClass
 
+#I need jobs to be stored in order so pagination works
+from sortedcontainers import SortedDict
+
 # When passed a list will returned a paginated result for that list
-def getPaginatedResult(listRes, offset, pagesize):
+def getPaginatedResult(list, outputFN, request):
+  offset = request.args.get('offset')
+  if offset is None:
+    offset = 0
+  else:
+    offset = int(offset)
+  pagesize = request.args.get('pagesize')
+  if pagesize is None:
+    pagesize = 20
+  else:
+    pagesize = int(pagesize)
+  output = []
+  for cur in range(offset, (pagesize + offset)):
+    if (cur<len(list)):
+      output.append(outputFN(list[list.keys()[cur]]))
   return {
     'pagination': {
-      'offset': 0,
-      'pagesize': 20,
-      'total': len(listRes)
+      'offset': offset,
+      'pagesize': pagesize,
+      'total': len(list)
     },
-    'result': listRes
+    'result': output
   }
 
 class jobsDataClass():
   # map of guid to Job
-  jobs = {}
+  jobs = None
   # map of Job name to guid
-  jobs_name_lookup = {}
+  jobs_name_lookup = None
   def __init__(self):
-    self.jobs = {}
-    self.jobs_name_lookup = {}
+    self.jobs = SortedDict()
+    self.jobs_name_lookup = SortedDict()
     pass
 
   def getJob(self, guid):
@@ -90,10 +107,14 @@ def registerAPI(appObj):
     # @ns.marshal_list_with(todo)
     def get(self):
       '''Get Jobs'''
-      ret = []
-      for curJob in appObj.appData['jobsData'].jobs:
-        ret.append(appObj.appData['jobsData'].jobs[curJob])
-      return getPaginatedResult(ret, 0, 20)
+      def outputJob(item):
+        return appObj.appData['jobsData'].jobs[item]
+      return getPaginatedResult(
+        #appObj.appData['jobsData'].jobs,
+        appObj.appData['jobsData'].jobs_name_lookup,
+        outputJob,
+        request
+      )
 
     @nsJobs.doc('postjob')
     @nsJobs.expect(jobCreationModel, validate=True)

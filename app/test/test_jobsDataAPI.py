@@ -21,6 +21,14 @@ data_simpleJobCreateExpRes = {
   "lastRunDate": None,
 }
 class test_jobsData(testHelperAPIClient):
+  def assertJSONJobStringsEqual(self, result,expectedResult):
+    #ignores fields that may be different
+    result['guid'] = expectedResult['guid']
+    result['nextScheduledRun'] = expectedResult['nextScheduledRun']
+    result['creationDate'] = expectedResult['creationDate']
+    result['lastUpdateDate'] = expectedResult['lastUpdateDate']
+    self.assertJSONStringsEqual(result, expectedResult);
+
   def test_JobCreate(self):
     result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
     self.assertEqual(result.status_code, 200)
@@ -29,11 +37,7 @@ class test_jobsData(testHelperAPIClient):
     self.assertTrue(resultJSON['creationDate'] == resultJSON['lastUpdateDate'], msg='Creation date dosen''t match last update')
     tim = from_iso8601(resultJSON['creationDate'])
     self.assertTimeCloseToCurrent(tim)
-    resultJSON['guid'] = data_simpleJobCreateExpRes['guid']
-    resultJSON['nextScheduledRun'] = data_simpleJobCreateExpRes['nextScheduledRun']
-    resultJSON['creationDate'] = data_simpleJobCreateExpRes['creationDate']
-    resultJSON['lastUpdateDate'] = data_simpleJobCreateExpRes['lastUpdateDate']
-    self.assertJSONStringsEqual(resultJSON, data_simpleJobCreateExpRes);
+    self.assertJSONJobStringsEqual(resultJSON, data_simpleJobCreateExpRes);
 
   def test_JobCreateDuplicateErrors(self):
     result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
@@ -78,11 +82,7 @@ class test_jobsData(testHelperAPIClient):
     result2 = self.testClient.get('/api/jobs/' + resultJSON['guid'])
     self.assertEqual(result2.status_code, 200, msg='Read back record')
     result2JSON = json.loads(result2.get_data(as_text=True))
-    resultJSON['guid'] = data_simpleJobCreateExpRes['guid']
-    resultJSON['nextScheduledRun'] = data_simpleJobCreateExpRes['nextScheduledRun']
-    resultJSON['creationDate'] = data_simpleJobCreateExpRes['creationDate']
-    resultJSON['lastUpdateDate'] = data_simpleJobCreateExpRes['lastUpdateDate']
-    self.assertJSONStringsEqual(resultJSON, data_simpleJobCreateExpRes);
+    self.assertJSONJobStringsEqual(resultJSON, data_simpleJobCreateExpRes);
 
   def test_jobGetInvalid(self):
     result = self.testClient.get('/api/jobs/INVALID_KEY')
@@ -95,33 +95,81 @@ class test_jobsData(testHelperAPIClient):
     result2 = self.testClient.get('/api/jobs/' + resultJSON['name'])
     self.assertEqual(result2.status_code, 200, msg='Read back record')
     result2JSON = json.loads(result2.get_data(as_text=True))
-    resultJSON['guid'] = data_simpleJobCreateExpRes['guid']
-    resultJSON['nextScheduledRun'] = data_simpleJobCreateExpRes['nextScheduledRun']
-    resultJSON['creationDate'] = data_simpleJobCreateExpRes['creationDate']
-    resultJSON['lastUpdateDate'] = data_simpleJobCreateExpRes['lastUpdateDate']
-    self.assertJSONStringsEqual(resultJSON, data_simpleJobCreateExpRes);
+    self.assertJSONJobStringsEqual(resultJSON, data_simpleJobCreateExpRes);
 
+  def findRecord(self, params, name):
+    for cur in params:
+      if (name==params[cur]['name']):
+        return params[cur]
+    return None
+  
   def test_jobCreateAndQueryBackByName(self):
-    for cur in range(1, 6):
-      param = dict(data_simpleJobCreateParams)
-      param['name'] = data_simpleJobCreateParams['name'] + str(cur)
-      result = self.testClient.post('/api/jobs/', data=json.dumps(param), content_type='application/json')
+    numTestRecords = 6
+    param = {}
+    for cur in range(0, numTestRecords):
+      param[cur] = dict(data_simpleJobCreateParams)
+      param[cur]['name'] = data_simpleJobCreateParams['name'] + str(cur+1)
+      result = self.testClient.post('/api/jobs/', data=json.dumps(param[cur]), content_type='application/json')
       self.assertEqual(result.status_code, 200, msg='job creation failed')
     result2 = self.testClient.get('/api/jobs/')
     self.assertEqual(result.status_code, 200, msg='Fetch failed')
     result2JSON = json.loads(result2.get_data(as_text=True))
-    expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': 5}
+    expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': numTestRecords}
     self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
-    self.assertEqual(len(result2JSON["result"]),5,msg="Wrong number of returned results")
+    self.assertEqual(len(result2JSON["result"]),numTestRecords,msg="Wrong number of returned results")
     exp = data_simpleJobCreateExpRes
-    for cur in range(0,5):
-      rem = len(result2JSON["result"][cur]['name']) - len(data_simpleJobCreateParams['name'])
-      result2JSON["result"][cur]['name'] = result2JSON["result"][cur]['name'][:(-1 * rem)]
-      result2JSON["result"][cur]['guid'] = data_simpleJobCreateExpRes['guid']
-      result2JSON["result"][cur]['nextScheduledRun'] = data_simpleJobCreateExpRes['nextScheduledRun']
-      result2JSON["result"][cur]['creationDate'] = data_simpleJobCreateExpRes['creationDate']
-      result2JSON["result"][cur]['lastUpdateDate'] = data_simpleJobCreateExpRes['lastUpdateDate']
-      self.assertJSONStringsEqual(result2JSON["result"][cur], exp);
+    for cur in range(0,numTestRecords):
+      thisParam = self.findRecord(param, result2JSON["result"][cur]['name'])
+      exp['name'] = thisParam['name']
+      self.assertJSONJobStringsEqual(result2JSON["result"][cur], exp);
+
+  def test_jobQueryPaginationTests(self):
+    numTestRecords = 45
+    pagesize = 15
+    param = {}
+    exp = data_simpleJobCreateExpRes
+    for cur in range(0, numTestRecords):
+      param[cur] = dict(data_simpleJobCreateParams)
+      param[cur]['name'] = data_simpleJobCreateParams['name'] + str(cur+1).zfill(2)
+      result = self.testClient.post('/api/jobs/', data=json.dumps(param[cur]), content_type='application/json')
+      self.assertEqual(result.status_code, 200, msg='job creation failed')
+
+    #Query back first page of 15
+    result2 = self.testClient.get('/api/jobs/?pagesize=' + str(pagesize))
+    self.assertEqual(result.status_code, 200, msg='Fetch failed')
+    result2JSON = json.loads(result2.get_data(as_text=True))
+    expPaginationResult = {'offset': 0, 'pagesize': pagesize, 'total': numTestRecords}
+    self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
+    self.assertEqual(len(result2JSON["result"]),pagesize,msg="Wrong number of returned results in first page")
+    for cur in range(0,pagesize):
+      exp['name'] = param[cur]['name']
+      self.assertJSONJobStringsEqual(result2JSON["result"][cur], exp);
+
+    #Query back 2nd page of 15
+    offset = 15
+    result2 = self.testClient.get('/api/jobs/?pagesize=' + str(pagesize) + '&offset=' + str(offset))
+    self.assertEqual(result.status_code, 200, msg='Fetch failed')
+    result2JSON = json.loads(result2.get_data(as_text=True))
+    expPaginationResult = {'offset': offset, 'pagesize': pagesize, 'total': numTestRecords}
+    self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
+    self.assertEqual(len(result2JSON["result"]),pagesize,msg="Wrong number of returned results in second page")
+    for cur in range(0,pagesize):
+      exp['name'] = param[cur + offset]['name']
+      self.assertJSONJobStringsEqual(result2JSON["result"][cur], exp);
+
+    #Query back 3rd final page (only 5 left)
+    offset = 30
+    result2 = self.testClient.get('/api/jobs/?pagesize=' + str(pagesize) + '&offset=' + str(offset))
+    self.assertEqual(result.status_code, 200, msg='Fetch failed')
+    result2JSON = json.loads(result2.get_data(as_text=True))
+    expPaginationResult = {'offset': offset, 'pagesize': pagesize, 'total': numTestRecords}
+    self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
+    self.assertEqual(len(result2JSON["result"]),pagesize,msg="Wrong number of returned results in last page")
+    for cur in range(0,numTestRecords - offset):
+      exp['name'] = param[cur + offset]['name']
+      self.assertJSONJobStringsEqual(result2JSON["result"][cur], exp);
+
+
 
 #Delete job by GUID
 #Delete job by GUID error not exist
@@ -129,9 +177,6 @@ class test_jobsData(testHelperAPIClient):
 #Delete job by name error not exist
 
 
-#Query back 30 jobs (pagination test)
-#Query back 2nd page
-#Query back part of page
 
 
 
