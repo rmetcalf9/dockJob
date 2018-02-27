@@ -89,6 +89,7 @@ def registerAPI(appObj):
     @appObj.flastRestPlusAPIObject.response(200, 'Success')
     @nsJobs.param('offset', 'Number to start from')
     @nsJobs.param('pagesize', 'Results per page')
+    @nsJobs.param('query', 'Search Filter')
     def get(self):
       '''Get Jobs'''
       def outputJob(item):

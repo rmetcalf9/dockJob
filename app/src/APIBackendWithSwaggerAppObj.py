@@ -105,7 +105,7 @@ class APIBackendWithSwaggerAppObj():
 
   # Helper function to allow API's to return paginated data
   # When passed a list will returned a paginated result for that list
-  def getPaginatedResult(self, list, outputFN, request):
+  def getPaginatedResult(self, list, outputFN, request, filterFN):
     offset = request.args.get('offset')
     if offset is None:
       offset = 0
@@ -117,6 +117,8 @@ class APIBackendWithSwaggerAppObj():
     else:
       pagesize = int(pagesize)
     output = []
+    if request.args.get('query') is not None:
+      list = []
     for cur in range(offset, (pagesize + offset)):
       if (cur<len(list)):
         output.append(outputFN(list[list.keys()[cur]]))
