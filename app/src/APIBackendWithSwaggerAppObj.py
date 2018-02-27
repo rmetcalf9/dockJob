@@ -3,6 +3,7 @@ from GlobalParamaters import GlobalParamatersClass
 from flask import Flask, Blueprint
 import signal
 from FlaskRestSubclass import FlaskRestSubclass
+from flask_restplus import fields
 from webfrontendAPI import webfrontendBP
 
 
@@ -127,3 +128,15 @@ class APIBackendWithSwaggerAppObj():
       },
       'result': output
     }
+  # return the model of paginated results for flask restplus
+  def getResultModel(self, recordModel):
+    paginationModel = self.flastRestPlusAPIObject.model('paginationList', {
+      'offset': fields.Integer(default='0',description='Number to start from'),
+      'pagesize': fields.Integer(default='',description='Pagesize for pagination'),
+      'total': fields.Integer(default='0',description='Total number of records in output')
+    })
+    return self.flastRestPlusAPIObject.model('resultList', {
+      'pagination': fields.Nested(paginationModel),
+      'result': fields.List(fields.Nested(recordModel)),
+    })
+    

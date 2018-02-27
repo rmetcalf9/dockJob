@@ -72,14 +72,14 @@ def registerAPI(appObj):
     # TODO Add runs to this model
   })
 
-    
   nsJobs = appObj.flastRestPlusAPIObject.namespace('jobs', description='Job Operations')
   @nsJobs.route('/')
   class jobList(Resource):
     '''Operations relating to jobs'''
 
     @nsJobs.doc('getjobs')
-    # @ns.marshal_list_with(todo)
+    @nsJobs.marshal_with(appObj.getResultModel(jobModel))
+    @appObj.flastRestPlusAPIObject.response(200, 'Success')
     def get(self):
       '''Get Jobs'''
       def outputJob(item):
