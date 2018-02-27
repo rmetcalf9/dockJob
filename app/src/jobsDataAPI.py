@@ -11,31 +11,6 @@ from RepetitionInterval import RepetitionIntervalClass
 #I need jobs to be stored in order so pagination works
 from sortedcontainers import SortedDict
 
-# When passed a list will returned a paginated result for that list
-def getPaginatedResult(list, outputFN, request):
-  offset = request.args.get('offset')
-  if offset is None:
-    offset = 0
-  else:
-    offset = int(offset)
-  pagesize = request.args.get('pagesize')
-  if pagesize is None:
-    pagesize = 20
-  else:
-    pagesize = int(pagesize)
-  output = []
-  for cur in range(offset, (pagesize + offset)):
-    if (cur<len(list)):
-      output.append(outputFN(list[list.keys()[cur]]))
-  return {
-    'pagination': {
-      'offset': offset,
-      'pagesize': pagesize,
-      'total': len(list)
-    },
-    'result': output
-  }
-
 class jobsDataClass():
   # map of guid to Job
   jobs = None
@@ -109,8 +84,7 @@ def registerAPI(appObj):
       '''Get Jobs'''
       def outputJob(item):
         return appObj.appData['jobsData'].jobs[item]
-      return getPaginatedResult(
-        #appObj.appData['jobsData'].jobs,
+      return appObj.getPaginatedResult(
         appObj.appData['jobsData'].jobs_name_lookup,
         outputJob,
         request
