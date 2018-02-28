@@ -3,44 +3,56 @@
 import axios from 'axios'
 // import callbackHelper from 'callbackHelper'
 
-function getData (callback) {
+// Try the first location in the list
+function tryLocation (locationList, callback) {
+  var toTry = locationList.pop()
   var config = {
     method: 'GET',
-    url: 'webfrontendConnectionData'
+    url: toTry
   }
   axios(config).then(
     (response) => {
       callback.ok(response)
     },
     (response) => {
-      var devBoxData = {
-        version: 'Development-devBoxData', // Version show as 0 from this file
-        apiurl: 'http://localhost:80/api',
-        apiaccesssecurity: [] // all supported auth types. Can be empty, or JSON: basic-auth, jwt
-        // Empty list means no auth type
-        //  { type: 'basic-auth' } - webfrontend will prompt user for username and password
-        //  ...
+      if (locationList.length > 0) {
+        tryLocation(locationList, callback)
       }
-      var basicAuthData = {
-        version: 'Development-basicAuthData',
-        apiurl: 'http://localhost:80/api',
-        apiaccesssecurity: [{type: 'basic-auth'}]
+      else {
+        var devBoxData = {
+          version: 'Development-devBoxData', // Version show as 0 from this file
+          apiurl: 'http://localhost:80/api',
+          apiaccesssecurity: [] // all supported auth types. Can be empty, or JSON: basic-auth, jwt
+          // Empty list means no auth type
+          //  { type: 'basic-auth' } - webfrontend will prompt user for username and password
+          //  ...
+        }
+        var basicAuthData = {
+          version: 'Development-basicAuthData',
+          apiurl: 'http://localhost:80/api',
+          apiaccesssecurity: [{type: 'basic-auth'}]
+        }
+        var workLoginConnectionData = {
+          version: 'Development-basicAuthData',
+          apiurl: 'http://somefunnyhostname.com:5080/api',
+          apidocsurl: 'http://somefunnyhostname.com:5080/apidocs',
+          apiaccesssecurity: []
+        }
+        var a = false
+        if (a) {
+          console.log(devBoxData) // This is the one to use for localhost testing
+          console.log(basicAuthData)
+          console.log(workLoginConnectionData)
+        }
+        callback.ok({data: devBoxData})
       }
-      var workLoginConnectionData = {
-        version: 'Development-basicAuthData',
-        apiurl: 'http://somefunnyhostname.com:5080/api',
-        apidocsurl: 'http://somefunnyhostname.com:5080/apidocs',
-        apiaccesssecurity: []
-      }
-      var a = false
-      if (a) {
-        console.log(devBoxData) // This is the one to use for localhost testing
-        console.log(basicAuthData)
-        console.log(workLoginConnectionData)
-      }
-      callback.ok({data: devBoxData})
     }
   )
+}
+
+function getData (callback) {
+  var locationsToTry = ['webfrontendConnectionData', '/webfrontendConnectionData', 'http://somefunnyhostname.com:5080/frontend/webfrontendConnectionData']
+  tryLocation(locationsToTry.reverse(), callback)
 }
 
 export default getData

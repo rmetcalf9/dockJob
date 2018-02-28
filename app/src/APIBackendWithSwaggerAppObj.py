@@ -3,7 +3,7 @@ from flask import Flask, Blueprint
 import signal
 from FlaskRestSubclass import FlaskRestSubclass
 from flask_restplus import fields
-from webfrontendAPI import webfrontendBP
+from webfrontendAPI import webfrontendBP, registerAPI as registerWebFrontendAPI
 
 #I need jobs to be stored in order so pagination works
 from sortedcontainers import SortedDict
@@ -81,6 +81,7 @@ class APIBackendWithSwaggerAppObj():
     self.flastRestPlusAPIObject.init_app(api_blueprint)  
 
     self.flaskAppObject.register_blueprint(api_blueprint, url_prefix='/api')
+    registerWebFrontendAPI(self)
     self.flaskAppObject.register_blueprint(webfrontendBP, url_prefix='/frontend')
 
     signal.signal(signal.SIGINT, self.exit_gracefully)
