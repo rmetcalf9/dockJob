@@ -69,12 +69,6 @@ class FlaskRestSubclass(Api):
   #By default swagger.json is registered as /api/swagger.json
   # as this is security protected I need this to be accessed in /apidocs/swagger.json as well
   def getSwaggerJSON(self):
-    if not self._schema:
-      #aaa = Swagger(self).as_dict()
-      pass
-    else:
-      print('self._schema')
-    print('CCC')
     schema = self.__schema__
     return json.dumps(schema), HTTPStatus.INTERNAL_SERVER_ERROR if 'error' in schema else HTTPStatus.OK, {'Content-Type': 'application/json'}
 

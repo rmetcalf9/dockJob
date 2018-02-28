@@ -15,7 +15,7 @@ class test_appObjClass(testHelperAPIClient):
     #get now datetime.now(pytz.utc)
     curDatetime = pytz.timezone('UTC').localize(datetime.datetime(2018,1,1,13,46,0,0))
     serverInfo = appObj.getServerInfoJSON(curDatetime)
-    expRes = json.dumps({'Server': {'ServerDatetime': str(curDatetime), 'DefaultUserTimezone': 'Europe/London'}, 'Jobs': {'TotalJobs': 0, 'NextExecuteJob': None}})
+    expRes = json.dumps({'Server': {'ServerDatetime': curDatetime.isoformat(), 'DefaultUserTimezone': 'Europe/London'}, 'Jobs': {'TotalJobs': 0, 'NextExecuteJob': None}})
     self.assertJSONStringsEqual(json.dumps(serverInfo), expRes);
 
   def test_InitialServerInfoMessageOnlyAcceptsUTCTimezone(self):

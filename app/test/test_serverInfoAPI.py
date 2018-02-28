@@ -5,21 +5,21 @@ import json
 class test_api(testHelperAPIClient):
 
   def test_getServceInfo(self):
-    expRes = json.dumps({
+    expRes = {
       'Jobs': {
-        'NextExecuteJob': None,
+        'NextExecuteJob': '',
         'TotalJobs': 0
       },
       'Server': {
         'DefaultUserTimezone': 'Europe/London', 
         'ServerDatetime': 'IGNORE'
       },
-      })
+      }
     result = self.testClient.get('/api/serverinfo/')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     resultJSON['Server']['ServerDatetime'] = 'IGNORE'
-    self.assertJSONStringsEqual(resultJSON, json.loads(expRes));
+    self.assertJSONStringsEqual(resultJSON, expRes)
     pass
 
   def test_swaggerJSONProperlyShared(self):
