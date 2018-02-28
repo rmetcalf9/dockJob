@@ -21,6 +21,12 @@ class jobsDataClass():
     self.jobs_name_lookup = SortedDict()
     pass
 
+  def getJobServerInfo(self):
+    return{
+      'TotalJobs': len(self.jobs),
+      'NextExecuteJob': None
+    }
+    
   def getJob(self, guid):
     return self.jobs[str(guid)]
   def getJobByName(self, name):
@@ -94,7 +100,7 @@ def registerAPI(appObj):
       '''Get Jobs'''
       def outputJob(item):
         return appObj.appData['jobsData'].jobs[item]
-      def filterJob(item, whereClauseText): #if mutiple seperated by spaces each is passed individually and anded together
+      def filterJob(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
         if appObj.appData['jobsData'].jobs[item]['name'].upper().find(whereClauseText) != -1:
           return True
         if appObj.appData['jobsData'].jobs[item]['command'].upper().find(whereClauseText) != -1:

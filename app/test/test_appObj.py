@@ -1,18 +1,17 @@
 #tests for appObj
-from TestHelperSuperClass import testHelperSuperClass
-from appObj import appObjClass
+from TestHelperSuperClass import testHelperAPIClient
+from appObj import appObj, appObjClass
 import pytz
 import datetime
 import json
 
-class test_appObjClass(testHelperSuperClass):
+class test_appObjClass(testHelperAPIClient):
 #Actual tests below
 
   def test_CreateAppOBjInstance(self):
-    appObj = appObjClass()
+    pass
 
   def test_InitialServerInfoMessage(self):
-    appObj = appObjClass()
     #get now datetime.now(pytz.utc)
     curDatetime = pytz.timezone('UTC').localize(datetime.datetime(2018,1,1,13,46,0,0))
     serverInfo = appObj.getServerInfoJSON(curDatetime)
@@ -20,7 +19,6 @@ class test_appObjClass(testHelperSuperClass):
     self.assertJSONStringsEqual(json.dumps(serverInfo), expRes);
 
   def test_InitialServerInfoMessageOnlyAcceptsUTCTimezone(self):
-    appObj = appObjClass()
     #get now datetime.now(pytz.utc)
     curDatetime = pytz.timezone('Europe/London').localize(datetime.datetime(2018,1,1,13,46,0,0))
     with self.assertRaises(Exception) as context:

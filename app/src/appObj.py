@@ -4,6 +4,7 @@
 #All times will be passed to callers in UTC
 # it is up to the callers to convert into any desired user timezone
 
+import pytz
 
 from APIBackendWithSwaggerAppObj import APIBackendWithSwaggerAppObj
 from serverInfoAPI import registerAPI as registerMainApi
@@ -18,6 +19,14 @@ class appObjClass(APIBackendWithSwaggerAppObj):
     super(appObjClass, self).initOnce()
     registerMainApi(self)
     registerJobsApi(self)
+
+  #curDateTime must be in UTC
+  def getServerInfoJSON(self, curDateTime):
+    if (curDateTime.tzinfo != pytz.utc):
+      raise self.NotUTCException
+    self.serverObj['ServerDatetime'] = str(curDateTime)
+    return {'Server': self.serverObj, 'Jobs': self.appData['jobsData'].getJobServerInfo()}
+    #return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
 
 
 appObj = appObjClass()

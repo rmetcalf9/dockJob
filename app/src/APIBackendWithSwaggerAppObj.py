@@ -1,4 +1,3 @@
-import pytz
 from GlobalParamaters import GlobalParamatersClass
 from flask import Flask, Blueprint
 import signal
@@ -26,22 +25,9 @@ class APIBackendWithSwaggerAppObj():
     'ServerDatetime': '01-Jan-2018 13:46', #Real value never held here
     'DefaultUserTimezone': 'Europe/London'
   }
-  jobs = []
   flaskAppObject = None
   flastRestPlusAPIObject = None
   globalParamObject = None
-
-  #curDateTime must be in UTC
-  def getServerInfoJSON(self, curDateTime):
-    if (curDateTime.tzinfo != pytz.utc):
-      raise self.NotUTCException
-    self.serverObj['ServerDatetime'] = str(curDateTime)
-    jobsObj = {
-      'TotalJobs': len(self.jobs),
-      'NextExecuteJob': None
-    }
-    return {'Server': self.serverObj, 'Jobs': jobsObj}
-    #return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
 
   # called by app.py to run the application
   def run(self):
