@@ -6,7 +6,8 @@
     "WebDriverIO": {
       "smartWait": 6000,
       "url": "http://localhost:8080",
-      "browser": "chrome"
+      "browser": "chrome",
+      "windowSize": "1024x768"
     }
   },
   "include": {

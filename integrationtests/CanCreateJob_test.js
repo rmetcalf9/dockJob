@@ -6,13 +6,14 @@ Scenario('I can create a one job', (I) => {
 
   I.amOnPage('/');
   I.waitForElement('DIV.layout DIV.layout-page-container .layout-page', 3000); // Wait for 3 seconds
-  within('DIV.layout > HEADER', () => {
-    I.click('menu');
-  });
-  within('DIV.layout > ASIDE.layout-aside', () => {
-    I.click('Jobs');
-  });
-  I.waitForElement('Create Job', 3000); // Wait for 3 seconds
+
+  //within('DIV.layout > HEADER', () => {
+  //  I.click('menu');
+  //});
+
+  //Click Jobs
+  I.executeScript("var elements = document.querySelector('#q-app > div > aside > div.q-scrollarea.relative-position > div.scroll.relative-position.overflow-hidden.full-height.full-width.q-touch.q-touch-x > div > div:nth-child(3) > div.q-item-main.q-item-section > div');elements.click();");
+
   I.click('Create Job');
   I.fillField('Job Name',jobName);
   I.fillField('Command','ls -la');
