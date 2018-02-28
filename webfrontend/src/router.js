@@ -53,7 +53,8 @@ export default new VueRouter({
       beforeEnter: commonPreLoad,
       children: [
         { path: '/', redirect: '/dashboard' },
-        { path: 'dashboard', component: load('Dashboard'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Dashboard') } }
+        { path: 'dashboard', component: load('Dashboard'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Dashboard') } },
+        { path: 'jobs', component: load('Jobs'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Jobs') } }
       ]
     },
     { path: '/login', component: load('Login') }, // Can't redirect to common preload or we will get endless loop

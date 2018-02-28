@@ -25,9 +25,9 @@
         <q-item-side icon="home" />
         <q-item-main label="Dashboard" />
       </q-side-link>
-      <q-side-link item to="/dashboard2">
-        <q-item-side icon="home" />
-        <q-item-main label="Dashboard2" />
+      <q-side-link item to="/jobs">
+        <q-item-side icon="rowing" />
+        <q-item-main label="Jobs" />
       </q-side-link>
       <hr v-if="loginRequiredByServer">
       <q-side-link item to="/logout" v-if="loginRequiredByServer">
