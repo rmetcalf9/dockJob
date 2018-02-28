@@ -8,7 +8,7 @@ import pytz
 
 from APIBackendWithSwaggerAppObj import APIBackendWithSwaggerAppObj
 from serverInfoAPI import registerAPI as registerMainApi
-from jobsDataAPI import registerAPI as registerJobsApi, resetData as resetJobsData
+from jobsDataAPI import registerAPI as registerJobsApi, resetData as resetJobsData, getJobServerInfoModel
 from flask_restplus import fields
 
 class appObjClass(APIBackendWithSwaggerAppObj):
@@ -26,14 +26,10 @@ class appObjClass(APIBackendWithSwaggerAppObj):
       'DefaultUserTimezone': fields.String(default='Europe/London', description='Timezone used by client to display times. (All API''s use UTC so client must convert)'),
       'ServerDatetime': fields.DateTime(dt_format=u'iso8601', description='Current server date time')
     })
-    serverInfoJobsModel = appObj.flastRestPlusAPIObject.model('ServerInfoJobs', {
-      'NextExecuteJob': fields.String(default='', description='Next job scheduled for execution TODO'),
-      'TotalJobs': fields.Integer(default='0',description='Total Jobs')
-    })
 
     return appObj.flastRestPlusAPIObject.model('ServerInfo', {
       'Server': fields.Nested(serverInfoServerModel),
-      'Jobs': fields.Nested(serverInfoJobsModel)
+      'Jobs': fields.Nested(getJobServerInfoModel(appObj))
     })  
 
     #curDateTime must be in UTC

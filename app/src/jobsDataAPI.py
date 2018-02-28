@@ -11,6 +11,14 @@ from RepetitionInterval import RepetitionIntervalClass
 #I need jobs to be stored in order so pagination works
 from sortedcontainers import SortedDict
 
+def getJobServerInfoModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('ServerInfoJobs', {
+    'NextExecuteJob': fields.String(default='', description='Next job scheduled for execution TODO'),
+    'TotalJobs': fields.Integer(default='0',description='Total Jobs')
+  })
+
+
+
 class jobsDataClass():
   # map of guid to Job
   jobs = None
