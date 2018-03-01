@@ -22,20 +22,16 @@ function webserviceError (callback, response) {
   if (typeof (response.response) === 'undefined') {
     if (typeof (response.message) === 'undefined') {
       rjmmsg = 'Bad Response UNKNOWN'
-    }
-    else {
+    } else {
       rjmmsg = 'Bad Response ' + response.message
     }
-  }
-  else if (typeof (response.response.data) !== 'undefined') {
+  } else if (typeof (response.response.data) !== 'undefined') {
     if (typeof (response.response.data.errorMessages) !== 'undefined') {
       rjmmsg = 'Bad Response(' + response.response.data.errorMessages.length + ') ' + response.response.data.errorMessages
-    }
-    else {
+    } else {
       rjmmsg = 'Data Bad Response ' + response.response.status
     }
-  }
-  else {
+  } else {
     rjmmsg = 'Nested Bad Response ' + response.response.status
   }
   callbackWithError(callback, rjmmsg, response)

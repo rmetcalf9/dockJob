@@ -3,7 +3,8 @@
 module.exports = function (ctx) {
   return {
     plugins: [
-      'axios'
+      'axios',
+      'callDockjobAPI'
     ],
     css: [
       'app.styl'
