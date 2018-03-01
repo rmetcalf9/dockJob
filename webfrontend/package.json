@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue src",
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "jest"
   },
   "dependencies": {
     "axios": "^0.17.1"
@@ -24,7 +24,11 @@
     "eslint-plugin-promise": "3.4.0",
     "eslint-plugin-standard": "3.0.1",
     "eslint-plugin-vue": "4.0.0",
-    "quasar-cli": "^0.15.4"
+    "quasar-cli": "^0.15.4",
+    "jest": "^22.1.4",
+    "jest-vue-preprocessor": "^1.0.1",
+    "babel-preset-es2015": "^6.0.0",
+    "babel-preset-stage-2": "^6.0.0"
   },
   "engines": {
     "node": ">= 8.9.0",
@@ -34,5 +38,23 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 10"
-  ]
+  ],
+  "jest": {
+    "moduleNameMapper": {
+      "src/components/([^\\.]*).vue$": "<rootDir>/src/components/$1.vue",
+      "src/components/([^\\.]*)$": "<rootDir>/src/components/$1.js",
+      "^vue$": "vue/dist/vue.common.js",
+      "src/([^\\.]*)$": "<rootDir>/src/$1.js",
+      "src/([^\\.]*).vue$": "<rootDir>/src/$1.vue",
+      "(.*)/(.*).vue$": "$1/$2.vue"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "vue"
+    ],
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/babel-jest",
+      ".*\\.(vue)$": "<rootDir>/node_modules/jest-vue-preprocessor"
+    }
+  }
 }
