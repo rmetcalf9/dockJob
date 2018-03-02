@@ -50,7 +50,7 @@ function tryLocation (locationList, callback) {
 }
 
 function getData (callback) {
-  var locationsToTry = ['webfrontendConnectionData', '/webfrontendConnectionData', 'http://somefunnyhostname.com:5080/frontend/webfrontendConnectionData']
+  var locationsToTry = ['webfrontendConnectionData', '/webfrontendConnectionData', 'http://somefunnyhostname.com:5080/frontend/webfrontendConnectionData', 'http://localhost:80/frontend/webfrontendConnectionData']
   tryLocation(locationsToTry.reverse(), callback)
 }
 

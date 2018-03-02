@@ -4,7 +4,7 @@ APP_DIR=.
 
 export APIAPP_MODE=DEVELOPER
 export APIAPP_FRONTEND=_
-export APIAPP_APIURL="apirul_dosent_matter"
+export APIAPP_APIURL="http://localhost:80/api"
 export APIAPP_APIACCESSSECURITY="[{\"type\": \"basic-auth\" }]"
 
 
