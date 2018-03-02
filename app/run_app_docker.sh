@@ -16,7 +16,7 @@ if [ E${APIAPP_VERSION} = 'E' ]; then
 fi
 
 _term() { 
-  echo "Caught SIGTERM signal!" 
+  echo "run_app_docker.sh - Caught SIGTERM signal!" 
   kill -TERM "$child" 2>/dev/null
 }
 
