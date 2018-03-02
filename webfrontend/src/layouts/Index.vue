@@ -41,7 +41,9 @@
       </q-list>
     </q-layout-drawer>
 
-    <router-view />
+    <q-page-container>
+      <router-view />
+    </q-page-container>
     <q-toolbar slot="footer">
         <table width="100%"><tr>
         <td>
