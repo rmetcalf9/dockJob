@@ -44,7 +44,8 @@
     <q-page-container>
       <router-view />
     </q-page-container>
-    <q-toolbar slot="footer">
+
+    <q-layout-footer><q-toolbar>
         <table width="100%"><tr>
         <td>
           <a v-if="! (connectionData.apidocsurl === '_')" v-bind:href="connectionData.apidocsurl" target="_blank">APIdocs</a>
@@ -52,7 +53,7 @@
         </td>
         <td align="right">Version: {{connectionData.version}}</td>
         </tr></table>
-    </q-toolbar>
+    </q-toolbar></q-layout-footer>
   </q-layout>
 </template>
 
