@@ -64,7 +64,8 @@ module.exports = function (ctx) {
         'Ripple'
       ],
       plugins: [
-        'Notify'
+        'Notify',
+        'Loading'
       ]
     },
     // animations: 'all' --- includes all animations

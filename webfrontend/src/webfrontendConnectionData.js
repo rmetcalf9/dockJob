@@ -17,8 +17,7 @@ function tryLocation (locationList, callback) {
     (response) => {
       if (locationList.length > 0) {
         tryLocation(locationList, callback)
-      }
-      else {
+      } else {
         var devBoxData = {
           version: 'Development-devBoxData', // Version show as 0 from this file
           apiurl: 'http://localhost:80/api',

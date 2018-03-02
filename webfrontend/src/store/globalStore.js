@@ -13,7 +13,7 @@ export const getInitialState = function () {
     APIFn: undefined,
     accessCredentials: undefined,
     pageTitle: 'Default Page Title',
-    connectionData: undefined, // Data retrieved from this server (no security)
+    connectionData: { version: 'UNKNOWN' }, // Data retrieved from this server (no security)
     serverInfo: undefined // Data retrieved from server info service call
   }
 }
@@ -36,8 +36,7 @@ export const mutations = {
     if (state.connectionData.apiaccesssecurity.length === 0) {
       state.datastoreState = 'LOGGED_IN' // no login required
       state.loginRequiredByServer = false
-    }
-    else {
+    } else {
       state.datastoreState = 'REQUIRE_LOGIN'
       state.loginRequiredByServer = true
     }
