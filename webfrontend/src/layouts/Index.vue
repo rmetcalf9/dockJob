@@ -36,7 +36,7 @@
         <hr v-if="loginRequiredByServer">
         <q-item to="/logout" v-if="loginRequiredByServer">
           <q-item-side icon="exit_to_app" />
-          <q-item-main label="Jobs" Logout="" />
+          <q-item-main label="Logout" Logout="" />
         </q-item>
       </q-list>
     </q-layout-drawer>

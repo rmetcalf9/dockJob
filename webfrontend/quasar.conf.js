@@ -52,6 +52,9 @@ module.exports = function (ctx) {
         'QCardMedia',
         'QCardSeparator',
         'QCardActions',
+        'QDialog',
+        'QField',
+        'QInput',
         'QLayout',
         'QLayoutHeader',
         'QLayoutDrawer',
@@ -59,6 +62,7 @@ module.exports = function (ctx) {
         'QPageContainer',
         'QPage',
         'QTable',
+        'QToggle',
         'QToolbar',
         'QToolbarTitle',
         'QBtn',
@@ -67,10 +71,13 @@ module.exports = function (ctx) {
         'QListHeader',
         'QItem',
         'QItemMain',
-        'QItemSide'
+        'QItemSide',
+        'QModal',
+        'QModalLayout'
       ],
       directives: [
-        'Ripple'
+        'Ripple',
+        'CloseOverlay'
       ],
       plugins: [
         'Notify',
