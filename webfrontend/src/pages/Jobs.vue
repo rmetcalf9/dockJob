@@ -45,11 +45,40 @@
         <q-field helper="Automatic Schedule Enabled" label="Automatic Schedule Enabled" :label-width="3">
           <q-toggle v-model="showCreateJobDialogData.enabled" />
         </q-field>
+        <q-field label="Repetition Interval" :label-width="3">
+          <q-select
+            v-model="showCreateJobDialogData.repetitionInterval.mode"
+           :options="showCreateJobDialogData.repetitionInterval.modeOptions"
+           :disable="!showCreateJobDialogData.enabled"
+          />
+          <q-input v-model="showCreateJobDialogData.repetitionInterval.hour" type="number" float-label="Hour (24 hour format)"
+            :disable="!((showCreateJobDialogData.enabled) && (showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))"
+          />
+          <q-input v-model="showCreateJobDialogData.repetitionInterval.minute" type="number" float-label="Minute"
+            :disable="!showCreateJobDialogData.enabled"
+          />
+          <q-select
+            toggle
+            multiple
+            v-model="showCreateJobDialogData.repetitionInterval.days"
+           :options="showCreateJobDialogData.repetitionInterval.dayOptions"
+            :disable="!((showCreateJobDialogData.enabled) && (showCreateJobDialogData.repetitionInterval.mode === 'DAILY'))"
+            float-label="Day(s) of week"
+          />
+          <q-input v-model="showCreateJobDialogData.repetitionInterval.dayofmonth" type="number" float-label="Day of Month"
+            :disable="!((showCreateJobDialogData.enabled) && (showCreateJobDialogData.repetitionInterval.mode === 'MONTHLY'))"
+          />
+          <q-input v-model="showCreateJobDialogData.repetitionInterval.timezone" float-label="Timezone" :disable="!showCreateJobDialogData.enabled" />
+        </q-field>
 
         <q-btn
           color="primary"
           v-close-overlay
-          label="Close"
+          label="Create"
+        />
+        <q-btn
+          v-close-overlay
+          label="Cancel"
         />
       </div>
     </q-modal-layout>
@@ -68,18 +97,55 @@ function initShowCreateJobDialogData () {
     enabled: true,
     repetitionInterval: {
       mode: 'DAILY', // Monthly, Daily, Hourly
-      minute: 0,
-      hour: 0,
-      days: {
-        mon: false,
-        tue: false,
-        wed: false,
-        thur: false,
-        fri: false,
-        sat: false,
-        sun: false
-      },
-      timezone: 'TODO'
+      modeOptions: [
+        {
+          label: 'Daily',
+          value: 'DAILY'
+        },
+        {
+          label: 'Monthly',
+          value: 'MONTHLY'
+        },
+        {
+          label: 'Hourly',
+          value: 'HOURLY'
+        }
+      ],
+      minute: 1,
+      hour: 1,
+      days: [],
+      dayOptions: [
+        {
+          label: 'Monday',
+          value: 'MON'
+        },
+        {
+          label: 'Tuesday',
+          value: 'TUE'
+        },
+        {
+          label: 'Wednesday',
+          value: 'WED'
+        },
+        {
+          label: 'Thursday',
+          value: 'THUR'
+        },
+        {
+          label: 'Friday',
+          value: 'FRI'
+        },
+        {
+          label: 'Saturday',
+          value: 'SAT'
+        },
+        {
+          label: 'Sunday',
+          value: 'SUN'
+        }
+      ],
+      timezone: globalStore.getters.serverInfo.Server.DefaultUserTimezone,
+      dayofmonth: 1
     }
   }
 }
