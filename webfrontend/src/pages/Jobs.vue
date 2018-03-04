@@ -36,11 +36,11 @@
       </q-toolbar>
 
       <div class="layout-padding">
-        <q-field helper="Name of Job" label="Job name" :label-width="3">
-          <q-input v-model="showCreateJobDialogData.jobname" />
+        <q-field helper="Name of Job" label="Job name" :label-width="3" error-label="Job name must have more than two characters">
+          <q-input v-model="showCreateJobDialogData.jobname" :error='createJobInValidJobName' />
         </q-field>
-        <q-field helper="Command to execute" label="Command" :label-width="3">
-          <q-input v-model="showCreateJobDialogData.command" type="textarea" />
+        <q-field helper="Command to execute" label="Command" :label-width="3" error-label="Command to run must be supplied">
+          <q-input v-model="showCreateJobDialogData.command" type="textarea" :error='showCreateJobDialogData.command.length <= 2' />
         </q-field>
         <q-field helper="Automatic Schedule Enabled" label="Automatic Schedule Enabled" :label-width="3">
           <q-toggle v-model="showCreateJobDialogData.enabled" />
@@ -52,10 +52,13 @@
            :disable="!showCreateJobDialogData.enabled"
           />
           <q-input v-model="showCreateJobDialogData.repetitionInterval.hour" type="number" float-label="Hour (24 hour format)"
-            :disable="!((showCreateJobDialogData.enabled) && (showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))"
+            error-label="Hour must be a number between 0 and 23"
+            :error="createJobInValidRepHour"
+            :disable="createJobHourDisabled"
           />
-          <q-input v-model="showCreateJobDialogData.repetitionInterval.minute" type="number" float-label="Minute"
-            :disable="!showCreateJobDialogData.enabled"
+          <q-input v-model="showCreateJobDialogData.repetitionInterval.minute" type="number" float-label="Minute" error-label="Minute must be a number between 0 and 59"
+            :error="createJobInValidRepMinute"
+            :disable="createJobMinuteDisabled"
           />
           <q-select
             toggle
@@ -73,8 +76,9 @@
 
         <q-btn
           color="primary"
-          v-close-overlay
           label="Create"
+          :disable="!createJobValidAll"
+          @click="createJobMethod"
         />
         <q-btn
           v-close-overlay
@@ -88,6 +92,7 @@
 </template>
 
 <script>
+import { Notify } from 'quasar'
 import globalStore from '../store/globalStore'
 
 function initShowCreateJobDialogData () {
@@ -181,11 +186,44 @@ export default {
     openCreateJobDialog () {
       this.showCreateJobDialogData = initShowCreateJobDialogData()
       this.showCreateJobDialog = true
+    },
+    createJobMethod () {
+      this.showCreateJobDialog = false
+      if (!this.createJobValidAll) {
+        Notify('Please review fields again.')
+        return
+      }
+      Notify.create('TODO Call create job service and present result')
     }
   },
   computed: {
     datastoreState () {
       return globalStore.getters.datastoreState
+    },
+    createJobHourDisabled () {
+      return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))
+    },
+    createJobMinuteDisabled () {
+      return !this.showCreateJobDialogData.enabled
+    },
+    createJobInValidJobName () {
+      return this.showCreateJobDialogData.jobname.length <= 2
+    },
+    createJobInValidJobCommand () {
+      return this.showCreateJobDialogData.command.length <= 2
+    },
+    createJobInValidRepMinute () {
+      return (!this.createJobMinuteDisabled) && ((this.showCreateJobDialogData.repetitionInterval.minute < 0) || (this.showCreateJobDialogData.repetitionInterval.minute > 59))
+    },
+    createJobInValidRepHour () {
+      return (!this.createJobHourDisabled) && ((this.showCreateJobDialogData.repetitionInterval.hour < 0) || (this.showCreateJobDialogData.repetitionInterval.hour > 23))
+    },
+    createJobValidAll () {
+      if (this.createJobInValidJobName) return false
+      if (this.createJobInValidJobCommand) return false
+      if (this.createJobInValidRepMinute) return false
+      if (this.createJobInValidRepHour) return false
+      return true
     }
   }
 }
