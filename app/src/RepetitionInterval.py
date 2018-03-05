@@ -12,7 +12,7 @@ missingTimezoneException = Exception('datetime objects passed must be timezone a
 class ModeType(Enum):
   HOURLY = 1 #Single paramater which is the minute past the error
   DAILY = 2  #three params, minute, hour, days (+-+-+-- Each char represents DOW mon-sun + means include day, - do not), final paramater is the timezone the passed in date is
-  MONTHLY = 3	#Same hour and minute each day of the month (24 hour clock)	"MONTHLY:13:39:3" = Run at 1:39pm each 3rd of month, final paramater is the timezone the passed in date is
+  MONTHLY = 3	#Same hour and minute each day of the month (24 hour clock)	"MONTHLY:39:13:3" = Run at 1:39pm each 3rd of month, final paramater is the timezone the passed in date is
   # params are always minute:hour:day
 
   #                       | HOURLY  | DAILY  | MONTHLY |

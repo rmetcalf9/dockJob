@@ -48,14 +48,16 @@
             toggle
             multiple
             v-model="showCreateJobDialogData.repetitionInterval.days"
-           :options="showCreateJobDialogData.repetitionInterval.dayOptions"
-            :disable="!((showCreateJobDialogData.enabled) && (showCreateJobDialogData.repetitionInterval.mode === 'DAILY'))"
+            :options="showCreateJobDialogData.repetitionInterval.dayOptions"
+            :error="createJobInValidDays"
+            :disable="createJobDaysDisabled"
             float-label="Day(s) of week"
+            error-label="Minute must be a number between 0 and 59"
           />
           <q-input v-model="showCreateJobDialogData.repetitionInterval.dayofmonth" type="number" float-label="Day of Month"
             :disable="!((showCreateJobDialogData.enabled) && (showCreateJobDialogData.repetitionInterval.mode === 'MONTHLY'))"
           />
-          <q-input v-model="showCreateJobDialogData.repetitionInterval.timezone" float-label="Timezone" :disable="!showCreateJobDialogData.enabled" />
+          <q-input v-model="showCreateJobDialogData.repetitionInterval.timezone" float-label="Timezone" :disable="createJobTimezoneDisabled" :error="createJobInValidTimezone" />
         </q-field>
 
         <q-btn
@@ -104,31 +106,31 @@ function initShowCreateJobDialogData () {
       dayOptions: [
         {
           label: 'Monday',
-          value: 'MON'
+          value: 0
         },
         {
           label: 'Tuesday',
-          value: 'TUE'
+          value: 1
         },
         {
           label: 'Wednesday',
-          value: 'WED'
+          value: 2
         },
         {
           label: 'Thursday',
-          value: 'THUR'
+          value: 3
         },
         {
           label: 'Friday',
-          value: 'FRI'
+          value: 4
         },
         {
           label: 'Saturday',
-          value: 'SAT'
+          value: 5
         },
         {
           label: 'Sunday',
-          value: 'SUN'
+          value: 6
         }
       ],
       timezone: globalStore.getters.serverInfo.Server.DefaultUserTimezone,
@@ -137,8 +139,45 @@ function initShowCreateJobDialogData () {
   }
 }
 
+function pad (num, size) {
+  var s = String(num)
+  while (s.length < (size || 2)) { s = '0' + s }
+  return s
+}
+
 function getRepIntervalString (dialogData) {
-  return ''
+  if (!dialogData.enabled) return ''
+  if (dialogData.repetitionInterval.mode === 'HOURLY') {
+    return 'HOURLY:' + pad(dialogData.repetitionInterval.minute, 2)
+  }
+  if (dialogData.repetitionInterval.mode === 'MONTHLY') {
+    // MONTHLY hour minute day
+    return 'MONTHLY:' + pad(dialogData.repetitionInterval.minute, 2) + ':' + pad(dialogData.repetitionInterval.hour, 2) + ':' + pad(dialogData.repetitionInterval.dayofmonth, 2)
+  }
+  if (dialogData.repetitionInterval.mode === 'DAILY') {
+    if (dialogData.repetitionInterval.days.length === 0) {
+      return 'ERROR'
+    }
+    if (dialogData.repetitionInterval.timezone === '') {
+      return 'ERROR'
+    }
+    // DAILY:1:11:+++++XX:UTC
+    // (+-+-+-- Each char represents DOW mon-sun + means include day, - do not)
+    var dayArr = [false, false, false, false, false, false, false]
+    dialogData.repetitionInterval.days.map(function (val) {
+      dayArr[val] = true
+    })
+    var daySTR = ''
+    for (var c = 0; c < 7; c++) {
+      if (dayArr[c]) {
+        daySTR += '+'
+      } else {
+        daySTR += '-'
+      }
+    }
+    return 'DAILY:' + pad(dialogData.repetitionInterval.minute, 2) + ':' + pad(dialogData.repetitionInterval.hour, 2) + ':' + daySTR + ':' + dialogData.repetitionInterval.timezone
+  }
+  return 'ERROR'
 }
 
 export default {
@@ -160,12 +199,12 @@ export default {
         return
       }
       this.repititionIntervalString = getRepIntervalString(this.showCreateJobDialogData)
-      if (this.repititionIntervalString === '') {
+      if (this.repititionIntervalString === 'ERROR') {
         Notify.create('Please review fields again.')
         return
       }
       this.showCreateJobDialog = false
-      Notify.create('TODO Call create job service and present result')
+      Notify.create('TODO Call create job service and present result - ' + this.repititionIntervalString)
     }
   },
   computed: {
@@ -173,6 +212,12 @@ export default {
       return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))
     },
     createJobMinuteDisabled () {
+      return !this.showCreateJobDialogData.enabled
+    },
+    createJobDaysDisabled () {
+      return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode === 'DAILY'))
+    },
+    createJobTimezoneDisabled () {
       return !this.showCreateJobDialogData.enabled
     },
     createJobInValidJobName () {
@@ -187,11 +232,19 @@ export default {
     createJobInValidRepHour () {
       return (!this.createJobHourDisabled) && ((this.showCreateJobDialogData.repetitionInterval.hour < 0) || (this.showCreateJobDialogData.repetitionInterval.hour > 23))
     },
+    createJobInValidDays () {
+      return (!this.createJobDaysDisabled) && (this.showCreateJobDialogData.repetitionInterval.days.length === 0)
+    },
+    createJobInValidTimezone () {
+      return (!this.createJobTimezoneDisabled) && (this.showCreateJobDialogData.repetitionInterval.timezone.length === 0)
+    },
     createJobValidAll () {
       if (this.createJobInValidJobName) return false
       if (this.createJobInValidJobCommand) return false
       if (this.createJobInValidRepMinute) return false
       if (this.createJobInValidRepHour) return false
+      if (this.createJobInValidDays) return false
+      if (this.createJobInValidTimezone) return false
       return true
     }
   }
