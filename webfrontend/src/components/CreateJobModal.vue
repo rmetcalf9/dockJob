@@ -137,11 +137,16 @@ function initShowCreateJobDialogData () {
   }
 }
 
+function getRepIntervalString (dialogData) {
+  return ''
+}
+
 export default {
   data () {
     return {
       showCreateJobDialog: false,
-      showCreateJobDialogData: initShowCreateJobDialogData()
+      showCreateJobDialogData: initShowCreateJobDialogData(),
+      repititionIntervalString: ''
     }
   },
   methods: {
@@ -150,11 +155,16 @@ export default {
       this.showCreateJobDialog = true
     },
     createJobMethod () {
-      this.showCreateJobDialog = false
       if (!this.createJobValidAll) {
-        Notify('Please review fields again.')
+        Notify.create('Please review fields again.')
         return
       }
+      this.repititionIntervalString = getRepIntervalString(this.showCreateJobDialogData)
+      if (this.repititionIntervalString === '') {
+        Notify.create('Please review fields again.')
+        return
+      }
+      this.showCreateJobDialog = false
       Notify.create('TODO Call create job service and present result')
     }
   },
