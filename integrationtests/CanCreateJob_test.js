@@ -29,7 +29,7 @@ Scenario('I can create a one job', (I) => {
   //I.executeScript("var elements2 = document.querySelector('" + t + "');elements2.click();");
 
   t = 'body > div.q-popover.scroll.column.no-wrap.animate-popup-down > div > div.q-item.q-item-division.relative-position.q-item-link.cursor-pointer.q-select-highlight > div > div'
-  I.executeScript("var elements3 = document.querySelector('" + t + "');elements3.click();");
+  I.executeScript("var elements3 = document.querySelector('body > div.q-popover.scroll.column.no-wrap.animate-popup-down > div > div.q-item.q-item-division.relative-position.q-item-link.cursor-pointer.q-select-highlight > div > div');elements3.click();");
 
   //I.uncheckOption('Daily');
   //I.uncheckOption('Monthly');
