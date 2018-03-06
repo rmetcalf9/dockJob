@@ -105,6 +105,9 @@ export default {
           Notify.create('Job query failed - ' + callbackHelper.getErrorFromResponse(error))
         }
       }
+      if (pagination.page === 0) {
+        pagination.page = 1
+      }
       var queryString = 'jobs/?pagesize=' + pagination.rowsPerPage.toString() + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
       if (filter !== '') {
         queryString = 'jobs/?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
