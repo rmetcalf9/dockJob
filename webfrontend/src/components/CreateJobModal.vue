@@ -20,7 +20,7 @@
       </q-toolbar>
 
       <div class="layout-padding">
-        <q-field helper="Name of Job" label="Job name" :label-width="3" error-label="Job name must have more than two characters">
+        <q-field helper="Name of Job" label="Job Name" :label-width="3" error-label="Job name must have more than two characters">
           <q-input v-model="showCreateJobDialogData.jobname" :error='createJobInValidJobName' />
         </q-field>
         <q-field helper="Command to execute" label="Command" :label-width="3" error-label="Command to run must be supplied">
