@@ -78,6 +78,7 @@
 <script>
 import globalStore from '../store/globalStore'
 import { Notify } from 'quasar'
+import callbackHelper from '../callbackHelper'
 
 function initShowCreateJobDialogData () {
   return {
@@ -211,18 +212,7 @@ export default {
           Notify.create('Successfully created job ' + response.data.name)
         },
         error: function (error) {
-          var msg = error.message
-          if (typeof (error.orig) !== 'undefined') {
-            if (typeof (error.orig.response) !== 'undefined') {
-              if (typeof (error.orig.response.data) !== 'undefined') {
-                if (typeof (error.orig.response.data.message) !== 'undefined') {
-                  msg = error.orig.response.data.message
-                }
-              }
-            }
-          }
-          console.log(error.orig.response.data.message)
-          Notify.create('Failed to create job - ' + msg)
+          Notify.create('Failed to create job - ' + callbackHelper.getErrorFromResponse(error))
         }
       }
       globalStore.getters.apiFN('POST', 'jobs/',

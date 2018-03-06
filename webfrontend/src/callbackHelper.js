@@ -49,10 +49,25 @@ function getDoNothingCallback () {
   return callback
 }
 
+// function to get human error message from error
+function getErrorFromResponse (respError) {
+  if (typeof (respError.orig) !== 'undefined') {
+    if (typeof (respError.orig.response) !== 'undefined') {
+      if (typeof (respError.orig.response.data) !== 'undefined') {
+        if (typeof (respError.orig.response.data.message) !== 'undefined') {
+          return respError.orig.response.data.message
+        }
+      }
+    }
+  }
+  return respError.message
+}
+
 export default {
   callbackWithError: callbackWithError,
   callbackWithSimpleError: callbackWithSimpleError,
   callbackWithNotImplemented: callbackWithNotImplemented,
   webserviceError: webserviceError,
-  getDoNothingCallback: getDoNothingCallback
+  getDoNothingCallback: getDoNothingCallback,
+  getErrorFromResponse: getErrorFromResponse
 }
