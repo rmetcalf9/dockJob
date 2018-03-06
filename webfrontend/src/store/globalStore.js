@@ -112,6 +112,9 @@ const getters = {
   },
   loginRequiredByServer: (state, getters) => {
     return state.loginRequiredByServer
+  },
+  apiFN: (state, getters) => {
+    return state.APIFn
   }
 }
 

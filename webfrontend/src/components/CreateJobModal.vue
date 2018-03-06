@@ -204,7 +204,36 @@ export default {
         return
       }
       this.showCreateJobDialog = false
-      Notify.create('TODO Call create job service and present result - ' + this.repititionIntervalString)
+
+      var callback = {
+        ok: function (response) {
+          // console.log(response.data.guid)
+          Notify.create('Successfully created job ' + response.data.name)
+        },
+        error: function (error) {
+          var msg = error.message
+          if (typeof (error.orig) !== 'undefined') {
+            if (typeof (error.orig.response) !== 'undefined') {
+              if (typeof (error.orig.response.data) !== 'undefined') {
+                if (typeof (error.orig.response.data.message) !== 'undefined') {
+                  msg = error.orig.response.data.message
+                }
+              }
+            }
+          }
+          console.log(error.orig.response.data.message)
+          Notify.create('Failed to create job - ' + msg)
+        }
+      }
+      globalStore.getters.apiFN('POST', 'jobs/',
+        {
+          'name': this.showCreateJobDialogData.jobname,
+          'enabled': this.showCreateJobDialogData.enabled,
+          'command': this.showCreateJobDialogData.command,
+          'repetitionInterval': this.repititionIntervalString
+        },
+        callback
+      )
     }
   },
   computed: {
