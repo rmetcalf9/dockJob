@@ -4,6 +4,7 @@
       title='Jobs'
       :data="jobData"
       :columns="jobTableColumns"
+      :visible-columns="visibleColumns"
       :filter="filter"
       row-key="name"
       :pagination.sync="serverPagination"
@@ -18,7 +19,13 @@
         >Create Job</q-btn>
       </template>
       <template slot="top-right" slot-scope="props">
-        <q-search hide-underline v-model="filter" />
+      <q-table-columns
+        color="secondary"
+        class="q-mr-sm"
+        v-model="visibleColumns"
+        :columns="jobTableColumns"
+      />
+      <q-search hide-underline v-model="filter" />
       </template>
     </q-table>
     <CreateJobModal
@@ -43,7 +50,15 @@ export default {
     return {
       createJobModalDialog: {},
       jobTableColumns: [
-        { name: 'name', required: true, label: 'Job Name', align: 'left', field: 'name', sortable: false, filter: true }
+        // { name: 'guid', required: false, label: 'GUID', align: 'left', field: 'guid', sortable: false, filter: true },
+        { name: 'name', required: true, label: 'Job Name', align: 'left', field: 'name', sortable: false, filter: true },
+        { name: 'enabled', required: false, label: 'Enabled', align: 'left', field: 'enabled', sortable: false, filter: true },
+        { name: 'creationDate', required: false, label: 'Created', align: 'left', field: 'creationDate', sortable: false, filter: true },
+        { name: 'lastRunDate', required: false, label: 'Last Run', align: 'left', field: 'lastRunDate', sortable: false, filter: true },
+        { name: 'repetitionInterval', required: false, label: 'Repetition', align: 'left', field: 'repetitionInterval', sortable: false, filter: true },
+        { name: 'nextScheduledRun', required: false, label: 'Next Run', align: 'left', field: 'nextScheduledRun', sortable: false, filter: true },
+        { name: 'command', required: false, label: 'Command', align: 'left', field: 'command', sortable: false, filter: true },
+        { name: 'lastUpdateDate', required: false, label: 'Last Update', align: 'left', field: 'lastUpdateDate', sortable: false, filter: true }
       ],
       jobData: [],
       filter: '',
@@ -51,7 +66,8 @@ export default {
       serverPagination: {
         page: 1,
         rowsNumber: 10 // specifying this determines pagination is server-side
-      }
+      },
+      visibleColumns: ['name', 'enabled', 'nextScheduledRun']
     }
   },
   methods: {
@@ -97,7 +113,14 @@ export default {
     },
     openCreateJobModalDialog () {
       var child = this.$refs.createJobModalDialog
-      child.openCreateJobDialog()
+      var TTTT = this
+      child.openCreateJobDialog(function (newJobName) {
+        TTTT.filter = newJobName
+        TTTT.request({
+          pagination: TTTT.serverPagination, // Rows number will be overwritten when query returns
+          filter: TTTT.filter
+        })
+      })
     }
   },
   computed: {

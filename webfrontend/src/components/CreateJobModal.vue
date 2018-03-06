@@ -186,13 +186,15 @@ export default {
     return {
       showCreateJobDialog: false,
       showCreateJobDialogData: initShowCreateJobDialogData(),
-      repititionIntervalString: ''
+      repititionIntervalString: '',
+      createdOKCallback: undefined // Function called if a new job is created
     }
   },
   methods: {
-    openCreateJobDialog () {
+    openCreateJobDialog (confirmFunction) {
       this.showCreateJobDialogData = initShowCreateJobDialogData()
       this.showCreateJobDialog = true
+      this.createdOKCallback = confirmFunction
     },
     createJobMethod () {
       if (!this.createJobValidAll) {
@@ -205,10 +207,12 @@ export default {
         return
       }
       this.showCreateJobDialog = false
-
+      var TTT = this
       var callback = {
         ok: function (response) {
-          // console.log(response.data.guid)
+          if (typeof (TTT.createdOKCallback) !== 'undefined') {
+            TTT.createdOKCallback(response.data.name)
+          }
           Notify.create('Successfully created job ' + response.data.name)
         },
         error: function (error) {
