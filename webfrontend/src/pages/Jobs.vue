@@ -31,7 +31,7 @@
         v-model="visibleColumns"
         :columns="jobTableColumns"
       />
-      <q-search hide-underline v-model="filter" />
+      <q-search clearable hide-underline v-model="filter" />
       </template>
     </q-table>
     <CreateJobModal
