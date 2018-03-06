@@ -84,7 +84,8 @@ module.exports = function (ctx) {
       ],
       plugins: [
         'Notify',
-        'Loading'
+        'Loading',
+        'Dialog'
       ]
     },
     // animations: 'all' --- includes all animations

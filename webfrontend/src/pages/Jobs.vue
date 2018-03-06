@@ -10,7 +10,13 @@
       :pagination.sync="serverPagination"
       :loading="loading"
       @request="request"
+      selection="single"
+      :selected.sync="selectedSecond"
     >
+      <template slot="top-selection" slot-scope="props">
+        <q-btn flat round delete icon="delete" @click="deleteJob" />
+      </template>
+
       <template slot="top-left" slot-scope="props">
         <q-btn
           color="primary"
@@ -37,7 +43,7 @@
 </template>
 
 <script>
-import { Notify } from 'quasar'
+import { Notify, Dialog } from 'quasar'
 import globalStore from '../store/globalStore'
 import CreateJobModal from '../components/CreateJobModal'
 import callbackHelper from '../callbackHelper'
@@ -67,7 +73,8 @@ export default {
         page: 1,
         rowsNumber: 10 // specifying this determines pagination is server-side
       },
-      visibleColumns: ['name', 'enabled', 'nextScheduledRun']
+      visibleColumns: ['name', 'enabled', 'nextScheduledRun'],
+      selectedSecond: []
     }
   },
   methods: {
@@ -123,6 +130,32 @@ export default {
           pagination: TTTT.serverPagination, // Rows number will be overwritten when query returns
           filter: TTTT.filter
         })
+      })
+    },
+    deleteJob () {
+      var TTT = this
+      Dialog.create({
+        title: 'Confirm',
+        message: 'Delete ' + this.selectedSecond[0].name,
+        ok: 'Confirm',
+        cancel: 'Cancel'
+      }).then(() => {
+        var callback = {
+          ok: function (response) {
+            // console.log(response.data.name)
+            TTT.selectedSecond = []
+            TTT.request({
+              pagination: TTT.serverPagination,
+              filter: TTT.filter
+            })
+            Notify.create('Job "' + response.data.name + '" Deleted')
+          },
+          error: function (error) {
+            TTT.loading = false
+            Notify.create('Job delete failed - ' + callbackHelper.getErrorFromResponse(error))
+          }
+        }
+        globalStore.getters.apiFN('DELETE', 'jobs/' + this.selectedSecond[0].guid, undefined, callback)
       })
     }
   },
