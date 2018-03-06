@@ -153,7 +153,7 @@ function getRepIntervalString (dialogData) {
   }
   if (dialogData.repetitionInterval.mode === 'MONTHLY') {
     // MONTHLY hour minute day
-    return 'MONTHLY:' + pad(dialogData.repetitionInterval.minute, 2) + ':' + pad(dialogData.repetitionInterval.hour, 2) + ':' + pad(dialogData.repetitionInterval.dayofmonth, 2)
+    return 'MONTHLY:' + pad(dialogData.repetitionInterval.minute, 2) + ':' + pad(dialogData.repetitionInterval.hour, 2) + ':' + pad(dialogData.repetitionInterval.dayofmonth, 2) + ':' + dialogData.repetitionInterval.timezone
   }
   if (dialogData.repetitionInterval.mode === 'DAILY') {
     if (dialogData.repetitionInterval.days.length === 0) {
@@ -241,7 +241,7 @@ export default {
       return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode === 'DAILY'))
     },
     createJobTimezoneDisabled () {
-      return !this.showCreateJobDialogData.enabled
+      return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))
     },
     createJobInValidJobName () {
       return this.showCreateJobDialogData.jobname.length <= 2
