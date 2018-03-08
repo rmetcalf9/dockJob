@@ -10,11 +10,22 @@ from APIBackendWithSwaggerAppObj import APIBackendWithSwaggerAppObj
 from serverInfoAPI import registerAPI as registerMainApi
 from jobsDataAPI import registerAPI as registerJobsApi, resetData as resetJobsData, getJobServerInfoModel
 from flask_restplus import fields
+from JobExecutor import JobExecutorClass
+
+MissingUserForJobsException = Exception('Missing user for Jobs')
+MissingGroupForJobsException = Exception('Missing group for Jobs')
 
 class appObjClass(APIBackendWithSwaggerAppObj):
+  jobExecutor = None
+  userforjobs = None
+  groupforjobs = None
+
   def init(self, env):
     super(appObjClass, self).init(env)
     resetJobsData(self)
+    self.userforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, MissingUserForJobsException, None)
+    self.groupforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_GROUPFORJOBS', None, MissingGroupForJobsException, None)
+    self.jobExecutor = JobExecutorClass(self)
 
   def initOnce(self):
     super(appObjClass, self).initOnce()

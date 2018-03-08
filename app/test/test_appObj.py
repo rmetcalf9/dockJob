@@ -1,6 +1,6 @@
 #tests for appObj
 from TestHelperSuperClass import testHelperAPIClient
-from appObj import appObj, appObjClass
+from appObj import appObj, appObjClass, MissingUserForJobsException, MissingGroupForJobsException
 import pytz
 import datetime
 import json
@@ -25,4 +25,30 @@ class test_appObjClass(testHelperAPIClient):
       serverInfo = appObj.getServerInfoJSON(curDatetime)
     self.checkGotRightException(context,appObjClass.NotUTCException)
 
+
+  def test_missingUserForJobs(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-3.3.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurlxxx:45/aa/bb/cc',
+      'APIAPP_APIACCESSSECURITY': '[]',
+      'APIAPP_GROUPFORJOBS': 'root',
+    }
+    with self.assertRaises(Exception) as context:
+      appObj.init(env)
+    self.checkGotRightException(context,MissingUserForJobsException)
+
+  def test_missingUserForJobs(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-3.3.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurlxxx:45/aa/bb/cc',
+      'APIAPP_APIACCESSSECURITY': '[]',
+      'APIAPP_USERFORJOBS': 'root',
+    }
+    with self.assertRaises(Exception) as context:
+      appObj.init(env)
+    self.checkGotRightException(context,MissingGroupForJobsException)
 

@@ -1,6 +1,7 @@
 from TestHelperSuperClass import testHelperAPIClient
 from JobExecutor import JobExecutorClass
 import os
+from appObj import appObj
 
 class test_appObjClass(testHelperAPIClient):
 
@@ -12,8 +13,7 @@ class test_appObjClass(testHelperAPIClient):
     thisGID = os.getgid()
     cmdToExecute = 'id -u'
     expResSTDOUT = str(thisUID) + '\n'
-    a = JobExecutorClass(thisUID,thisGID)
-    res = a.executeCommand(cmdToExecute)
+    res = appObj.jobExecutor.executeCommand(cmdToExecute)
     self.assertEqual(res.stdout.decode(), expResSTDOUT)
 
   def test_ErrorSTDErrOutput(self):
@@ -21,8 +21,7 @@ class test_appObjClass(testHelperAPIClient):
     thisGID = os.getgid()
     cmdToExecute = 'sadgfdhgf'
     expResSTDOUT = '/bin/sh: 1: sadgfdhgf: not found\n'
-    a = JobExecutorClass(thisUID,thisGID)
-    res = a.executeCommand(cmdToExecute)
+    res = appObj.jobExecutor.executeCommand(cmdToExecute)
     self.assertEqual(res.stdout.decode(), expResSTDOUT)
 
   def test_MultipleCommandsWithMixedOutput(self):
@@ -30,6 +29,5 @@ class test_appObjClass(testHelperAPIClient):
     thisGID = os.getgid()
     cmdToExecute = 'echo "Hello"\newflkjdsfdsjlk\necho "Goodbye"'
     expResSTDOUT = 'Hello\n/bin/sh: 2: ewflkjdsfdsjlk: not found\nGoodbye\n'
-    a = JobExecutorClass(thisUID,thisGID)
-    res = a.executeCommand(cmdToExecute)
+    res = appObj.jobExecutor.executeCommand(cmdToExecute)
     self.assertEqual(res.stdout.decode(), expResSTDOUT)

@@ -188,5 +188,4 @@ class test_GlobalParamaters(testHelperSuperClass):
     gp = GlobalParamatersClass(env)
     self.assertEqual(gp.getAPIHost(), 'apiurlxxx:45')
     self.assertEqual(gp.getAPIPath(), '/aa/bb/cc')
-  
 

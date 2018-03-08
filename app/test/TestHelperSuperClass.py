@@ -15,6 +15,8 @@ env = {
   'APIAPP_FRONTEND': '../app',
   'APIAPP_APIURL': 'http://apiurlxxx',
   'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]',
+  'APIAPP_USERFORJOBS': 'root',
+  'APIAPP_GROUPFORJOBS': 'root',
 }
 
 class testHelperSuperClass(unittest.TestCase):
