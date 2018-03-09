@@ -26,6 +26,7 @@ class appObjClass(APIBackendWithSwaggerAppObj):
     self.userforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, MissingUserForJobsException, None)
     self.groupforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_GROUPFORJOBS', None, MissingGroupForJobsException, None)
     self.jobExecutor = JobExecutorClass(self)
+    self.jobExecutor.start()
 
   def initOnce(self):
     super(appObjClass, self).initOnce()
@@ -51,6 +52,11 @@ class appObjClass(APIBackendWithSwaggerAppObj):
     return {'Server': self.serverObj, 'Jobs': self.appData['jobsData'].getJobServerInfo()}
     #return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
 
+  #override exit gracefully to stop worker thread
+  def exit_gracefully(self, signum, frame):
+    self.jobExecutor.stopThreadRunning()
+    time.sleep(0.3) #give thread a chance to stop
+    super(appObjClass, self).exit_gracefully(signum, frame)
 
 appObj = appObjClass()
 

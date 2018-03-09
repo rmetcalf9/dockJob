@@ -6,8 +6,9 @@ import signal
 import pwd
 import grp
 import time
+import threading
 
-class JobExecutorClass():
+class JobExecutorClass(threading.Thread):
   processUserID = None
   processGroupID = None
   timeout = 15 #default to 15 second timeout for jobs
@@ -32,7 +33,7 @@ class JobExecutorClass():
       if not appObj.userforjobs in groupent.gr_mem:
         print(groupent.gr_mem)
         raise Exception('User ' + appObj.userforjobs + ' is not in group ' + appObj.groupforjobs)
-    
+
     print('Will run jobs as user: ' + appObj.userforjobs + ' (' + str(self.processUserID) + ')')
     print('Will run jobs as group: ' + appObj.groupforjobs + ' (' + str(self.processGroupID) + ')')
 
@@ -48,6 +49,9 @@ class JobExecutorClass():
         print(testProcess.stderr.decode())
       raise Exception('Test process running as wrong user')
     print('Test process passed')
+
+    threading.Thread.__init__(self)
+    #super(threading.Thread, self).__init__()
 
   #Function to execute the command. Passed the shell string and outputs the executed result
   def executeCommand(self, shellCmd):
@@ -84,3 +88,31 @@ class JobExecutorClass():
       os.setsid()
     return demote
 
+  #called when new service needs submission
+  def submitJobForExecution(self, jobGUID):
+    pass
+
+  #return current status of a job execution
+  def getJobExecutionStatus(self, jobGUID):
+    pass
+  
+  #return all the jobs, if jobGUID is none than all, otherwise filter just for that job
+  def getAllJobExecutions(self, jobGUID):
+    pass
+
+  #main loop of thread
+  running = True
+  def run(self):
+    self.running = True
+    print('Job runner thread starting')
+    while self.running:
+      #TODO run next pending job
+      
+      #TODO schedule any new jobs that are due to be automatically run
+      time.sleep(0.2)
+    print('Job runner thread terminating')
+
+  def stopThreadRunning(self):
+    self.running = False
+    #not sleeping here in case appObj has other threads to stop. (Should stop them all then wait once)
+    #time.sleep(0.3) #give thread a chance to stop
