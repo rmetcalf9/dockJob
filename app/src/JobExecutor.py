@@ -2,12 +2,15 @@
 #  Jobs will be run as a separate user to the main user
 import subprocess
 import os
+import signal
 import pwd
 import grp
+import time
 
 class JobExecutorClass():
   processUserID = None
   processGroupID = None
+  timeout = 15 #default to 15 second timeout for jobs
 
   def __init__(self, appObj):
     if os.getuid() != 0:
@@ -49,13 +52,35 @@ class JobExecutorClass():
   #Function to execute the command. Passed the shell string and outputs the executed result
   def executeCommand(self, shellCmd):
     # https://docs.python.org/3/library/subprocess.html#subprocess.CompletedProcess
-    completedProcess = subprocess.run(shellCmd, stdin=None, input=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=None, timeout=None, check=False, preexec_fn=self.getDemoteFunction())
-    return completedProcess
+    #completedProcess = subprocess.run(shellCmd, stdin=None, input=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=None, timeout=self.timeout, check=False, preexec_fn=self.getDemoteFunction())
+    #return completedProcess
+    start_time = time.time()
+    proc = subprocess.Popen(shellCmd, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=None, preexec_fn=self.getDemoteFunction())
+    returncode = None
+    while (returncode == None):
+      returncode = proc.poll()
+      if (time.time() - start_time) > self.timeout:
+        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+        #valid return codes are between 0-255. I have hijacked -1 for timeout
+        returncode = -1
+      time.sleep(0.2)
+    stdout, stderr = proc.communicate()
+    completed = subprocess.CompletedProcess(
+      args=shellCmd,
+      returncode=returncode,
+      stdout=stdout,
+      stderr=stderr,
+    )
+    return completed
 
   def getDemoteFunction(self):
     def demote():
       # must set group first as user may not have permission to set group
       os.setgid(self.processGroupID)
       os.setuid(self.processUserID)
+      # Set a session ID. When this process is killed I need to kill a program group (because I use Shell=True) and if 
+      #  I don't set a session ID that will kill the server also
+      # https://stackoverflow.com/questions/4789837/how-to-terminate-a-python-subprocess-launched-with-shell-true/4791612#4791612
+      os.setsid()
     return demote
 
