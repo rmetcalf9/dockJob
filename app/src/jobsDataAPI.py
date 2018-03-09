@@ -17,7 +17,51 @@ def getJobServerInfoModel(appObj):
     'TotalJobs': fields.Integer(default='0',description='Total Jobs')
   })
 
+def uniqueJobName(name):
+  return name.strip().upper()
 
+#Class to represent a job
+class jobClass():
+  guid = None
+  name = None
+  command = None
+  enabled = None
+  repetitionInterval = None
+  creationDate = None
+  lastUpdateDate = None
+  lastRunDate = None
+  nextScheduledRun = None
+
+  def __init__(self, name, command, enabled, repetitionInterval):
+    if (len(name)<2):
+      raise BadRequest('Job name must be more than 2 characters')
+    curTime = datetime.datetime.now(pytz.timezone("UTC"))
+    self.guid = str(uuid.uuid4())
+    self.name = name
+    self.command = command
+    self.enabled = enabled
+    self.repetitionInterval = repetitionInterval
+    self.creationDate = curTime.isoformat()
+    self.lastUpdateDate = curTime.isoformat()
+    self.lastRunDate = None
+
+    ri = None
+    if (repetitionInterval != None):
+      if (repetitionInterval != ''):
+        try:
+          ri = RepetitionIntervalClass(self.repetitionInterval)
+        except:
+          raise BadRequest('Invalid Repetition Interval')
+        self.setNextScheduledRun()
+
+
+
+  def setNextScheduledRun(self):
+    ri = RepetitionIntervalClass(self.repetitionInterval)
+    self.nextScheduledRun = ri.getNextOccuranceDatetime(datetime.datetime.now(pytz.timezone("UTC"))).isoformat()
+
+  def uniqueName(self):
+    return uniqueJobName(self.name)
 
 class jobsDataClass():
   # map of guid to Job
@@ -38,35 +82,23 @@ class jobsDataClass():
   def getJob(self, guid):
     return self.jobs[str(guid)]
   def getJobByName(self, name):
-    return self.jobs[str(self.jobs_name_lookup[self.nameUniqunessFn(name)])]
+    return self.jobs[str(self.jobs_name_lookup[uniqueJobName(name)])]
 
-  def nameUniqunessFn(self, name):
-    return name.strip().upper()
-    
   # return GUID or error
   def addJob(self, job):
-    if (len(job['name'])<2):
-      return {'msg': 'Job name must be more than 2 characters', 'guid':''}
-    uniqueJobName = self.nameUniqunessFn(job['name'])
-    if (str(job['guid']) in self.jobs):
+    uniqueJobName = job.uniqueName()
+    if (str(job.guid) in self.jobs):
       return {'msg': 'GUID already in use', 'guid':''}
     if (uniqueJobName in self.jobs_name_lookup):
       return {'msg': 'Job Name already in use - ' + uniqueJobName, 'guid':''}
-    if (job['repetitionInterval'] != None):
-      if (job['repetitionInterval'] != ''):
-        try:
-          ri = RepetitionIntervalClass(job['repetitionInterval'])
-        except:
-          return {'msg': 'Invalid Repetition Interval', 'guid':''}
-        job['nextScheduledRun'] = ri.getNextOccuranceDatetime(datetime.datetime.now(pytz.timezone("UTC"))).isoformat()
-    self.jobs[str(job['guid'])] = job
-    self.jobs_name_lookup[uniqueJobName] = job['guid']
-    return {'msg': 'OK', 'guid':job['guid']}
+    self.jobs[str(job.guid)] = job
+    self.jobs_name_lookup[uniqueJobName] = job.guid
+    return {'msg': 'OK', 'guid':job.guid}
 
   def deleteJob(self, jobObj):
-    uniqueJobName = self.nameUniqunessFn(jobObj['name'])
+    uniqueJobName = jobObj.uniqueName()
     self.jobs_name_lookup.pop(uniqueJobName)
-    self.jobs.pop(jobObj['guid'])
+    self.jobs.pop(jobObj.guid)
 
 def resetData(appObj):
   appObj.appData['jobsData']=jobsDataClass()
@@ -109,9 +141,9 @@ def registerAPI(appObj):
       def outputJob(item):
         return appObj.appData['jobsData'].jobs[item]
       def filterJob(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
-        if appObj.appData['jobsData'].jobs[item]['name'].upper().find(whereClauseText) != -1:
+        if appObj.appData['jobsData'].jobs[item].name.upper().find(whereClauseText) != -1:
           return True
-        if appObj.appData['jobsData'].jobs[item]['command'].upper().find(whereClauseText) != -1:
+        if appObj.appData['jobsData'].jobs[item].command.upper().find(whereClauseText) != -1:
           return True
         return False
       return appObj.getPaginatedResult(
@@ -129,18 +161,8 @@ def registerAPI(appObj):
     def post(self):
       '''Create Job'''
       content = request.get_json()
-      curTime = datetime.datetime.now(pytz.timezone("UTC"))
-      newJob = {
-        'guid': str(uuid.uuid4()),
-        'name': content['name'],
-        'command': content['command'],
-        'enabled': content['enabled'],
-        'repetitionInterval': content['repetitionInterval'],
-        'creationDate': curTime.isoformat(),
-        'lastUpdateDate': curTime.isoformat(),
-        'lastRunDate': None
-      }
-      res = appObj.appData['jobsData'].addJob(newJob)
+      jobObj = jobClass(content['name'], content['command'], content['enabled'], content['repetitionInterval'])
+      res = appObj.appData['jobsData'].addJob(jobObj)
       if res['msg']!='OK':
         raise BadRequest(res['msg'])
       return appObj.appData['jobsData'].getJob(res['guid'])
@@ -155,10 +177,10 @@ def registerAPI(appObj):
     def get(self, guid):
       '''Fetch a given resource'''
       try:
-        return appObj.appData['jobsData'].getJob(guid)
+        return appObj.appData['jobsData'].getJob(guid).__dict__
       except:
         try:
-          return appObj.appData['jobsData'].getJobByName(guid)
+          return appObj.appData['jobsData'].getJobByName(guid).__dict__
         except:
           raise BadRequest('Invalid Job Identifier')
       return None
@@ -177,4 +199,4 @@ def registerAPI(appObj):
         except:
           raise BadRequest('Invalid Job Identifier')
       appObj.appData['jobsData'].deleteJob(deletedJob)
-      return deletedJob
+      return deletedJob.__dict__
