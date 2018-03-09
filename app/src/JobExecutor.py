@@ -88,6 +88,10 @@ class JobExecutorClass(threading.Thread):
       os.setsid()
     return demote
 
+  # https://docs.python.org/3/library/asyncio-sync.html#asyncio.Lock
+  JobExecutions = []
+  JobExecutionLock = threading.Lock()
+    
   #called when new service needs submission
   def submitJobForExecution(self, jobGUID):
     pass
@@ -109,6 +113,8 @@ class JobExecutorClass(threading.Thread):
       #TODO run next pending job
       
       #TODO schedule any new jobs that are due to be automatically run
+      
+      #TODO purge old runs from list
       time.sleep(0.2)
     print('Job runner thread terminating')
 
