@@ -12,8 +12,8 @@ from jobsDataAPI import registerAPI as registerJobsApi, resetData as resetJobsDa
 from flask_restplus import fields
 from JobExecutor import JobExecutorClass
 
-MissingUserForJobsException = Exception('Missing user for Jobs')
-MissingGroupForJobsException = Exception('Missing group for Jobs')
+MissingUserForJobsException = Exception('Missing user for Jobs (set APIAPP_USERFORJOBS)')
+MissingGroupForJobsException = Exception('Missing group for Jobs (set APIAPP_GROUPFORJOBS)')
 
 class appObjClass(APIBackendWithSwaggerAppObj):
   jobExecutor = None

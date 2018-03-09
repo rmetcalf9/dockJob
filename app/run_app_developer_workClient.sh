@@ -7,6 +7,8 @@ export APIAPP_FRONTEND=_
 export APIAPP_APIURL=http://somefunnyhostname.com:5080/api
 export APIAPP_APIDOCSURL=http://somefunnyhostname.com:5080/apidocs/
 export APIAPP_APIACCESSSECURITY=[]
+export APIAPP_USERFORJOBS=dockjobuser
+export APIAPP_GROUPFORJOBS=dockjobgroup
 
 
 export APIAPP_VERSION=
