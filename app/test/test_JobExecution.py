@@ -25,6 +25,7 @@ class test_JobExecution(testHelperAPIClient):
     self.assertEqual(a.resultReturnCode, 0)
     self.assertEqual(a.resultSTDOUT, 'This is a test')
 
+  #Time consuming tests commented out
   #def test_timeout(self):
   #  jobObj = jobClass('TestJob123', 'sleep 5', True, '')
   #  a = JobExecutionClass(jobObj)
