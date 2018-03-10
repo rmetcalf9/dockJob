@@ -20,6 +20,23 @@ data_simpleJobCreateExpRes = {
   "lastUpdateDate": "IGNORE",
   "lastRunDate": None,
 }
+data_simpleJobExecutionCreateParams = {
+  "name": "TestExecutionName"
+}
+data_simpleJobExecutionCreateExpRes = {
+  "guid": 'IGNORE',
+  "stage": 'Pending', 
+  "executionName": 'TestExecutionName', 
+  "resultReturnCode": 0, 
+  "jobGUID": 'OVERRIDE',
+  "jobCommand": 'OVERRIDE',
+  "resultsSTDOUT": '', 
+  "manual": True, 
+  "dateCreated": 'IGNORE', 
+  "dateStarted": 'IGNORE', 
+  "dateCompleted": 'IGNORE' 
+}
+
 class test_jobsData(testHelperAPIClient):
   def assertJSONJobStringsEqual(self, result,expectedResult):
     #ignores fields that may be different
@@ -43,8 +60,8 @@ class test_jobsData(testHelperAPIClient):
     result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
-    self.assertTrue(len(resultJSON['guid']) == 36, msg='Invalid GUID - must be 36 chars')
-    self.assertTrue(resultJSON['creationDate'] == resultJSON['lastUpdateDate'], msg='Creation date dosen''t match last update')
+    self.assertEqual(len(resultJSON['guid']), 36, msg='Invalid GUID - must be 36 chars')
+    self.assertEqual(resultJSON['creationDate'], resultJSON['lastUpdateDate'], msg='Creation date dosen''t match last update')
     tim = from_iso8601(resultJSON['creationDate'])
     self.assertTimeCloseToCurrent(tim)
     self.assertJSONJobStringsEqual(resultJSON, data_simpleJobCreateExpRes)
@@ -323,4 +340,27 @@ class test_jobsData(testHelperAPIClient):
     result2JSON = json.loads(result2.get_data(as_text=True))
     expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': 0}
     self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
+
+  def test_submitJobForExecution(self):
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    jobGUID = resultJSON['guid']
+    jobCommand = resultJSON['command']
+    self.assertEqual(len(jobGUID),36, msg='Invalid job GUID - must be 36 chars')
+
+    result2 = self.testClient.post('/api/jobs/' + jobGUID + '/execution', data=json.dumps(data_simpleJobExecutionCreateParams), content_type='application/json')
+    self.assertEqual(result2.status_code, 200)
+    exp = dict(data_simpleJobExecutionCreateExpRes)
+    resultJSON2 = json.loads(result2.get_data(as_text=True))
+    resultJSON2['guid'] = exp['guid']
+    resultJSON2['dateCreated'] = exp['dateCreated']
+    resultJSON2['dateStarted'] = exp['dateStarted']
+    resultJSON2['dateCompleted'] = exp['dateCompleted']
+
+    exp['jobCommand'] = jobCommand
+    exp['jobGUID'] = jobGUID
+
+    self.assertJSONStringsEqual(resultJSON2, exp);
+
 

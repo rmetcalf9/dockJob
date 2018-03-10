@@ -10,7 +10,7 @@ class test_JobExecution(testHelperAPIClient):
 
   def test_Create(self):
     jobObj = jobClass('TestJob123', 'echo "This is a test"', True, '')
-    a = JobExecutionClass(jobObj)
+    a = JobExecutionClass(jobObj, 'TestExecutionName', False)
     tim = from_iso8601(a.dateCreated)
     self.assertTimeCloseToCurrent(tim)
     self.assertEqual(a.stage, 'Pending')
@@ -19,7 +19,7 @@ class test_JobExecution(testHelperAPIClient):
 
   def test_run(self):
     jobObj = jobClass('TestJob123', 'echo "This is a test"', True, '')
-    a = JobExecutionClass(jobObj)
+    a = JobExecutionClass(jobObj, 'TestExecutionName', False)
     a.execute(appObj.jobExecutor)
     self.assertEqual(a.stage, 'Completed')
     self.assertEqual(a.resultReturnCode, 0)
@@ -57,7 +57,9 @@ class test_JobExecution(testHelperAPIClient):
       'dateStarted': None,
       'dateCompleted': None,
       'resultReturnCode': None,
-      'resultSTDOUT': None
+      'resultSTDOUT': None,
+      'executionName': 'TestExecutionName',
+      'manual': False
     }
     expCompleted = dict(expPending)
     expCompleted['resultSTDOUT'] = 'This is a test'
@@ -65,7 +67,7 @@ class test_JobExecution(testHelperAPIClient):
     expCompleted['dateStarted'] = 'OVERRIDE'
     expCompleted['dateCompleted'] = 'OVERRIDE'
     expCompleted['resultReturnCode'] = 0
-    a = JobExecutionClass(jobObj)
+    a = JobExecutionClass(jobObj, 'TestExecutionName', False)
     resDict = dict(a.__dict__)
     tim = from_iso8601(a.dateCreated)
     resDict['dateCreated'] = 'OVERRIDE'

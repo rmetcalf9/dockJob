@@ -7,13 +7,16 @@ import pwd
 import grp
 import time
 import threading
+from JobExecution import JobExecutionClass
 
 class JobExecutorClass(threading.Thread):
   processUserID = None
   processGroupID = None
   timeout = 15 #default to 15 second timeout for jobs
+  appObj = None
 
   def __init__(self, appObj):
+    self.appObj = appObj
     if os.getuid() != 0:
       raise Exception('Job Executor only works when run as root')
     if appObj.userforjobs == None:
@@ -89,12 +92,18 @@ class JobExecutorClass(threading.Thread):
     return demote
 
   # https://docs.python.org/3/library/asyncio-sync.html#asyncio.Lock
-  JobExecutions = []
+  JobExecutions = {}
   JobExecutionLock = threading.Lock()
     
   #called when new service needs submission
-  def submitJobForExecution(self, jobGUID):
-    pass
+  def submitJobForExecution(self, jobGUID, executionName, manual):
+    #manual = True when called by jobsDataAPI and Flast when called from schedular
+    jobObj = self.appObj.appData['jobsData'].getJob(jobGUID)
+    if jobObj is None:
+      raise BadRequest('Invalid job')
+    execution = JobExecutionClass(jobObj, executionName, manual)
+    self.JobExecutions[execution.guid] = execution
+    return execution
 
   #return current status of a job execution
   def getJobExecutionStatus(self, jobGUID):

@@ -7,6 +7,7 @@ import datetime
 # from pytz import timezone
 import pytz
 from RepetitionInterval import RepetitionIntervalClass
+from JobExecution import getJobExecutionCreationModel, getJobExecutionModel
 
 #I need jobs to be stored in order so pagination works
 from sortedcontainers import SortedDict
@@ -80,7 +81,11 @@ class jobsDataClass():
     }
     
   def getJob(self, guid):
-    return self.jobs[str(guid)]
+    try:
+      r = self.jobs[str(guid)]
+    except KeyError:
+      raise BadRequest('Invalid Job GUID')
+    return r
   def getJobByName(self, name):
     return self.jobs[str(self.jobs_name_lookup[uniqueJobName(name)])]
 
@@ -200,3 +205,18 @@ def registerAPI(appObj):
           raise BadRequest('Invalid Job Identifier')
       appObj.appData['jobsData'].deleteJob(deletedJob)
       return deletedJob.__dict__
+
+  @nsJobs.route('/<string:guid>/execution')
+  @nsJobs.response(400, 'Job not found')
+  @nsJobs.param('guid', 'Job identifier (or name)')
+  class jobExecutionList(Resource):
+    @nsJobs.doc('postexecution')
+    @nsJobs.expect(getJobExecutionCreationModel(appObj), validate=True)
+    @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
+    @appObj.flastRestPlusAPIObject.response(200, 'Success')
+    @appObj.flastRestPlusAPIObject.marshal_with(getJobExecutionModel(appObj), code=200, description='Job created')
+    def post(self, guid):
+      '''Create Job Execution'''
+      content = request.get_json()
+      return appObj.jobExecutor.submitJobForExecution(guid, content['name'], True)
+
