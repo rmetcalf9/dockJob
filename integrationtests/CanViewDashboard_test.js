@@ -1,15 +1,13 @@
-vars = require('./vars')
-
 Feature('CanViewDashboard');
 
-Scenario('I can view the dashboard', (I) => {
+Scenario('I can view the dashboard', (I, dashboardPage, indexPage) => {
   I.amOnPage('/');
-  I.waitForElement(vars().selectors.dashboard, 3000); // Wait for 3 seconds
+  I.waitForElement(dashboardPage.dashboardWindow, 5); // Wait for 5 seconds
   I.seeCurrentUrlEquals('/#/dashboard');
-  within(vars().selectors.toolbar, () => {
+  within(indexPage.Toolbar, () => {
     I.see('Dashboard');
   });
-  within(vars().selectors.dashboard, () => {
+  within(dashboardPage.dashboardWindow, () => {
     I.see('Server Info');
   });
 });
