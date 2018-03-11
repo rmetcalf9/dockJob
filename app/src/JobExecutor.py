@@ -109,7 +109,11 @@ class JobExecutorClass(threading.Thread):
 
   #return current data for a job execution
   def getJobExecutionStatus(self, jobGUID):
-    pass
+    try:
+      return self.JobExecutions[jobGUID]
+    except KeyError:
+      return None
+    return retVal
   
   #return all the jobs, if jobGUID is none than all, otherwise filter just for that job
   def getAllJobExecutions(self, jobGUID):

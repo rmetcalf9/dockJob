@@ -1,6 +1,7 @@
 from flask_restplus import Resource
 from JobExecution import getJobExecutionModel
 from flask import request
+from werkzeug.exceptions import BadRequest
 
 
 def registerAPI(appObj):
@@ -27,4 +28,18 @@ def registerAPI(appObj):
         request,
         filterJobExecution
       )
+
+  @nsJobExecutions.route('/<string:guid>')
+  @nsJobExecutions.response(400, 'Job Execution not found')
+  @nsJobExecutions.param('guid', 'Job Execution identifier')
+  class job(Resource):
+    '''Show a single execution Job'''
+    @nsJobExecutions.doc('get_jobexecution')
+    @nsJobExecutions.marshal_with(getJobExecutionModel(appObj))
+    def get(self, guid):
+      '''Fetch a given resource'''
+      execution = appObj.jobExecutor.getJobExecutionStatus(guid)
+      if execution is None:
+        raise BadRequest('Invalid Job Execution Identifier')
+      return execution
 

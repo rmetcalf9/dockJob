@@ -29,6 +29,17 @@ class test_jobExecutionsData(testHelperAPIClient):
       if seen[cur] == False:
         self.assertTrue(False, msg='Execution missing from resultset - ' + cur)
 
+  def test_GetSingleExecution(self):
+    execution_guids = self.setupJobsAndExecutions(data_simpleJobCreateParams)
+    reqURL = '/api/executions/' + execution_guids['001_001']
+    queryJobExecutionsResult = self.testClient.get(reqURL)
+    self.assertEqual(queryJobExecutionsResult.status_code, 200, msg='Request to ' + reqURL + ' failed')
+
+  def test_GetInvalidSingleExecution(self):
+    reqURL = '/api/executions/aaa123'
+    queryJobExecutionsResult = self.testClient.get(reqURL)
+    queryJobExecutionsResultJSON = json.loads(queryJobExecutionsResult.get_data(as_text=True))
+    self.assertEqual(queryJobExecutionsResult.status_code, 400, msg='Request to ' + reqURL + ' did not fail with error 400')
 
 
 
