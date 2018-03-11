@@ -231,11 +231,6 @@ def registerAPI(appObj):
         return item
       def filterJobExecution(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
         return True
-        #if appObj.appData['jobsData'].jobs[item].name.upper().find(whereClauseText) != -1:
-        #  return True
-        #if appObj.appData['jobsData'].jobs[item].command.upper().find(whereClauseText) != -1:
-        #  return True
-        #return False
       return appObj.getPaginatedResult(
         appObj.jobExecutor.getAllJobExecutions(guid),
         outputJobExecution,

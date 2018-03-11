@@ -43,16 +43,6 @@ class test_jobsData(testHelperAPIClient):
     result['lastUpdateDate'] = expectedResult['lastUpdateDate']
     self.assertJSONStringsEqual(result, expectedResult);
 
-  def getTotalJobs(self):
-    result2 = self.testClient.get('/api/serverinfo/')
-    self.assertEqual(result2.status_code, 200)
-    resultJSON = json.loads(result2.get_data(as_text=True))
-    return resultJSON['Jobs']['TotalJobs']
-    
-  def assertCorrectTotalJobs(self, num):
-    # Ensure total reflected in serverinfo
-    self.assertEqual(self.getTotalJobs(), num, msg='Server Info Total Jobs field not correct');
-
   def test_JobCreate(self):
     result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
     self.assertEqual(result.status_code, 200)
@@ -121,23 +111,6 @@ class test_jobsData(testHelperAPIClient):
     self.assertEqual(result2.status_code, 200, msg='Read back record')
     result2JSON = json.loads(result2.get_data(as_text=True))
     self.assertJSONJobStringsEqual(resultJSON, data_simpleJobCreateExpRes);
-
-  def findRecord(self, params, name):
-    for cur in params:
-      if (name==params[cur]['name']):
-        return params[cur]
-    return None
-
-  def createJobs(self, num, basis):
-    jobsAtStart = self.getTotalJobs()
-    param = {}
-    for cur in range(0, num):
-      param[cur] = dict(basis)
-      param[cur]['name'] = basis['name'] + str(cur+1).zfill(3)
-      result = self.testClient.post('/api/jobs/', data=json.dumps(param[cur]), content_type='application/json')
-      self.assertEqual(result.status_code, 200, msg='job creation failed')
-    self.assertCorrectTotalJobs(num + jobsAtStart)
-    return param
 
   def test_jobCreateAndQueryBackByName(self):
     numTestRecords = 6
@@ -338,11 +311,6 @@ class test_jobsData(testHelperAPIClient):
     expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': 0}
     self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
 
-  def addExecution(self, jobGUID, jobName):
-    result2 = self.testClient.post('/api/jobs/' + jobGUID + '/execution', data=json.dumps({"name": jobName}), content_type='application/json')
-    self.assertEqual(result2.status_code, 200)
-    return json.loads(result2.get_data(as_text=True))
-
   def test_submitJobForExecution(self):
     result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
     self.assertEqual(result.status_code, 200)
@@ -364,62 +332,7 @@ class test_jobsData(testHelperAPIClient):
     self.assertJSONStringsEqual(resultJSON2, exp);
 
   def test_getJobExecutions(self):
-    #add a load of jobs, then add two jobs we will put executions against
-    # call back executions and check we get executions for only one of the two jobs
-    self.createJobs(10, data_simpleJobCreateParams)
-    jobOneCreateParams = dict(data_simpleJobCreateParams)
-    jobOneCreateParams['name'] = 'TestJobOne'
-    jobTwoCreateParams = dict(data_simpleJobCreateParams)
-    jobTwoCreateParams['name'] = 'TestJobTwo'
-    result = self.testClient.post('/api/jobs/', data=json.dumps(jobOneCreateParams), content_type='application/json')
-    self.assertEqual(result.status_code, 200)
-    resultJSON = json.loads(result.get_data(as_text=True))
-    jobOneGUID = resultJSON['guid']
-    result = self.testClient.post('/api/jobs/', data=json.dumps(jobTwoCreateParams), content_type='application/json')
-    self.assertEqual(result.status_code, 200)
-    resultJSON = json.loads(result.get_data(as_text=True))
-    jobTwoGUID = resultJSON['guid']
-
-    # Add two executions for job one
-    execution_guids = {}
-    result2 = self.addExecution(jobOneGUID, '001_001')
-    execution_guids['001_001'] = result2['guid']
-    result2 = self.addExecution(jobOneGUID, '001_002')
-    execution_guids['001_002'] = result2['guid']
-
-    # Add two executions for job two
-    result2 = self.addExecution(jobTwoGUID, '002_001')
-    execution_guids['002_001'] = result2['guid']
-    result2 = self.addExecution(jobTwoGUID, '002_002')
-    execution_guids['002_002'] = result2['guid']
-
-    #Retreieve executions for job one and make sure we only get two and they match the two we put in
-    queryJobExecutionsForJobOneResult = self.testClient.get('/api/jobs/' + jobOneGUID + '/execution')
-    self.assertEqual(queryJobExecutionsForJobOneResult.status_code, 200)
-    queryJobExecutionsForJobOneResultJSON = json.loads(queryJobExecutionsForJobOneResult.get_data(as_text=True))
-
-    #We should only get two results returned
-    self.assertJSONStringsEqual(queryJobExecutionsForJobOneResultJSON["pagination"]["total"], 2, msg='Expected to get 2 executions for job one');
-    executionOneSeen = False
-    executionTwoSeen = False
-    #Check Correct execution GUID's returned
-    for cur in range(0,queryJobExecutionsForJobOneResultJSON["pagination"]["total"]):
-      self.assertEqual(queryJobExecutionsForJobOneResultJSON["result"][cur]["jobGUID"],jobOneGUID, msg='Execution for job one has not got jobGUID matching one job')
-      #exp['name'] = param2[cur]['name']
-      #self.assertJSONJobStringsEqual(result2JSON["result"][cur], exp);
-      if queryJobExecutionsForJobOneResultJSON["result"][cur]["guid"] == execution_guids['001_001']:
-        if executionOneSeen:
-          self.assertTrue(False, msg='Returned execution one twice')
-        executionOneSeen = True
-      if queryJobExecutionsForJobOneResultJSON["result"][cur]["guid"] == execution_guids['001_002']:
-        if executionTwoSeen:
-          self.assertTrue(False, msg='Returned execution two twice')
-        executionTwoSeen = True
-      #print(queryJobExecutionsForJobOneResultJSON["result"][cur]["guid"])
-    if not executionOneSeen:
-      self.assertTrue(False, msg='Execution one not returned')
-    if not executionTwoSeen:
-      self.assertTrue(False, msg='Execution two not returned')
+    execution_guids = self.setupJobsAndExecutions(data_simpleJobCreateParams)
 
 
 

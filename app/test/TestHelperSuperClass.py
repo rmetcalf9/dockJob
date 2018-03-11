@@ -60,3 +60,100 @@ class testHelperAPIClient(testHelperSuperClass):
     self.testClient.testing = True 
   def tearDown(self):
     self.testClient = None
+
+  def getTotalJobs(self):
+    result2 = self.testClient.get('/api/serverinfo/')
+    self.assertEqual(result2.status_code, 200)
+    resultJSON = json.loads(result2.get_data(as_text=True))
+    return resultJSON['Jobs']['TotalJobs']
+    
+  def assertCorrectTotalJobs(self, num):
+    # Ensure total reflected in serverinfo
+    self.assertEqual(self.getTotalJobs(), num, msg='Server Info Total Jobs field not correct');
+
+  def findRecord(self, params, name):
+    for cur in params:
+      if (name==params[cur]['name']):
+        return params[cur]
+    return None
+
+  def createJobs(self, num, basis):
+    jobsAtStart = self.getTotalJobs()
+    param = {}
+    for cur in range(0, num):
+      param[cur] = dict(basis)
+      param[cur]['name'] = basis['name'] + str(cur+1).zfill(3)
+      result = self.testClient.post('/api/jobs/', data=json.dumps(param[cur]), content_type='application/json')
+      self.assertEqual(result.status_code, 200, msg='job creation failed')
+    self.assertCorrectTotalJobs(num + jobsAtStart)
+    return param
+
+  def addExecution(self, jobGUID, jobName):
+    result2 = self.testClient.post('/api/jobs/' + jobGUID + '/execution', data=json.dumps({"name": jobName}), content_type='application/json')
+    self.assertEqual(result2.status_code, 200)
+    return json.loads(result2.get_data(as_text=True))
+
+  #data_simpleJobCreateParams
+  def setupJobsAndExecutions(self, jobCreateParams):
+    #Set up some job data and two special jobs each with two executions
+    # return the guids of the jobs that were setup with executions
+
+    #add a load of jobs, then add two jobs we will put executions against
+    # call back executions and check we get executions for only one of the two jobs
+    self.createJobs(10, jobCreateParams)
+    jobOneCreateParams = dict(jobCreateParams)
+    jobOneCreateParams['name'] = 'TestJobOne'
+    jobTwoCreateParams = dict(jobCreateParams)
+    jobTwoCreateParams['name'] = 'TestJobTwo'
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jobOneCreateParams), content_type='application/json')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    jobOneGUID = resultJSON['guid']
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jobTwoCreateParams), content_type='application/json')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    jobTwoGUID = resultJSON['guid']
+
+    # Add two executions for job one
+    execution_guids = {}
+    result2 = self.addExecution(jobOneGUID, '001_001')
+    execution_guids['001_001'] = result2['guid']
+    result2 = self.addExecution(jobOneGUID, '001_002')
+    execution_guids['001_002'] = result2['guid']
+
+    # Add two executions for job two
+    result2 = self.addExecution(jobTwoGUID, '002_001')
+    execution_guids['002_001'] = result2['guid']
+    result2 = self.addExecution(jobTwoGUID, '002_002')
+    execution_guids['002_002'] = result2['guid']
+
+    #Retreieve executions for job one and make sure we only get two and they match the two we put in
+    queryJobExecutionsForJobOneResult = self.testClient.get('/api/jobs/' + jobOneGUID + '/execution')
+    self.assertEqual(queryJobExecutionsForJobOneResult.status_code, 200)
+    queryJobExecutionsForJobOneResultJSON = json.loads(queryJobExecutionsForJobOneResult.get_data(as_text=True))
+
+    #We should only get two results returned
+    self.assertJSONStringsEqual(queryJobExecutionsForJobOneResultJSON["pagination"]["total"], 2, msg='Expected to get 2 executions for job one');
+    executionOneSeen = False
+    executionTwoSeen = False
+    #Check Correct execution GUID's returned
+    for cur in range(0,queryJobExecutionsForJobOneResultJSON["pagination"]["total"]):
+      self.assertEqual(queryJobExecutionsForJobOneResultJSON["result"][cur]["jobGUID"],jobOneGUID, msg='Execution for job one has not got jobGUID matching one job')
+      #exp['name'] = param2[cur]['name']
+      #self.assertJSONJobStringsEqual(result2JSON["result"][cur], exp);
+      if queryJobExecutionsForJobOneResultJSON["result"][cur]["guid"] == execution_guids['001_001']:
+        if executionOneSeen:
+          self.assertTrue(False, msg='Returned execution one twice')
+        executionOneSeen = True
+      if queryJobExecutionsForJobOneResultJSON["result"][cur]["guid"] == execution_guids['001_002']:
+        if executionTwoSeen:
+          self.assertTrue(False, msg='Returned execution two twice')
+        executionTwoSeen = True
+      #print(queryJobExecutionsForJobOneResultJSON["result"][cur]["guid"])
+    if not executionOneSeen:
+      self.assertTrue(False, msg='Execution one not returned')
+    if not executionTwoSeen:
+      self.assertTrue(False, msg='Execution two not returned')
+
+    return execution_guids
+

@@ -9,6 +9,7 @@ import pytz
 from APIBackendWithSwaggerAppObj import APIBackendWithSwaggerAppObj
 from serverInfoAPI import registerAPI as registerMainApi
 from jobsDataAPI import registerAPI as registerJobsApi, resetData as resetJobsData, getJobServerInfoModel
+from jobExecutionsDataAPI import registerAPI as registerJobExecutionsApi
 from flask_restplus import fields
 from JobExecutor import JobExecutorClass
 import time
@@ -34,6 +35,7 @@ class appObjClass(APIBackendWithSwaggerAppObj):
     super(appObjClass, self).initOnce()
     registerMainApi(self)
     registerJobsApi(self)
+    registerJobExecutionsApi(self)
 
   def getServerInfoModel(self):
     serverInfoServerModel = appObj.flastRestPlusAPIObject.model('ServerInfoServer', {
