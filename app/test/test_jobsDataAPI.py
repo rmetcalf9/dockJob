@@ -20,9 +20,6 @@ data_simpleJobCreateExpRes = {
   "lastUpdateDate": "IGNORE",
   "lastRunDate": None,
 }
-data_simpleJobExecutionCreateParams = {
-  "name": "TestExecutionName"
-}
 data_simpleJobExecutionCreateExpRes = {
   "guid": 'IGNORE',
   "stage": 'Pending', 
@@ -341,6 +338,11 @@ class test_jobsData(testHelperAPIClient):
     expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': 0}
     self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
 
+  def addExecution(self, jobGUID, jobName):
+    result2 = self.testClient.post('/api/jobs/' + jobGUID + '/execution', data=json.dumps({"name": jobName}), content_type='application/json')
+    self.assertEqual(result2.status_code, 200)
+    return json.loads(result2.get_data(as_text=True))
+
   def test_submitJobForExecution(self):
     result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
     self.assertEqual(result.status_code, 200)
@@ -349,10 +351,8 @@ class test_jobsData(testHelperAPIClient):
     jobCommand = resultJSON['command']
     self.assertEqual(len(jobGUID),36, msg='Invalid job GUID - must be 36 chars')
 
-    result2 = self.testClient.post('/api/jobs/' + jobGUID + '/execution', data=json.dumps(data_simpleJobExecutionCreateParams), content_type='application/json')
-    self.assertEqual(result2.status_code, 200)
+    resultJSON2 = self.addExecution(jobGUID, 'TestExecutionName')
     exp = dict(data_simpleJobExecutionCreateExpRes)
-    resultJSON2 = json.loads(result2.get_data(as_text=True))
     resultJSON2['guid'] = exp['guid']
     resultJSON2['dateCreated'] = exp['dateCreated']
     resultJSON2['dateStarted'] = exp['dateStarted']
@@ -362,5 +362,42 @@ class test_jobsData(testHelperAPIClient):
     exp['jobGUID'] = jobGUID
 
     self.assertJSONStringsEqual(resultJSON2, exp);
+
+  def test_getJobExecutions(self):
+    #add a load of jobs, then add two jobs we will put executions against
+    # call back executions and check we get executions for only one of the two jobs
+    self.createJobs(10, data_simpleJobCreateParams)
+    jobOneCreateParams = dict(data_simpleJobCreateParams)
+    jobOneCreateParams['name'] = 'TestJobOne'
+    jobTwoCreateParams = dict(data_simpleJobCreateParams)
+    jobTwoCreateParams['name'] = 'TestJobTwo'
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jobOneCreateParams), content_type='application/json')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    jobOneGUID = resultJSON['guid']
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jobTwoCreateParams), content_type='application/json')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    jobTwoGUID = resultJSON['guid']
+
+    # Add two executions for job one
+    execution_guids = {}
+    result2 = self.addExecution(jobOneGUID, '001_001')
+    execution_guids['001_001'] = result2['guid']
+    result2 = self.addExecution(jobOneGUID, '001_002')
+    execution_guids['001_002'] = result2['guid']
+
+    # Add two executions for job two
+    result2 = self.addExecution(jobTwoGUID, '002_001')
+    execution_guids['002_001'] = result2['guid']
+    result2 = self.addExecution(jobTwoGUID, '002_002')
+    execution_guids['002_002'] = result2['guid']
+
+    #TODO Retreieve executions for job one and make sure we only get two and they match the two we put in
+
+    print(execution_guids)
+
+    self.assertEqual(jobOneGUID, jobTwoGUID)
+
 
 

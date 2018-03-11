@@ -8,6 +8,7 @@ import grp
 import time
 import threading
 from JobExecution import JobExecutionClass
+from sortedcontainers import SortedDict
 
 class JobExecutorClass(threading.Thread):
   processUserID = None
@@ -93,7 +94,7 @@ class JobExecutorClass(threading.Thread):
     return demote
 
   # https://docs.python.org/3/library/asyncio-sync.html#asyncio.Lock
-  JobExecutions = {}
+  JobExecutions =  SortedDict()
   JobExecutionLock = threading.Lock()
     
   #called when new service needs submission
@@ -112,7 +113,14 @@ class JobExecutorClass(threading.Thread):
   
   #return all the jobs, if jobGUID is none than all, otherwise filter just for that job
   def getAllJobExecutions(self, jobGUID):
-    pass
+    return JobExecutions
+    #retVal = []
+    #for val in JobExecutions:
+    #  retVal.append
+    #return retVal
+    #if jobGUID is None:
+    #  return JobExecutions
+    #pass
 
   #main loop of thread
   running = True

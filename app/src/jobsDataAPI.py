@@ -127,7 +127,6 @@ def registerAPI(appObj):
     'creationDate': fields.DateTime(dt_format=u'iso8601', description='Time job record was created'),
     'lastUpdateDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was changed (excluding runs)'),
     'lastRunDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was run'),
-    # TODO Add runs to this model
   })
 
   nsJobs = appObj.flastRestPlusAPIObject.namespace('jobs', description='Job Operations')
@@ -219,4 +218,29 @@ def registerAPI(appObj):
       '''Create Job Execution'''
       content = request.get_json()
       return appObj.jobExecutor.submitJobForExecution(guid, content['name'], True)
+
+    @nsJobs.doc('getjobexecutions')
+    @nsJobs.marshal_with(appObj.getResultModel(getJobExecutionModel(appObj)))
+    @appObj.flastRestPlusAPIObject.response(200, 'Success')
+    @nsJobs.param('offset', 'Number to start from')
+    @nsJobs.param('pagesize', 'Results per page')
+    @nsJobs.param('query', 'Search Filter')
+    def get(self, guid):
+      '''Get Job Executions'''
+      def outputJobExecution(item):
+        return appObj.appData['jobsData'].jobs[item]
+      def filterJobExecution(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
+        return True
+        #if appObj.appData['jobsData'].jobs[item].name.upper().find(whereClauseText) != -1:
+        #  return True
+        #if appObj.appData['jobsData'].jobs[item].command.upper().find(whereClauseText) != -1:
+        #  return True
+        #return False
+      return appObj.getPaginatedResult(
+        appObj.jobExecutor.getAllJobExecutions(guid),
+        outputJobExecution,
+        request,
+        filterJobExecution
+      )
+
 
