@@ -15,7 +15,7 @@ class JobExecutorClass(threading.Thread):
   timeout = 15 #default to 15 second timeout for jobs
   appObj = None
 
-  def __init__(self, appObj):
+  def __init__(self, appObj, skipUserCheck):
     self.appObj = appObj
     if os.getuid() != 0:
       raise Exception('Job Executor only works when run as root')
@@ -40,18 +40,19 @@ class JobExecutorClass(threading.Thread):
     print('Will run jobs as user: ' + appObj.userforjobs + ' (' + str(self.processUserID) + ')')
     print('Will run jobs as group: ' + appObj.groupforjobs + ' (' + str(self.processGroupID) + ')')
 
-    testProcess = self.executeCommand('whoami')
-    if testProcess.returncode != 0:
-      print(testProcess.stdout.decode())
-      if testProcess.stderr != None:
-        print(testProcess.stderr.decode())
-      raise Exception('Test process didn''t return success. returncode = ' + testProcess.returncode)
-    if testProcess.stdout.decode().strip() != appObj.userforjobs:
-      print(testProcess.stdout.decode())
-      if testProcess.stderr != None:
-        print(testProcess.stderr.decode())
-      raise Exception('Test process running as wrong user')
-    print('Test process passed')
+    if not skipUserCheck:
+      testProcess = self.executeCommand('whoami')
+      if testProcess.returncode != 0:
+        print(testProcess.stdout.decode())
+        if testProcess.stderr != None:
+          print(testProcess.stderr.decode())
+        raise Exception('Test process didn''t return success. returncode = ' + testProcess.returncode)
+      if testProcess.stdout.decode().strip() != appObj.userforjobs:
+        print(testProcess.stdout.decode())
+        if testProcess.stderr != None:
+          print(testProcess.stderr.decode())
+        raise Exception('Test process running as wrong user')
+      print('User check passed')
 
     threading.Thread.__init__(self)
     #super(threading.Thread, self).__init__()

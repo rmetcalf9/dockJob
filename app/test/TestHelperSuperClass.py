@@ -17,6 +17,7 @@ env = {
   'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]',
   'APIAPP_USERFORJOBS': 'root',
   'APIAPP_GROUPFORJOBS': 'root',
+  'APIAPP_SKIPUSERCHECK': True,
 }
 
 class testHelperSuperClass(unittest.TestCase):

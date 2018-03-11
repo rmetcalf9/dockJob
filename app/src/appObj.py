@@ -26,7 +26,8 @@ class appObjClass(APIBackendWithSwaggerAppObj):
     resetJobsData(self)
     self.userforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, MissingUserForJobsException, None)
     self.groupforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_GROUPFORJOBS', None, MissingGroupForJobsException, None)
-    self.jobExecutor = JobExecutorClass(self)
+    skipUserCheck = self.globalParamObject.readFromEnviroment(env, 'APIAPP_SKIPUSERCHECK', False, MissingGroupForJobsException, None)
+    self.jobExecutor = JobExecutorClass(self, skipUserCheck)
     self.jobExecutor.start()
 
   def initOnce(self):
