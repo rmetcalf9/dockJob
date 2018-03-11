@@ -393,11 +393,33 @@ class test_jobsData(testHelperAPIClient):
     result2 = self.addExecution(jobTwoGUID, '002_002')
     execution_guids['002_002'] = result2['guid']
 
-    #TODO Retreieve executions for job one and make sure we only get two and they match the two we put in
+    #Retreieve executions for job one and make sure we only get two and they match the two we put in
+    queryJobExecutionsForJobOneResult = self.testClient.get('/api/jobs/' + jobOneGUID + '/execution')
+    self.assertEqual(queryJobExecutionsForJobOneResult.status_code, 200)
+    queryJobExecutionsForJobOneResultJSON = json.loads(queryJobExecutionsForJobOneResult.get_data(as_text=True))
 
-    print(execution_guids)
-
-    self.assertEqual(jobOneGUID, jobTwoGUID)
+    #We should only get two results returned
+    self.assertJSONStringsEqual(queryJobExecutionsForJobOneResultJSON["pagination"]["total"], 2, msg='Expected to get 2 executions for job one');
+    executionOneSeen = False
+    executionTwoSeen = False
+    #Check Correct execution GUID's returned
+    for cur in range(0,queryJobExecutionsForJobOneResultJSON["pagination"]["total"]):
+      self.assertEqual(queryJobExecutionsForJobOneResultJSON["result"][cur]["jobGUID"],jobOneGUID, msg='Execution for job one has not got jobGUID matching one job')
+      #exp['name'] = param2[cur]['name']
+      #self.assertJSONJobStringsEqual(result2JSON["result"][cur], exp);
+      if queryJobExecutionsForJobOneResultJSON["result"][cur]["guid"] == execution_guids['001_001']:
+        if executionOneSeen:
+          self.assertTrue(False, msg='Returned execution one twice')
+        executionOneSeen = True
+      if queryJobExecutionsForJobOneResultJSON["result"][cur]["guid"] == execution_guids['001_002']:
+        if executionTwoSeen:
+          self.assertTrue(False, msg='Returned execution two twice')
+        executionTwoSeen = True
+      #print(queryJobExecutionsForJobOneResultJSON["result"][cur]["guid"])
+    if not executionOneSeen:
+      self.assertTrue(False, msg='Execution one not returned')
+    if not executionTwoSeen:
+      self.assertTrue(False, msg='Execution two not returned')
 
 
 

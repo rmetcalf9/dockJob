@@ -228,7 +228,7 @@ def registerAPI(appObj):
     def get(self, guid):
       '''Get Job Executions'''
       def outputJobExecution(item):
-        return appObj.appData['jobsData'].jobs[item]
+        return item
       def filterJobExecution(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
         return True
         #if appObj.appData['jobsData'].jobs[item].name.upper().find(whereClauseText) != -1:

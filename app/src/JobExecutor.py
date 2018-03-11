@@ -107,20 +107,20 @@ class JobExecutorClass(threading.Thread):
     self.JobExecutions[execution.guid] = execution
     return execution
 
-  #return current status of a job execution
+  #return current data for a job execution
   def getJobExecutionStatus(self, jobGUID):
     pass
   
   #return all the jobs, if jobGUID is none than all, otherwise filter just for that job
   def getAllJobExecutions(self, jobGUID):
-    return JobExecutions
-    #retVal = []
-    #for val in JobExecutions:
-    #  retVal.append
-    #return retVal
-    #if jobGUID is None:
-    #  return JobExecutions
-    #pass
+    output = SortedDict()
+    for cur in self.JobExecutions:
+      if jobGUID is None:
+        output[self.JobExecutions[cur].guid] = self.JobExecutions[cur]
+      else:
+        if jobGUID == self.JobExecutions[cur].jobGUID:
+          output[self.JobExecutions[cur].guid] = self.JobExecutions[cur]
+    return output
 
   #main loop of thread
   running = True

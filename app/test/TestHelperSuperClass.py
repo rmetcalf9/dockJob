@@ -35,7 +35,7 @@ class testHelperSuperClass(unittest.TestCase):
     b = json.dumps(str2, sort_keys=True)
     return (a == b)
 
-  def assertJSONStringsEqual(self, str1, str2):
+  def assertJSONStringsEqual(self, str1, str2, msg=''):
     if (self.areJSONStringsEqual(str1,str2)):
       return
     print("Mismatch JSON")
@@ -44,7 +44,7 @@ class testHelperSuperClass(unittest.TestCase):
     print(a)
     print("--")
     print(b)
-    self.assertTrue(False)
+    self.assertTrue(False, msg=msg)
 
   def assertTimeCloseToCurrent(self, time):
     curTime = datetime.datetime.now(pytz.timezone("UTC"))
