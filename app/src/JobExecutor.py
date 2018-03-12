@@ -9,6 +9,9 @@ import time
 import threading
 from JobExecution import JobExecutionClass
 from sortedcontainers import SortedDict
+import datetime
+import pytz
+import queue
 
 class JobExecutorClass(threading.Thread):
   processUserID = None
@@ -96,15 +99,20 @@ class JobExecutorClass(threading.Thread):
   # https://docs.python.org/3/library/asyncio-sync.html#asyncio.Lock
   JobExecutions =  SortedDict()
   JobExecutionLock = threading.Lock()
+  pendingExecutions = queue.Queue() # Queue to hold GUID's of executions to run
     
   #called when new service needs submission
   def submitJobForExecution(self, jobGUID, executionName, manual):
-    #manual = True when called by jobsDataAPI and Flast when called from schedular
+    #manual = True when called by jobsDataAPI and False when called from scheduler
     jobObj = self.appObj.appData['jobsData'].getJob(jobGUID)
     if jobObj is None:
       raise BadRequest('Invalid job')
     execution = JobExecutionClass(jobObj, executionName, manual)
+    #lock shouldn't be needed but it is a cheap operation
+    self.JobExecutionLock.acquire()
     self.JobExecutions[execution.guid] = execution
+    self.JobExecutionLock.release()
+    self.pendingExecutions.put(execution.guid)
     return execution
 
   #return current data for a job execution
@@ -118,13 +126,31 @@ class JobExecutorClass(threading.Thread):
   #return all the jobs, if jobGUID is none than all, otherwise filter just for that job
   def getAllJobExecutions(self, jobGUID):
     output = SortedDict()
+    self.JobExecutionLock.acquire()
     for cur in self.JobExecutions:
       if jobGUID is None:
         output[self.JobExecutions[cur].guid] = self.JobExecutions[cur]
       else:
         if jobGUID == self.JobExecutions[cur].jobGUID:
           output[self.JobExecutions[cur].guid] = self.JobExecutions[cur]
+    self.JobExecutionLock.release()
     return output
+
+  def loopIteration(self, curDatetime):
+    #Run next pending job only the next one, other jobs are run on subsequent loop iterations
+    # this will block this thread until the execution is complete
+    if not self.pendingExecutions.empty():
+      executionGUID = self.pendingExecutions.get()
+      self.JobExecutions[executionGUID].execute(self.appObj.jobExecutor, self.JobExecutionLock)
+
+    #schedule any new jobs that are due to be automatically run
+    #  no lock acquire required here as it is inside submitJobForExecution
+    #TODO actual code
+
+    #purge old runs from list
+    self.JobExecutionLock.acquire()
+    #TODO actual purge old runs
+    self.JobExecutionLock.release()
 
   #main loop of thread
   running = True
@@ -132,11 +158,8 @@ class JobExecutorClass(threading.Thread):
     self.running = True
     print('Job runner thread starting')
     while self.running:
-      #TODO run next pending job
-      
-      #TODO schedule any new jobs that are due to be automatically run
-      
-      #TODO purge old runs from list
+      curDatetime = datetime.datetime.now(pytz.utc)
+      self.loopIteration(curDatetime)
       time.sleep(0.2)
     print('Job runner thread terminating')
 

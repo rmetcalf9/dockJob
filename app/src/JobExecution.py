@@ -54,17 +54,22 @@ class JobExecutionClass():
     self.executionName = executionName
     self.manual = manual
 
-  def execute(self, executor):
+  def execute(self, executor, lock):
+    lock.acquire()
     self.stage = 'Running'
     self.dateStarted = datetime.datetime.now(pytz.timezone("UTC")).isoformat()
+    lock.release()
     try:
       executionResult = executor.executeCommand(self.jobCommand)
     except TimeoutExpired:
+      lock.acquire()
       self.resultReturnCode = -1
       self.resultSTDOUT = None
       self.stage = 'Timeout'
       self.dateCompleted = datetime.datetime.now(pytz.timezone("UTC")).isoformat()
+      lock.release()
       return
+    lock.acquire()
     self.resultReturnCode = executionResult.returncode
     self.resultSTDOUT = executionResult.stdout.decode().strip()
     #valid exit codes are between 0-255. I have hijacked -1 for timeout
@@ -73,6 +78,7 @@ class JobExecutionClass():
     else:
       self.stage = 'Completed'
     self.dateCompleted = datetime.datetime.now(pytz.timezone("UTC")).isoformat()
+    lock.release()
 
 
 
