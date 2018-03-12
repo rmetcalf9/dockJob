@@ -23,6 +23,10 @@ class appObjClass(APIBackendWithSwaggerAppObj):
   groupforjobs = None
 
   def init(self, env):
+    if self.jobExecutor is not None:
+      #for testing we init multiple times. We need to stop the thread running in this case
+      self.jobExecutor.stopThreadRunning()
+      self.jobExecutor.join()
     super(appObjClass, self).init(env)
     resetJobsData(self)
     self.userforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, MissingUserForJobsException, None)
@@ -59,7 +63,7 @@ class appObjClass(APIBackendWithSwaggerAppObj):
   #override exit gracefully to stop worker thread
   def exit_gracefully(self, signum, frame):
     self.jobExecutor.stopThreadRunning()
-    time.sleep(0.3) #give thread a chance to stop
+    self.jobExecutor.join()
     super(appObjClass, self).exit_gracefully(signum, frame)
 
 appObj = appObjClass()

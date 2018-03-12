@@ -40,9 +40,14 @@ class test_appObjClass(testHelperAPIClient):
       'APIAPP_GROUPFORJOBS': 'dockjobgroup',
     }
     appObj.init(env)
+    testClient = appObj.flaskAppObject.test_client()
+    testClient.testing = True 
 
     cmdToExecute = 'whoami'
     expResSTDOUT = 'dockjobuser\n'
     res = appObj.jobExecutor.executeCommand(cmdToExecute)
     self.assertEqual(res.stdout.decode(), expResSTDOUT)
+    
+    appObj.jobExecutor.stopThreadRunning()
+    testClient = None
 
