@@ -21,8 +21,10 @@ class appObjClass(APIBackendWithSwaggerAppObj):
   jobExecutor = None
   userforjobs = None
   groupforjobs = None
+  serverStartTime = None
 
-  def init(self, env):
+  def init(self, env, serverStartTime):
+    self.serverStartTime = serverStartTime
     if self.jobExecutor is not None:
       #for testing we init multiple times. We need to stop the thread running in this case
       self.jobExecutor.stopThreadRunning()
@@ -44,7 +46,8 @@ class appObjClass(APIBackendWithSwaggerAppObj):
   def getServerInfoModel(self):
     serverInfoServerModel = appObj.flastRestPlusAPIObject.model('ServerInfoServer', {
       'DefaultUserTimezone': fields.String(default='Europe/London', description='Timezone used by client to display times. (All API''s use UTC so client must convert)'),
-      'ServerDatetime': fields.DateTime(dt_format=u'iso8601', description='Current server date time')
+      'ServerDatetime': fields.DateTime(dt_format=u'iso8601', description='Current server date time'),
+      'ServerStartupTime': fields.DateTime(dt_format=u'iso8601', description='Time the dockJob server started')
     })
 
     return appObj.flastRestPlusAPIObject.model('ServerInfo', {
@@ -57,6 +60,7 @@ class appObjClass(APIBackendWithSwaggerAppObj):
     if (curDateTime.tzinfo != pytz.utc):
       raise self.NotUTCException
     self.serverObj['ServerDatetime'] = curDateTime.isoformat()
+    self.serverObj['ServerStartupTime'] = self.serverStartTime.isoformat()
     return {'Server': self.serverObj, 'Jobs': self.appData['jobsData'].getJobServerInfo()}
     #return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
 

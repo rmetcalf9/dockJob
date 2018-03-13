@@ -2,6 +2,8 @@ from appObj import appObj
 
 import sys
 import os
+import datetime
+import pytz
 
 ##App will host content in the following paths:
 ## /api        API
@@ -9,7 +11,8 @@ import os
 ## /frontend   Frontend for this application
 ##
 
-appObj.init(os.environ)
+curDatetime = datetime.datetime.now(pytz.utc)
+appObj.init(os.environ, curDatetime)
 
 expectedNumberOfParams = 0
 if ((len(sys.argv)-1) != expectedNumberOfParams):

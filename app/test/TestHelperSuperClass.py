@@ -54,8 +54,12 @@ class testHelperSuperClass(unittest.TestCase):
 #helper class with setup for an APIClient
 class testHelperAPIClient(testHelperSuperClass):
   testClient = None
+  standardStartupTime = pytz.timezone('Europe/London').localize(datetime.datetime(2018,1,1,13,46,0,0))
+
   def setUp(self):
-    appObj.init(env)
+    # curDatetime = datetime.datetime.now(pytz.utc)
+    # for testing always pretend the server started at a set datetime
+    appObj.init(env, self.standardStartupTime)
     self.testClient = appObj.flaskAppObject.test_client()
     self.testClient.testing = True 
   def tearDown(self):

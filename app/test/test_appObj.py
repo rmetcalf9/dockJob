@@ -15,8 +15,20 @@ class test_appObjClass(testHelperAPIClient):
     #get now datetime.now(pytz.utc)
     curDatetime = pytz.timezone('UTC').localize(datetime.datetime(2018,1,1,13,46,0,0))
     serverInfo = appObj.getServerInfoJSON(curDatetime)
-    expRes = json.dumps({'Server': {'ServerDatetime': curDatetime.isoformat(), 'DefaultUserTimezone': 'Europe/London'}, 'Jobs': {'TotalJobs': 0, 'NextExecuteJob': None}})
-    self.assertJSONStringsEqual(json.dumps(serverInfo), expRes);
+
+    expRes = {
+      'Jobs': {
+        'NextExecuteJob': None,
+        'TotalJobs': 0
+      },
+      'Server': {
+        'DefaultUserTimezone': 'Europe/London', 
+        'ServerDatetime': curDatetime.isoformat(),
+        'ServerStartupTime': '2018-01-01T13:46:00+00:00'
+      },
+    }
+
+    self.assertJSONStringsEqual(serverInfo, expRes);
 
   def test_InitialServerInfoMessageOnlyAcceptsUTCTimezone(self):
     #get now datetime.now(pytz.utc)
@@ -24,7 +36,6 @@ class test_appObjClass(testHelperAPIClient):
     with self.assertRaises(Exception) as context:
       serverInfo = appObj.getServerInfoJSON(curDatetime)
     self.checkGotRightException(context,appObjClass.NotUTCException)
-
 
   def test_missingUserForJobs(self):
     env = {
@@ -36,7 +47,7 @@ class test_appObjClass(testHelperAPIClient):
       'APIAPP_GROUPFORJOBS': 'root',
     }
     with self.assertRaises(Exception) as context:
-      appObj.init(env)
+      appObj.init(env, self.standardStartupTime)
     self.checkGotRightException(context,MissingUserForJobsException)
 
   def test_missingUserForJobs(self):
@@ -49,6 +60,6 @@ class test_appObjClass(testHelperAPIClient):
       'APIAPP_USERFORJOBS': 'root',
     }
     with self.assertRaises(Exception) as context:
-      appObj.init(env)
+      appObj.init(env, self.standardStartupTime)
     self.checkGotRightException(context,MissingGroupForJobsException)
 

@@ -7,9 +7,9 @@
       </q-card-title>
       <q-card-main>
         <table>
+          <tr><td align="right">Server Startup Time:</td><td>{{ serverInfo.Server.ServerStartupTime }}</td></tr>
+          <tr><td align="right">Current Time on Server:</td><td>{{ serverInfo.Server.ServerDatetime }}</td></tr>
           <tr><td align="right">Total jobs setup:</td><td>{{ serverInfo.Jobs.TotalJobs }}</td></tr>
-          <tr><td align="right">Number Scheduled:</td><td></td></tr>
-          <tr><td align="right">Number Manual:</td><td></td></tr>
         </table>
       </q-card-main>
     </q-card>

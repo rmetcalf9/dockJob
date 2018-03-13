@@ -39,7 +39,7 @@ class test_appObjClass(testHelperAPIClient):
       'APIAPP_USERFORJOBS': 'dockjobuser',
       'APIAPP_GROUPFORJOBS': 'dockjobgroup',
     }
-    appObj.init(env)
+    appObj.init(env, self.standardStartupTime)
     testClient = appObj.flaskAppObject.test_client()
     testClient.testing = True 
 
