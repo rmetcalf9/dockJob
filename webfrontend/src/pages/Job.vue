@@ -2,15 +2,15 @@
   <div>
     JOB INFO
     <q-table
-      title='Jobs'
-      :data="jobData"
+      title='Executions'
+      :data="jobExecutionData"
       :columns="jobTableColumns"
       :visible-columns="visibleColumns"
       :filter="filter"
       row-key="name"
       :pagination.sync="serverPagination"
       :loading="loading"
-      @request="request"
+      @request="requestExecutionData"
     >
       <template slot="top-right" slot-scope="props">
       <q-table-columns
@@ -37,27 +37,43 @@ export default {
       createJobModalDialog: {},
       jobTableColumns: [
         // { name: 'guid', required: false, label: 'GUID', align: 'left', field: 'guid', sortable: false, filter: true },
-        { name: 'name', required: true, label: 'Job Name', align: 'left', field: 'name', sortable: false, filter: true },
-        { name: 'enabled', required: false, label: 'Enabled', align: 'left', field: 'enabled', sortable: false, filter: true },
-        { name: 'creationDate', required: false, label: 'Created', align: 'left', field: 'creationDate', sortable: false, filter: true },
-        { name: 'lastRunDate', required: false, label: 'Last Run', align: 'left', field: 'lastRunDate', sortable: false, filter: true },
-        { name: 'repetitionInterval', required: false, label: 'Repetition', align: 'left', field: 'repetitionInterval', sortable: false, filter: true },
-        { name: 'nextScheduledRun', required: false, label: 'Next Run', align: 'left', field: 'nextScheduledRun', sortable: false, filter: true },
-        { name: 'command', required: false, label: 'Command', align: 'left', field: 'command', sortable: false, filter: true },
-        { name: 'lastUpdateDate', required: false, label: 'Last Update', align: 'left', field: 'lastUpdateDate', sortable: false, filter: true }
+        { name: 'executionName', required: false, label: 'Name', align: 'left', field: 'executionName', sortable: false, filter: true },
+        { name: 'stage', required: false, label: 'Stage', align: 'left', field: 'stage', sortable: false, filter: true },
+        { name: 'resultReturnCode', required: false, label: 'Return Code', align: 'left', field: 'resultReturnCode', sortable: false, filter: true },
+        { name: 'manual', required: false, label: 'Manual Run', align: 'left', field: 'manual', sortable: false, filter: true },
+        { name: 'dateCreated', required: false, label: 'Creation Date', align: 'left', field: 'dateCreated', sortable: false, filter: true },
+        { name: 'dateStarted', required: false, label: 'Start Date', align: 'left', field: 'dateStarted', sortable: false, filter: true },
+        { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompleted', sortable: false, filter: true },
+        { name: 'resultsSTDOUT', required: false, label: 'resultsSTDOUT', align: 'left', field: 'Output', sortable: false, filter: true },
+        { name: 'jobGUID', required: false, label: 'Last Job GUID', align: 'left', field: 'jobGUID', sortable: false, filter: true },
+        { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: false, filter: true }
       ],
-      jobData: [],
+      jobExecutionData: [],
       filter: '',
       loading: false,
       serverPagination: {
         page: 1,
         rowsNumber: 10 // specifying this determines pagination is server-side
       },
-      visibleColumns: ['name', 'enabled', 'nextScheduledRun']
+      visibleColumns: ['executionName', 'stage', 'resultReturnCode'],
+      jobData: {}
     }
   },
   methods: {
-    request ({ pagination, filter }) {
+    refreshJobData () {
+      var callback = {
+        ok: function (response) {
+          this.jobData = response.data
+          globalStore.commit('SET_PAGE_TITLE', 'Job ' + this.jobData.name)
+        },
+        error: function (error) {
+          Notify.create('Job query failed - ' + callbackHelper.getErrorFromResponse(error))
+          this.jobData = {}
+        }
+      }
+      globalStore.getters.apiFN('GET', 'jobs/' + this.$route.params.jobGUID, undefined, callback)
+    },
+    requestExecutionData ({ pagination, filter }) {
       var TTT = this
       TTT.loading = true
       var callback = {
@@ -71,7 +87,7 @@ export default {
           TTT.serverPagination.rowsNumber = response.data.pagination.total
 
           // then we update the rows with the fetched ones
-          TTT.jobData = response.data.result
+          TTT.jobExecutionData = response.data.result
 
           // finally we tell QTable to exit the "loading" state
           TTT.loading = false
@@ -84,9 +100,9 @@ export default {
       if (pagination.page === 0) {
         pagination.page = 1
       }
-      var queryString = 'jobs/?pagesize=' + pagination.rowsPerPage.toString() + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
+      var queryString = 'jobs/' + this.$route.params.jobGUID + '/execution?pagesize=' + pagination.rowsPerPage.toString() + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
       if (filter !== '') {
-        queryString = 'jobs/?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
+        queryString = 'jobs/' + this.$route.params.jobGUID + '/execution?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
       }
       globalStore.getters.apiFN('GET', queryString, undefined, callback)
     }
@@ -99,7 +115,8 @@ export default {
   mounted () {
     // once mounted, we need to trigger the initial server data fetch
     globalStore.commit('SET_PAGE_TITLE', 'Job ' + this.$route.params.jobGUID)
-    this.request({
+    this.refreshJobData()
+    this.requestExecutionData({
       pagination: this.serverPagination,
       filter: this.filter
     })
