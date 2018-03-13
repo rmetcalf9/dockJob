@@ -192,6 +192,7 @@ export default {
   },
   methods: {
     openCreateJobDialog (confirmFunction) {
+      // console.log('openCreateJobDialog')
       this.showCreateJobDialogData = initShowCreateJobDialogData()
       this.showCreateJobDialog = true
       this.createdOKCallback = confirmFunction

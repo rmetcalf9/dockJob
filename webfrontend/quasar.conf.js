@@ -64,6 +64,8 @@ module.exports = function (ctx) {
         'QSearch',
         'QTable',
         'QTableColumns',
+        'QTr',
+        'QTd',
         'QToggle',
         'QToolbar',
         'QToolbarTitle',

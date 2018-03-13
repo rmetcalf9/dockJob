@@ -1,5 +1,6 @@
 <template>
   <div>
+    JOB INFO
     <q-table
       title='Jobs'
       :data="jobData"
@@ -10,20 +11,7 @@
       :pagination.sync="serverPagination"
       :loading="loading"
       @request="request"
-      selection="single"
-      :selected.sync="selectedSecond"
     >
-      <template slot="top-selection" slot-scope="props">
-        <q-btn flat round delete icon="delete" @click="deleteJob" />
-      </template>
-
-      <template slot="top-left" slot-scope="props">
-        <q-btn
-          color="primary"
-          push
-          @click="openCreateJobModalDialog"
-        >Create Job</q-btn>
-      </template>
       <template slot="top-right" slot-scope="props">
       <q-table-columns
         color="secondary"
@@ -33,30 +21,17 @@
       />
       <q-search clearable hide-underline v-model="filter" />
       </template>
-
-      <q-td slot="body-cell-..." slot-scope="props" :props="props">
-        <q-btn flat color="primary" label="..." size="xs" @click="$router.push('/jobs/' + props.row.guid)" />
-      </q-td>
-
     </q-table>
-    <CreateJobModal
-      ref="createJobModalDialog"
-      v-model="createJobModalDialog"
-    />
   </div>
 
 </template>
 
 <script>
-import { Notify, Dialog } from 'quasar'
+import { Notify } from 'quasar'
 import globalStore from '../store/globalStore'
-import CreateJobModal from '../components/CreateJobModal'
 import callbackHelper from '../callbackHelper'
 
 export default {
-  components: {
-    CreateJobModal
-  },
   data () {
     return {
       createJobModalDialog: {},
@@ -69,8 +44,7 @@ export default {
         { name: 'repetitionInterval', required: false, label: 'Repetition', align: 'left', field: 'repetitionInterval', sortable: false, filter: true },
         { name: 'nextScheduledRun', required: false, label: 'Next Run', align: 'left', field: 'nextScheduledRun', sortable: false, filter: true },
         { name: 'command', required: false, label: 'Command', align: 'left', field: 'command', sortable: false, filter: true },
-        { name: 'lastUpdateDate', required: false, label: 'Last Update', align: 'left', field: 'lastUpdateDate', sortable: false, filter: true },
-        { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
+        { name: 'lastUpdateDate', required: false, label: 'Last Update', align: 'left', field: 'lastUpdateDate', sortable: false, filter: true }
       ],
       jobData: [],
       filter: '',
@@ -79,24 +53,13 @@ export default {
         page: 1,
         rowsNumber: 10 // specifying this determines pagination is server-side
       },
-      visibleColumns: ['name', 'enabled', 'nextScheduledRun'],
-      selectedSecond: []
+      visibleColumns: ['name', 'enabled', 'nextScheduledRun']
     }
   },
   methods: {
     request ({ pagination, filter }) {
       var TTT = this
       TTT.loading = true
-      // console.log('request')
-      // console.log(pagination)
-      // pagination = {
-      //   descending:false
-      //   page:2
-      //   rowsNumber:10
-      //   rowsPerPage:5
-      //   sortBy:null
-      // }
-      // console.log(filter) (String)
       var callback = {
         ok: function (response) {
           // console.log(response.data.guid)
@@ -126,43 +89,6 @@ export default {
         queryString = 'jobs/?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
       }
       globalStore.getters.apiFN('GET', queryString, undefined, callback)
-    },
-    openCreateJobModalDialog () {
-      var child = this.$refs.createJobModalDialog
-      var TTTT = this
-      child.openCreateJobDialog(function (newJobName) {
-        TTTT.filter = newJobName
-        TTTT.request({
-          pagination: TTTT.serverPagination, // Rows number will be overwritten when query returns
-          filter: TTTT.filter
-        })
-      })
-    },
-    deleteJob () {
-      var TTT = this
-      Dialog.create({
-        title: 'Confirm',
-        message: 'Delete ' + this.selectedSecond[0].name,
-        ok: 'Confirm',
-        cancel: 'Cancel'
-      }).then(() => {
-        var callback = {
-          ok: function (response) {
-            // console.log(response.data.name)
-            TTT.selectedSecond = []
-            TTT.request({
-              pagination: TTT.serverPagination,
-              filter: TTT.filter
-            })
-            Notify.create('Job "' + response.data.name + '" Deleted')
-          },
-          error: function (error) {
-            TTT.loading = false
-            Notify.create('Job delete failed - ' + callbackHelper.getErrorFromResponse(error))
-          }
-        }
-        globalStore.getters.apiFN('DELETE', 'jobs/' + this.selectedSecond[0].guid, undefined, callback)
-      })
     }
   },
   computed: {
@@ -172,6 +98,7 @@ export default {
   },
   mounted () {
     // once mounted, we need to trigger the initial server data fetch
+    globalStore.commit('SET_PAGE_TITLE', 'Job ' + this.$route.params.jobGUID)
     this.request({
       pagination: this.serverPagination,
       filter: this.filter
