@@ -27,7 +27,7 @@ data_simpleJobExecutionCreateExpRes = {
   "resultReturnCode": 0, 
   "jobGUID": 'OVERRIDE',
   "jobCommand": 'OVERRIDE',
-  "resultsSTDOUT": '', 
+  "resultSTDOUT": '', 
   "manual": True, 
   "dateCreated": 'IGNORE', 
   "dateStarted": 'IGNORE', 
