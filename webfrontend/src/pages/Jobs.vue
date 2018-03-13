@@ -63,7 +63,7 @@ export default {
       jobTableColumns: [
         // { name: 'guid', required: false, label: 'GUID', align: 'left', field: 'guid', sortable: false, filter: true },
         { name: 'name', required: true, label: 'Job Name', align: 'left', field: 'name', sortable: false, filter: true },
-        { name: 'enabled', required: false, label: 'Enabled', align: 'left', field: 'enabled', sortable: false, filter: true },
+        { name: 'enabled', required: false, label: 'Scheduled Running Enabled', align: 'left', field: 'enabled', sortable: false, filter: true },
         { name: 'creationDate', required: false, label: 'Created', align: 'left', field: 'creationDate', sortable: false, filter: true },
         { name: 'lastRunDate', required: false, label: 'Last Run', align: 'left', field: 'lastRunDate', sortable: false, filter: true },
         { name: 'repetitionInterval', required: false, label: 'Repetition', align: 'left', field: 'repetitionInterval', sortable: false, filter: true },

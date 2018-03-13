@@ -76,6 +76,7 @@ module.exports = function (ctx) {
         'QItem',
         'QItemMain',
         'QItemSide',
+        'QItemTile',
         'QModal',
         'QModalLayout',
         'QSelect'
