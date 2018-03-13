@@ -115,6 +115,16 @@ class JobExecutorClass(threading.Thread):
     self.pendingExecutions.put(execution.guid)
     return execution
 
+  def deleteExecutionsForJob(self, jobGUID):
+    for cur in self.JobExecutions:
+      if self.JobExecutions[cur].jobGUID == jobGUID:
+        self.deleteExecution(self.JobExecutions[cur].guid)
+
+  def deleteExecution(self, executionGUID):
+   self.JobExecutionLock.acquire()
+   self.JobExecutions.pop(executionGUID)
+   self.JobExecutionLock.release()
+
   #return current data for a job execution
   def getJobExecutionStatus(self, jobGUID):
     try:
@@ -141,7 +151,13 @@ class JobExecutorClass(threading.Thread):
     # this will block this thread until the execution is complete
     if not self.pendingExecutions.empty():
       executionGUID = self.pendingExecutions.get()
-      self.JobExecutions[executionGUID].execute(self.appObj.jobExecutor, self.JobExecutionLock)
+      jobObj = None
+      try:
+        jobObj = self.JobExecutions[executionGUID]
+      except KeyError:
+        jobObj = None # if we get a key error it just means this job was deleted while it had a pending execution
+      if jobObj is not None:
+        jobObj.execute(self.appObj.jobExecutor, self.JobExecutionLock)
 
     #schedule any new jobs that are due to be automatically run
     #  no lock acquire required here as it is inside submitJobForExecution

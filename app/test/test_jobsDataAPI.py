@@ -334,5 +334,21 @@ class test_jobsData(testHelperAPIClient):
   def test_getJobExecutions(self):
     execution_guids = self.setupJobsAndExecutions(data_simpleJobCreateParams)
 
+  def test_deleteJobRemovedExecutionLogs(self):
+    execution_guids = self.setupJobsAndExecutions(data_simpleJobCreateParams)
+    testExecutionGUID = execution_guids['002_002']
 
+    #Retrieve Execution Data to find jobGUID
+    result = self.testClient.get('/api/executions/' + testExecutionGUID)
+    self.assertEqual(result.status_code, 200, msg='Read back failed')
+    resultJSON = json.loads(result.get_data(as_text=True))
+    self.assertEqual(resultJSON['guid'],testExecutionGUID,msg='Query Exection error - wrong execution returned')
+    testJobGUID = resultJSON['jobGUID']
 
+    #Delete Job
+    result2 = self.testClient.delete('/api/jobs/' + testJobGUID)
+    self.assertEqual(result2.status_code, 200, msg='Didn''t delete record')
+
+    #requery execution to check if it has been deleted
+    result = self.testClient.get('/api/executions/' + testExecutionGUID)
+    self.assertEqual(result.status_code, 400, msg='Exectuion for deleted job still in system')

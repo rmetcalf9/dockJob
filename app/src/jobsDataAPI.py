@@ -69,10 +69,11 @@ class jobsDataClass():
   jobs = None
   # map of Job name to guid
   jobs_name_lookup = None
-  def __init__(self):
+  appObj = None
+  def __init__(self, appObj):
     self.jobs = SortedDict()
     self.jobs_name_lookup = SortedDict()
-    pass
+    self.appObj = appObj
 
   def getJobServerInfo(self):
     return{
@@ -104,9 +105,11 @@ class jobsDataClass():
     uniqueJobName = jobObj.uniqueName()
     self.jobs_name_lookup.pop(uniqueJobName)
     self.jobs.pop(jobObj.guid)
+    # Delete any executions
+    self.appObj.jobExecutor.deleteExecutionsForJob(jobObj.guid)
 
 def resetData(appObj):
-  appObj.appData['jobsData']=jobsDataClass()
+  appObj.appData['jobsData']=jobsDataClass(appObj)
 
 def registerAPI(appObj):
   # Fields required to create a Job
