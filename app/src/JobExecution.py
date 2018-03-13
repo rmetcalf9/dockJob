@@ -23,7 +23,7 @@ def getJobExecutionModel(appObj):
     'dateStarted': fields.DateTime(dt_format=u'iso8601', description='Time the execution was started'),
     'dateCompleted': fields.DateTime(dt_format=u'iso8601', description='Time the execution was completed'),
     'resultReturnCode': fields.Integer(default=0,description='Return code or -1 for timed out'),
-    'resultsSTDOUT': fields.String(default='',description='Output from the job'),
+    'resultSTDOUT': fields.String(default='',description='Output from the job'),
   })
 
 

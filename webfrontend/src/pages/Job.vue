@@ -96,7 +96,7 @@ export default {
         { name: 'dateCreated', required: false, label: 'Creation Date', align: 'left', field: 'dateCreated', sortable: false, filter: true },
         { name: 'dateStarted', required: false, label: 'Start Date', align: 'left', field: 'dateStarted', sortable: false, filter: true },
         { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompleted', sortable: false, filter: true },
-        { name: 'resultsSTDOUT', required: false, label: 'resultsSTDOUT', align: 'left', field: 'Output', sortable: false, filter: true },
+        { name: 'resultSTDOUT', required: false, label: 'Output', align: 'left', field: 'resultSTDOUT', sortable: false, filter: true },
         { name: 'jobGUID', required: false, label: 'Last Job GUID', align: 'left', field: 'jobGUID', sortable: false, filter: true },
         { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: false, filter: true }
       ],
