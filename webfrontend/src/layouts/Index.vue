@@ -25,7 +25,7 @@
     <q-layout-drawer side="left" v-model="showLeft">
       <q-list no-border link inset-separator>
         <q-list-header>Navigation</q-list-header>
-        <q-item tag="label"  to="/dashboard">
+        <q-item to="/dashboard">
           <q-item-side icon="home" />
           <q-item-main label="Dashboard" sublabel="" />
         </q-item>
