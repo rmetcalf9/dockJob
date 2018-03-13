@@ -52,6 +52,7 @@ module.exports = function (ctx) {
         'QCardMedia',
         'QCardSeparator',
         'QCardActions',
+        'QCheckbox',
         'QDialog',
         'QField',
         'QInput',

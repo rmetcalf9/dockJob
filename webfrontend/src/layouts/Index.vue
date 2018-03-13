@@ -25,8 +25,8 @@
     <q-layout-drawer side="left" v-model="showLeft">
       <q-list no-border link inset-separator>
         <q-list-header>Navigation</q-list-header>
-        <q-item to="/dashboard">
-          <q-item-side icon="home" />
+        <q-item tag="label">
+          <q-item-side icon="home"><q-checkbox v-model="dashboardMenuInvisibleCheckBox" v-show="false"/></q-item-side>
           <q-item-main label="Dashboard" sublabel="" />
         </q-item>
         <q-item to="/jobs">
@@ -93,7 +93,22 @@ export default {
   },
   data () {
     return {
-      showLeft: true
+      showLeft: true,
+      dashboardMenuInvisibleCheckBox: false
+    }
+  },
+  watch: {
+    dashboardMenuInvisibleCheckBox: function (newVal, oldVal) {
+      console.log('going to dsah')
+      var callback = {
+        ok: function (response) {
+        },
+        error: function (response) {
+          Notify.create(response.message)
+        }
+      }
+      globalStore.dispatch('getServerInfo', {callback: callback})
+      this.$router.push('/dashboard')
     }
   },
   computed: {
