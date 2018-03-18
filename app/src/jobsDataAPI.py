@@ -46,20 +46,19 @@ class jobClass():
     self.lastUpdateDate = curTime.isoformat()
     self.lastRunDate = None
 
+    self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
+
+
+  def setNextScheduledRun(self, curTime):
     ri = None
-    if (repetitionInterval != None):
-      if (repetitionInterval != ''):
+    if (self.repetitionInterval != None):
+      if (self.repetitionInterval != ''):
         try:
           ri = RepetitionIntervalClass(self.repetitionInterval)
         except:
           raise BadRequest('Invalid Repetition Interval')
-        self.setNextScheduledRun()
-
-
-
-  def setNextScheduledRun(self):
-    ri = RepetitionIntervalClass(self.repetitionInterval)
-    self.nextScheduledRun = ri.getNextOccuranceDatetime(datetime.datetime.now(pytz.timezone("UTC"))).isoformat()
+        ri = RepetitionIntervalClass(self.repetitionInterval)
+        self.nextScheduledRun = ri.getNextOccuranceDatetime(curTime).isoformat()
 
   def uniqueName(self):
     return uniqueJobName(self.name)
@@ -70,6 +69,7 @@ class jobsDataClass():
   # map of Job name to guid
   jobs_name_lookup = None
   appObj = None
+
   def __init__(self, appObj):
     self.jobs = SortedDict()
     self.jobs_name_lookup = SortedDict()
@@ -107,6 +107,36 @@ class jobsDataClass():
     self.jobs.pop(jobObj.guid)
     # Delete any executions
     self.appObj.jobExecutor.deleteExecutionsForJob(jobObj.guid)
+
+  #nextJobToExecute holds the next job scheduled to execute
+  # When ever any actions are preformed that may change this the CalcRequired flag is set to true
+  # the get function will either return or recaculate as desired
+  # Changing actions:
+  #  - Adding Job
+  #  - Delete job if it is the next to execute
+  #  - Executing a job
+  # None is a valid next job to execute but when it 
+  nextJobToExecute = None
+  nextJobToExecuteCalcRequired = True
+  def getNextJobToExecute(self):
+    if not self.nextJobToExecuteCalcRequired:
+      return self.nextJobToExecute
+    self.nextJobToExecute = None
+    for jobIdx in self.jobs:
+      if self.jobs[jobIdx].nextScheduledRun is not None:
+        if self.nextJobToExecute is None:
+          self.nextJobToExecute = self.jobs[jobIdx]
+        else:
+          if self.jobs[jobIdx].nextScheduledRun < self.nextJobToExecute.nextScheduledRun:
+            self.nextJobToExecute = self.jobs[jobIdx]
+    self.nextJobToExecuteCalcRequired = False
+    return self.nextJobToExecute
+
+  #funciton for testing allowing us to pretend it is currently a different time
+  def recaculateExecutionTimesBasedonNewTime(self, curTime):
+    for jobIdx in self.jobs:
+      self.jobs[jobIdx].setNextScheduledRun(curTime)
+
 
 def resetData(appObj):
   appObj.appData['jobsData']=jobsDataClass(appObj)

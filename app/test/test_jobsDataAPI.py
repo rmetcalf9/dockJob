@@ -2,6 +2,10 @@ from TestHelperSuperClass import testHelperAPIClient
 
 import json
 from utils import from_iso8601
+from appObj import appObj
+import datetime
+import pytz
+
 
 data_simpleJobCreateParams = {
   "name": "TestJob",
@@ -352,3 +356,34 @@ class test_jobsData(testHelperAPIClient):
     #requery execution to check if it has been deleted
     result = self.testClient.get('/api/executions/' + testExecutionGUID)
     self.assertEqual(result.status_code, 400, msg='Exectuion for deleted job still in system')
+
+  def createJobWithRepInterval(self, interval):
+    jobCreate = dict(data_simpleJobCreateParams)
+    jobCreate['repetitionInterval'] = interval
+    jobCreate['name'] = 'Job_with_ri_' + interval
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jobCreate), content_type='application/json')
+    resultJSON = json.loads(result.get_data(as_text=True))
+    if result.status_code != 200:
+      print(resultJSON)
+    self.assertEqual(result.status_code, 200, msg='Job creation for interval ' + interval + ' failed')
+    return resultJSON['guid']
+
+  def test_getNextJobToExecuteOneJobInSystem(self):
+    jobGUID = self.createJobWithRepInterval('HOURLY:55')
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertNotEqual(nextExecute, None, msg='Next job to execute should not be none as we have one hourly job')
+    self.assertEqual(nextExecute.guid,jobGUID)
+
+  #This test will break in the year 9999
+  def test_getNextJobToExecuteGetsRightJob(self):
+    jobGUID55 = self.createJobWithRepInterval('HOURLY:55')
+    jobGUID05 = self.createJobWithRepInterval('HOURLY:05')
+    jobGUID35 = self.createJobWithRepInterval('HOURLY:35')
+    jobGUID25 = self.createJobWithRepInterval('HOURLY:25')
+    jobGUID45 = self.createJobWithRepInterval('HOURLY:45')
+    appObj.appData['jobsData'].recaculateExecutionTimesBasedonNewTime(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
+    self.assertTrue(False,msg='TODO Complete this test')
+
+## Inactive Jobs ignored
+
+
