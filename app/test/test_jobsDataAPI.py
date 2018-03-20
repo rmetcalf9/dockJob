@@ -5,6 +5,7 @@ from utils import from_iso8601
 from appObj import appObj
 import datetime
 import pytz
+import time
 
 
 data_simpleJobCreateParams = {
@@ -352,6 +353,9 @@ class test_jobsData(testHelperAPIClient):
     #Delete Job
     result2 = self.testClient.delete('/api/jobs/' + testJobGUID)
     self.assertEqual(result2.status_code, 200, msg='Didn''t delete record')
+    time.sleep(0.1) #This test fails sometimes. I think it is because sometimes the delete thread gets overtaken
+                    # by the following get so I added this sleep
+                    #  sleep didn't work :(
 
     #requery execution to check if it has been deleted
     result = self.testClient.get('/api/executions/' + testExecutionGUID)
@@ -368,13 +372,24 @@ class test_jobsData(testHelperAPIClient):
     self.assertEqual(result.status_code, 200, msg='Job creation for interval ' + interval + ' failed')
     return resultJSON['guid']
 
+  def createInactiveJob(self, name):
+    jobCreate = dict(data_simpleJobCreateParams)
+    jobCreate['repetitionInterval'] = ''
+    jobCreate['enabled'] = False
+    jobCreate['name'] = name
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jobCreate), content_type='application/json')
+    resultJSON = json.loads(result.get_data(as_text=True))
+    if result.status_code != 200:
+      print(resultJSON)
+    self.assertEqual(result.status_code, 200, msg='Job creation for inactive job named ' + name + ' failed')
+    return resultJSON['guid']
+
   def test_getNextJobToExecuteOneJobInSystem(self):
     jobGUID = self.createJobWithRepInterval('HOURLY:55')
     nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
     self.assertNotEqual(nextExecute, None, msg='Next job to execute should not be none as we have one hourly job')
     self.assertEqual(nextExecute.guid,jobGUID)
 
-  #This test will break in the year 9999
   def test_getNextJobToExecuteGetsRightJob(self):
     jobGUID55 = self.createJobWithRepInterval('HOURLY:55')
     jobGUID05 = self.createJobWithRepInterval('HOURLY:05')
@@ -382,8 +397,72 @@ class test_jobsData(testHelperAPIClient):
     jobGUID25 = self.createJobWithRepInterval('HOURLY:25')
     jobGUID45 = self.createJobWithRepInterval('HOURLY:45')
     appObj.appData['jobsData'].recaculateExecutionTimesBasedonNewTime(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
-    self.assertTrue(False,msg='TODO Complete this test')
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertNotEqual(nextExecute, None, msg='Next job to execute should not be none as we have one hourly job')
+    self.assertEqual(nextExecute.guid,jobGUID05, msg='Wrong next job selected. The next job is the one that runs at ' + nextExecute.nextScheduledRun)
+
+    appObj.appData['jobsData'].recaculateExecutionTimesBasedonNewTime(datetime.datetime(2016,1,5,15,6,59,0,pytz.timezone('UTC')))
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertNotEqual(nextExecute, None, msg='Next job to execute should not be none as we have one hourly job')
+    self.assertEqual(nextExecute.guid,jobGUID25, msg='Wrong next job selected. The next job is the one that runs at ' + nextExecute.nextScheduledRun)
+
+    appObj.appData['jobsData'].recaculateExecutionTimesBasedonNewTime(datetime.datetime(2016,1,5,15,46,59,0,pytz.timezone('UTC')))
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertNotEqual(nextExecute, None, msg='Next job to execute should not be none as we have one hourly job')
+    self.assertEqual(nextExecute.guid,jobGUID55, msg='Wrong next job selected. The next job is the one that runs at ' + nextExecute.nextScheduledRun)
+
+  def test_deleteNextJobToExecute(self):
+    jobGUID55 = self.createJobWithRepInterval('HOURLY:55')
+    jobGUID05 = self.createJobWithRepInterval('HOURLY:05')
+    jobGUID35 = self.createJobWithRepInterval('HOURLY:35')
+    jobGUID25 = self.createJobWithRepInterval('HOURLY:25')
+    jobGUID45 = self.createJobWithRepInterval('HOURLY:45')
+    appObj.appData['jobsData'].recaculateExecutionTimesBasedonNewTime(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertEqual(nextExecute.guid,jobGUID05, msg='Wrong next job selected. The next job is the one that runs at ' + nextExecute.nextScheduledRun)
+
+    # Delete the job that runs at 5 past the hour (It is the next to execute)
+    result2 = self.testClient.delete('/api/jobs/' + jobGUID05)
+    self.assertEqual(result2.status_code, 200, msg='Didn''t delete job')
+
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertEqual(nextExecute.guid,jobGUID25, msg='After deleting the job that is next to execute the 25 minutes past job should be next to execute')
+
+  def test_nextExecuteWithOnlyInactive(self):
+    self.createInactiveJob('Inactive 001')
+    self.createInactiveJob('Inactive 002')
+    self.createInactiveJob('Inactive 003')
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertEqual(nextExecute,None)
 
 ## Inactive Jobs ignored
+  def test_inactiveJobsDoNotAffectNextExecute(self):
+    jobGUID55 = self.createJobWithRepInterval('HOURLY:55')
+    self.createInactiveJob('Inactive 001')
+    jobGUID05 = self.createJobWithRepInterval('HOURLY:05')
+    self.createInactiveJob('Inactive 002')
+    jobGUID35 = self.createJobWithRepInterval('HOURLY:35')
+    jobGUID25 = self.createJobWithRepInterval('HOURLY:25')
+    self.createInactiveJob('Inactive 003')
+    jobGUID45 = self.createJobWithRepInterval('HOURLY:45')
+    appObj.appData['jobsData'].recaculateExecutionTimesBasedonNewTime(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertEqual(nextExecute.guid,jobGUID05, msg='Wrong next job selected. The next job is the one that runs at ' + nextExecute.nextScheduledRun)
+
+  def test_executeJobUpdatesNextExecute(self):
+    ## Execute job updates the next execute
+    jobGUID05 = self.createJobWithRepInterval('HOURLY:05')
+    jobGUID25 = self.createJobWithRepInterval('HOURLY:25')
+    appObj.appData['jobsData'].recaculateExecutionTimesBasedonNewTime(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertEqual(nextExecute.guid,jobGUID05, msg='Wrong next job selected. The next job is the one that runs at ' + nextExecute.nextScheduledRun)
+
+    # Run execute loop a few times
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,3,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,4,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,5,59,0,pytz.timezone('UTC')))
+
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertEqual(nextExecute.guid,jobGUID25, msg='Wrong next job selected. Should have executed the 05 one and now the next to execute should be 25')
 
 

@@ -103,10 +103,18 @@ class jobsDataClass():
 
   def deleteJob(self, jobObj):
     uniqueJobName = jobObj.uniqueName()
-    self.jobs_name_lookup.pop(uniqueJobName)
-    self.jobs.pop(jobObj.guid)
+    tmpVar = self.jobs_name_lookup.pop(uniqueJobName)
+    if tmpVar is None:
+      raise Execption('Failed to delete a job could not get it out of the job name lookup')
+    tmpVar2 = self.jobs.pop(jobObj.guid)
+    if tmpVar2 is None:
+      raise Execption('Failed to delete a job could not get it out of the jobs')
     # Delete any executions
     self.appObj.jobExecutor.deleteExecutionsForJob(jobObj.guid)
+    # If it is next to execute we need to recaculate
+    if self.nextJobToExecute != None:
+      if jobObj.guid == self.nextJobToExecute.guid:
+        self.nextJobToExecuteCalcRequired = True
 
   #nextJobToExecute holds the next job scheduled to execute
   # When ever any actions are preformed that may change this the CalcRequired flag is set to true
@@ -136,6 +144,7 @@ class jobsDataClass():
   def recaculateExecutionTimesBasedonNewTime(self, curTime):
     for jobIdx in self.jobs:
       self.jobs[jobIdx].setNextScheduledRun(curTime)
+    self.nextJobToExecuteCalcRequired = True
 
 
 def resetData(appObj):
