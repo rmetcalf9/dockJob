@@ -23,19 +23,23 @@ class appObjClass(APIBackendWithSwaggerAppObj):
   groupforjobs = None
   serverStartTime = None
 
-  def init(self, env, serverStartTime):
+  def init(self, env, serverStartTime, testingMode = False):
     self.serverStartTime = serverStartTime
     if self.jobExecutor is not None:
       #for testing we init multiple times. We need to stop the thread running in this case
       self.jobExecutor.stopThreadRunning()
-      self.jobExecutor.join()
+      if self.jobExecutor.isAlive():
+        self.jobExecutor.join()
     super(appObjClass, self).init(env)
     resetJobsData(self)
     self.userforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, MissingUserForJobsException, None)
     self.groupforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_GROUPFORJOBS', None, MissingGroupForJobsException, None)
     skipUserCheck = self.globalParamObject.readFromEnviroment(env, 'APIAPP_SKIPUSERCHECK', False, MissingGroupForJobsException, None)
     self.jobExecutor = JobExecutorClass(self, skipUserCheck)
-    self.jobExecutor.start()
+
+    #When we are testing we will launch the loop iterations manually
+    if not testingMode:
+      self.jobExecutor.start()
 
   def initOnce(self):
     super(appObjClass, self).initOnce()

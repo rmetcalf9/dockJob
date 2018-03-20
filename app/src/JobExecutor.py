@@ -151,17 +151,24 @@ class JobExecutorClass(threading.Thread):
     # this will block this thread until the execution is complete
     if not self.pendingExecutions.empty():
       executionGUID = self.pendingExecutions.get()
-      jobObj = None
+      jobExecutionObj = None
       try:
-        jobObj = self.JobExecutions[executionGUID]
+        jobExecutionObj = self.JobExecutions[executionGUID]
       except KeyError:
-        jobObj = None # if we get a key error it just means this job was deleted while it had a pending execution
-      if jobObj is not None:
-        jobObj.execute(self.appObj.jobExecutor, self.JobExecutionLock)
+        jobExecutionObj = None # if we get a key error it just means this job was deleted while it had a pending execution
+      if jobExecutionObj is not None:
+        # print('Executing ' + jobExecutionObj.executionName)
+        jobExecutionObj.execute(self.appObj.jobExecutor, self.JobExecutionLock)
 
     #schedule any new jobs that are due to be automatically run
     #  no lock acquire required here as it is inside submitJobForExecution
-    #TODO actual code
+    nextJob = self.appObj.appData['jobsData'].getNextJobToExecute()
+    if nextJob is not None:
+      if curDatetime.isoformat() > nextJob.nextScheduledRun:
+        # print('Submitting job ' + nextJob.name + ' for scheduled execution')
+        self.submitJobForExecution(nextJob.guid, '', False)
+        nextJob.setNextScheduledRun(curDatetime)
+        self.appObj.appData['jobsData'].nextJobToExecuteCalcRequired = True
 
     #purge old runs from list
     self.JobExecutionLock.acquire()

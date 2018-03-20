@@ -449,6 +449,37 @@ class test_jobsData(testHelperAPIClient):
     nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
     self.assertEqual(nextExecute.guid,jobGUID05, msg='Wrong next job selected. The next job is the one that runs at ' + nextExecute.nextScheduledRun)
 
+  def test_jobExecutionInFutureNotExecuted(self):
+    ## Execute job updates the next execute
+    jobGUID05 = self.createJobWithRepInterval('HOURLY:05')
+    jobGUID25 = self.createJobWithRepInterval('HOURLY:25')
+    appObj.appData['jobsData'].recaculateExecutionTimesBasedonNewTime(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertEqual(nextExecute.guid,jobGUID05, msg='Wrong next job selected. The next job is the one that runs at ' + nextExecute.nextScheduledRun)
+
+    # Run execute loop a few times
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,1,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,3,59,0,pytz.timezone('UTC')))
+
+    nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
+    self.assertEqual(nextExecute.guid,jobGUID05, msg='Wrong next job selected. Should not have changed from 05')
+
+  def test_executeJobDoseNotExecuteWhenItsNotTime(self):
+    jobGUID05 = self.createJobWithRepInterval('HOURLY:05')
+    appObj.appData['jobsData'].recaculateExecutionTimesBasedonNewTime(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
+    # Run execute loop a few times
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,1,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,3,59,0,pytz.timezone('UTC')))
+
+    #Query back executions
+    queryJobExecutionsResult = self.testClient.get('/api/jobs/' + jobGUID05 + '/execution')
+    self.assertEqual(queryJobExecutionsResult.status_code, 200)
+    queryJobExecutionsResultJSON = json.loads(queryJobExecutionsResult.get_data(as_text=True))
+    self.assertEqual(queryJobExecutionsResultJSON['pagination']['total'], 0, msg='Found executions')
+
+
   def test_executeJobUpdatesNextExecute(self):
     ## Execute job updates the next execute
     jobGUID05 = self.createJobWithRepInterval('HOURLY:05')
@@ -459,10 +490,57 @@ class test_jobsData(testHelperAPIClient):
 
     # Run execute loop a few times
     appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,3,59,0,pytz.timezone('UTC')))
-    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,4,59,0,pytz.timezone('UTC')))
-    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,5,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,6,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,9,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,14,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,19,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,23,59,0,pytz.timezone('UTC')))
 
     nextExecute = appObj.appData['jobsData'].getNextJobToExecute()
     self.assertEqual(nextExecute.guid,jobGUID25, msg='Wrong next job selected. Should have executed the 05 one and now the next to execute should be 25')
+
+    # Check the execution log to make sure job jobGUID05 was executed
+    queryJobExecutionsResult = self.testClient.get('/api/jobs/' + jobGUID05 + '/execution')
+    self.assertEqual(queryJobExecutionsResult.status_code, 200)
+    queryJobExecutionsResultJSON = json.loads(queryJobExecutionsResult.get_data(as_text=True))
+    self.assertEqual(queryJobExecutionsResultJSON['pagination']['total'], 1, msg='Ditn''t find execution for 05 job')
+
+    # Check the execution log to make sure job jobGUID25 was not executed
+    queryJobExecutionsResult2 = self.testClient.get('/api/jobs/' + jobGUID25 + '/execution')
+    self.assertEqual(queryJobExecutionsResult2.status_code, 200)
+    queryJobExecutionsResult2JSON = json.loads(queryJobExecutionsResult2.get_data(as_text=True))
+    self.assertEqual(queryJobExecutionsResult2JSON['pagination']['total'], 0, msg='Found executions for 25 job but it should not have been run')
+
+
+  def test_oldRunLogsArePurgedAfter1Week(self):
+    #This will add a job, manually run it check it has a execution log then run loop iteration after purge interval later and then recheck execution log to make sure it has gone
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    jobGUID = resultJSON['guid']
+
+    resultJSON2 = self.addExecution(jobGUID, 'TestExecutionName')
+
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,3,59,0,pytz.timezone('UTC')))
+    # we need to sleep and allow the execution to complete
+    time.sleep(0.5)
+
+    # Check we have an execution log
+    queryJobExecutionsResult = self.testClient.get('/api/jobs/' + jobGUID + '/execution')
+    self.assertEqual(queryJobExecutionsResult.status_code, 200)
+    queryJobExecutionsResultJSON = json.loads(queryJobExecutionsResult.get_data(as_text=True))
+    self.assertEqual(queryJobExecutionsResultJSON['pagination']['total'], 1, msg='Didn''t find execution for job')
+    self.assertNotEqual(queryJobExecutionsResultJSON["result"][0]['dateCompleted'], None, msg='Job execution didn''t complete')
+
+    print(queryJobExecutionsResultJSON)
+    print(queryJobExecutionsResultJSON["result"][0]['dateCompleted'])
+
+
+
+    #appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,3,59,0,pytz.timezone('UTC')))
+
+    self.assertTrue(False, msg='To Implement')
+
+# TODO Test that dateStarted and dateCompleted are filled in when a job executes
 
 

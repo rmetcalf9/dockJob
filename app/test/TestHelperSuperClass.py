@@ -59,11 +59,12 @@ class testHelperAPIClient(testHelperSuperClass):
   def setUp(self):
     # curDatetime = datetime.datetime.now(pytz.utc)
     # for testing always pretend the server started at a set datetime
-    appObj.init(env, self.standardStartupTime)
+    appObj.init(env, self.standardStartupTime, testingMode = True)
     self.testClient = appObj.flaskAppObject.test_client()
     self.testClient.testing = True 
   def tearDown(self):
     appObj.jobExecutor.stopThreadRunning()
+    ### Testing mode the thread is never started appObj.jobExecutor.join() #wait for thread to stop
     self.testClient = None
 
   def getTotalJobs(self):
