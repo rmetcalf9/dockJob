@@ -33,6 +33,18 @@ class jobClass():
   lastRunDate = None
   nextScheduledRun = None
 
+  def __repr__(self):
+    ret = 'jobClass('
+    ret += 'guid:' + self.guid + ' '
+    ret += 'name:' + self.name + ' '
+    ret += 'command:' + self.command + ' '
+    ret += 'enabled:' + self.enabled + ' '
+    ret += 'repetitionInterval:' + self.repetitionInterval + ' '
+    ret += 'creationDate:' + self.creationDate
+    ret += ')'
+    return ret
+
+
   def __init__(self, name, command, enabled, repetitionInterval):
     if (len(name)<2):
       raise BadRequest('Job name must be more than 2 characters')

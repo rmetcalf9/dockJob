@@ -14,6 +14,12 @@ data_simpleJobCreateParams = {
   "command": "ls",
   "enabled": True
 }
+data_simpleManualJobCreateParams = {
+  "name": "TestJob",
+  "repetitionInterval": "",
+  "command": "ls",
+  "enabled": True
+}
 data_simpleJobCreateExpRes = {
   "guid": 'IGNORE', 
   "name": data_simpleJobCreateParams['name'], 
@@ -511,10 +517,9 @@ class test_jobsData(testHelperAPIClient):
     queryJobExecutionsResult2JSON = json.loads(queryJobExecutionsResult2.get_data(as_text=True))
     self.assertEqual(queryJobExecutionsResult2JSON['pagination']['total'], 0, msg='Found executions for 25 job but it should not have been run')
 
-
   def test_oldRunLogsArePurgedAfter1Week(self):
     #This will add a job, manually run it check it has a execution log then run loop iteration after purge interval later and then recheck execution log to make sure it has gone
-    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleManualJobCreateParams), content_type='application/json')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     jobGUID = resultJSON['guid']
@@ -522,25 +527,54 @@ class test_jobsData(testHelperAPIClient):
     resultJSON2 = self.addExecution(jobGUID, 'TestExecutionName')
 
     appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,3,59,0,pytz.timezone('UTC')))
-    # we need to sleep and allow the execution to complete
-    time.sleep(0.5)
 
     # Check we have an execution log
     queryJobExecutionsResult = self.testClient.get('/api/jobs/' + jobGUID + '/execution')
     self.assertEqual(queryJobExecutionsResult.status_code, 200)
     queryJobExecutionsResultJSON = json.loads(queryJobExecutionsResult.get_data(as_text=True))
     self.assertEqual(queryJobExecutionsResultJSON['pagination']['total'], 1, msg='Didn''t find execution for job')
+    self.assertEqual(queryJobExecutionsResultJSON["result"][0]['stage'], 'Completed', msg='Job not completed')
+    self.assertNotEqual(queryJobExecutionsResultJSON["result"][0]['dateCompleted'], None, msg='Job execution didn''t complete')
+    dateCompleted = from_iso8601(queryJobExecutionsResultJSON["result"][0]['dateCompleted'])
+    self.assertEqual(str(dateCompleted.tzinfo),'tzutc()',msg='date completed not returned in UTC')
+
+    # Test we still have execution in one days time (from date completed)
+    timeToTest = dateCompleted + datetime.timedelta(days=1)
+    appObj.jobExecutor.loopIteration(timeToTest)
+    queryJobExecutionsResult = self.testClient.get('/api/jobs/' + jobGUID + '/execution')
+    self.assertEqual(queryJobExecutionsResult.status_code, 200)
+    queryJobExecutionsResultJSON = json.loads(queryJobExecutionsResult.get_data(as_text=True))
+    self.assertEqual(queryJobExecutionsResultJSON['pagination']['total'], 1, msg='Didn''t find execution for job')
+    self.assertEqual(queryJobExecutionsResultJSON["result"][0]['stage'], 'Completed', msg='Job not completed')
     self.assertNotEqual(queryJobExecutionsResultJSON["result"][0]['dateCompleted'], None, msg='Job execution didn''t complete')
 
+    # Test we do not have execution in eight days time
+    timeToTest = dateCompleted + datetime.timedelta(days=8)
+    appObj.jobExecutor.loopIteration(timeToTest)
+    queryJobExecutionsResult = self.testClient.get('/api/jobs/' + jobGUID + '/execution')
+    self.assertEqual(queryJobExecutionsResult.status_code, 200)
+    queryJobExecutionsResultJSON = json.loads(queryJobExecutionsResult.get_data(as_text=True))
+    self.assertEqual(queryJobExecutionsResultJSON['pagination']['total'], 0, msg='Found execution but it should have been purged')
+
+  def test_jobExecutionFillsInDateStartedAndCompleted(self):
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleManualJobCreateParams), content_type='application/json')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    jobGUID = resultJSON['guid']
+
+    resultJSON2 = self.addExecution(jobGUID, 'TestExecutionName')
+
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,3,55,0,pytz.timezone('UTC')))
+
+    # Check we have an execution log
+    queryJobExecutionsResult = self.testClient.get('/api/jobs/' + jobGUID + '/execution')
+    self.assertEqual(queryJobExecutionsResult.status_code, 200)
+    queryJobExecutionsResultJSON = json.loads(queryJobExecutionsResult.get_data(as_text=True))
+    self.assertEqual(queryJobExecutionsResultJSON['pagination']['total'], 1, msg='Didn''t find execution for job')
     print(queryJobExecutionsResultJSON)
-    print(queryJobExecutionsResultJSON["result"][0]['dateCompleted'])
+    self.assertEqual(queryJobExecutionsResultJSON["result"][0]['stage'], 'Completed', msg='Job not completed')
+    self.assertNotEqual(queryJobExecutionsResultJSON["result"][0]['dateStarted'], None, msg='Date started not filled in')
+    self.assertNotEqual(queryJobExecutionsResultJSON["result"][0]['dateCompleted'], None, msg='Date completed not filled in')
 
-
-
-    #appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,3,59,0,pytz.timezone('UTC')))
-
-    self.assertTrue(False, msg='To Implement')
-
-# TODO Test that dateStarted and dateCompleted are filled in when a job executes
 
 

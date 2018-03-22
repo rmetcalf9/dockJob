@@ -30,6 +30,7 @@ class appObjClass(APIBackendWithSwaggerAppObj):
       self.jobExecutor.stopThreadRunning()
       if self.jobExecutor.isAlive():
         self.jobExecutor.join()
+      self.jobExecutor = None
     super(appObjClass, self).init(env)
     resetJobsData(self)
     self.userforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, MissingUserForJobsException, None)

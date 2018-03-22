@@ -40,6 +40,22 @@ class JobExecutionClass():
   resultReturnCode = None
   resultSTDOUT = None
 
+  def __repr__(self):
+    ret = 'JobExecutionClass('
+    ret += 'guid:' + self.guid + ' '
+    ret += 'executionName:' + self.executionName + ' '
+    ret += 'manual:' + str(self.manual) + ' '
+    ret += 'stage:' + self.stage + ' '
+    ret += 'jobGUID:' + self.jobGUID + ' '
+    ret += 'jobCommand:' + self.jobCommand + ' '
+    ret += 'dateCreated:' + self.dateCreated + ' '
+    ret += 'dateStarted:' + self.dateStarted + ' '
+    ret += 'dateCompleted:' + self.dateCompleted + ' '
+    ret += 'resultReturnCode:' + str(self.resultReturnCode) + ' '
+    ret += 'resultSTDOUT:' + self.resultSTDOUT
+    ret += ')'
+    return ret
+
 
   def __init__(self, job, executionName, manual):
     self.guid = str(uuid.uuid4())

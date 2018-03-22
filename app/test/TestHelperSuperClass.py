@@ -7,6 +7,7 @@ from appObj import appObj
 
 import datetime
 import pytz
+from utils import from_iso8601
 
 
 env = {
@@ -47,6 +48,8 @@ class testHelperSuperClass(unittest.TestCase):
     self.assertTrue(False, msg=msg)
 
   def assertTimeCloseToCurrent(self, time):
+    if (isinstance(time, str)):
+      time = from_iso8601(time)
     curTime = datetime.datetime.now(pytz.timezone("UTC"))
     time_diff = (curTime - time).total_seconds()
     self.assertTrue(time_diff < 3, msg='Creation time is more than 3 seconds adrift')

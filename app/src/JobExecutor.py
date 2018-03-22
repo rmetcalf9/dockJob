@@ -12,6 +12,7 @@ from sortedcontainers import SortedDict
 import datetime
 import pytz
 import queue
+from utils import from_iso8601
 
 class JobExecutorClass(threading.Thread):
   processUserID = None
@@ -21,6 +22,8 @@ class JobExecutorClass(threading.Thread):
 
   def __init__(self, appObj, skipUserCheck):
     self.appObj = appObj
+    self.pendingExecutions = queue.Queue()
+    self.JobExecutions =  SortedDict()
     if os.getuid() != 0:
       raise Exception('Job Executor only works when run as root')
     if appObj.userforjobs == None:
@@ -157,7 +160,7 @@ class JobExecutorClass(threading.Thread):
       except KeyError:
         jobExecutionObj = None # if we get a key error it just means this job was deleted while it had a pending execution
       if jobExecutionObj is not None:
-        # print('Executing ' + jobExecutionObj.executionName)
+        print('Executing ' + jobExecutionObj.executionName)
         jobExecutionObj.execute(self.appObj.jobExecutor, self.JobExecutionLock)
 
     #schedule any new jobs that are due to be automatically run
@@ -171,8 +174,16 @@ class JobExecutorClass(threading.Thread):
         self.appObj.appData['jobsData'].nextJobToExecuteCalcRequired = True
 
     #purge old runs from list
+    timeToPurgeBefore = curDatetime - datetime.timedelta(days=7)
+    toPurge = queue.Queue()
     self.JobExecutionLock.acquire()
-    #TODO actual purge old runs
+    for curJobExecution in self.JobExecutions:
+      if self.JobExecutions[curJobExecution].dateCompleted is not None:
+        if from_iso8601(self.JobExecutions[curJobExecution].dateCompleted) < timeToPurgeBefore:
+          toPurge.put(curJobExecution)
+    while not toPurge.empty():
+      toDel = toPurge.get()
+      self.JobExecutions.pop(toDel)
     self.JobExecutionLock.release()
 
   #main loop of thread

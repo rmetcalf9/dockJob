@@ -26,6 +26,9 @@ class test_JobExecution(testHelperAPIClient):
     self.assertEqual(a.stage, 'Completed')
     self.assertEqual(a.resultReturnCode, 0)
     self.assertEqual(a.resultSTDOUT, 'This is a test')
+    self.assertTimeCloseToCurrent(a.dateCreated)
+    self.assertTimeCloseToCurrent(a.dateStarted)
+    self.assertTimeCloseToCurrent(a.dateCompleted)
 
   #Time consuming tests commented out
   #def test_timeout(self):
