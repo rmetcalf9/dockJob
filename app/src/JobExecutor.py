@@ -103,6 +103,11 @@ class JobExecutorClass(threading.Thread):
   JobExecutions =  SortedDict()
   JobExecutionLock = threading.Lock()
   pendingExecutions = queue.Queue() # Queue to hold GUID's of executions to run
+
+  #Making this a function to set default params
+  def aquireJobExecutionLock(self):
+    if not self.JobExecutionLock.acquire(blocking=True, timeout=0.5): #timeout value is in seconds
+      raise Exception("Timedout waiting for lock")
     
   #called when new service needs submission
   def submitJobForExecution(self, jobGUID, executionName, manual):
@@ -112,9 +117,11 @@ class JobExecutorClass(threading.Thread):
       raise BadRequest('Invalid job')
     execution = JobExecutionClass(jobObj, executionName, manual)
     #lock shouldn't be needed but it is a cheap operation
-    self.JobExecutionLock.acquire()
-    self.JobExecutions[execution.guid] = execution
-    self.JobExecutionLock.release()
+    try:
+      self.aquireJobExecutionLock()
+      self.JobExecutions[execution.guid] = execution
+    finally:
+      self.JobExecutionLock.release()
     self.pendingExecutions.put(execution.guid)
     return execution
 
@@ -124,9 +131,11 @@ class JobExecutorClass(threading.Thread):
         self.deleteExecution(self.JobExecutions[cur].guid)
 
   def deleteExecution(self, executionGUID):
-   self.JobExecutionLock.acquire()
-   self.JobExecutions.pop(executionGUID)
-   self.JobExecutionLock.release()
+   try:
+     self.aquireJobExecutionLock()
+     self.JobExecutions.pop(executionGUID)
+   finally:
+     self.JobExecutionLock.release()
 
   #return current data for a job execution
   def getJobExecutionStatus(self, jobGUID):
@@ -139,14 +148,16 @@ class JobExecutorClass(threading.Thread):
   #return all the jobs, if jobGUID is none than all, otherwise filter just for that job
   def getAllJobExecutions(self, jobGUID):
     output = SortedDict()
-    self.JobExecutionLock.acquire()
-    for cur in self.JobExecutions:
-      if jobGUID is None:
-        output[self.JobExecutions[cur].guid] = self.JobExecutions[cur]
-      else:
-        if jobGUID == self.JobExecutions[cur].jobGUID:
+    try:
+      self.aquireJobExecutionLock()
+      for cur in self.JobExecutions:
+        if jobGUID is None:
           output[self.JobExecutions[cur].guid] = self.JobExecutions[cur]
-    self.JobExecutionLock.release()
+        else:
+          if jobGUID == self.JobExecutions[cur].jobGUID:
+            output[self.JobExecutions[cur].guid] = self.JobExecutions[cur]
+    finally:
+      self.JobExecutionLock.release()
     return output
 
   def loopIteration(self, curDatetime):
@@ -176,15 +187,17 @@ class JobExecutorClass(threading.Thread):
     #purge old runs from list
     timeToPurgeBefore = curDatetime - datetime.timedelta(days=7)
     toPurge = queue.Queue()
-    self.JobExecutionLock.acquire()
-    for curJobExecution in self.JobExecutions:
-      if self.JobExecutions[curJobExecution].dateCompleted is not None:
-        if from_iso8601(self.JobExecutions[curJobExecution].dateCompleted) < timeToPurgeBefore:
-          toPurge.put(curJobExecution)
-    while not toPurge.empty():
-      toDel = toPurge.get()
-      self.JobExecutions.pop(toDel)
-    self.JobExecutionLock.release()
+    try:
+      self.aquireJobExecutionLock()
+      for curJobExecution in self.JobExecutions:
+        if self.JobExecutions[curJobExecution].dateCompleted is not None:
+          if from_iso8601(self.JobExecutions[curJobExecution].dateCompleted) < timeToPurgeBefore:
+            toPurge.put(curJobExecution)
+      while not toPurge.empty():
+        toDel = toPurge.get()
+        self.JobExecutions.pop(toDel)
+    finally:
+      self.JobExecutionLock.release()
 
   #main loop of thread
   running = True
