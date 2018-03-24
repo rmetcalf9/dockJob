@@ -12,10 +12,28 @@ from JobExecution import getJobExecutionCreationModel, getJobExecutionModel
 #I need jobs to be stored in order so pagination works
 from sortedcontainers import SortedDict
 
+jobModel = None
+def getJobModel(appObj):
+  global jobModel
+  if jobModel is None:
+    jobModel = appObj.flastRestPlusAPIObject.model('Job', {
+      'name': fields.String(default=''),
+      'command': fields.String(default=''),
+      'enabled': fields.Boolean(default=False,description='Is the job currently enabled'),
+      'repetitionInterval': fields.String(default='',description='How the job is scheduled to run'),
+      'nextScheduledRun': fields.String(default='',description='Next scheudled run'),
+      'guid': fields.String(default='',description='Unique identifier for this job'),
+      'creationDate': fields.DateTime(dt_format=u'iso8601', description='Time job record was created'),
+      'lastUpdateDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was changed (excluding runs)'),
+      'lastRunDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was run'),
+    })
+  return jobModel
+
+
 def getJobServerInfoModel(appObj):
   return appObj.flastRestPlusAPIObject.model('ServerInfoJobs', {
-    'NextExecuteJob': fields.String(default='', description='Next job scheduled for execution TODO'),
-    'TotalJobs': fields.Integer(default='0',description='Total Jobs')
+    'TotalJobs': fields.Integer(default='0',description='Total Jobs'),
+    'NextJobsToExecute': fields.List(fields.Nested(getJobModel(appObj)))
   })
 
 def uniqueJobName(name):
@@ -38,7 +56,7 @@ class jobClass():
     ret += 'guid:' + self.guid + ' '
     ret += 'name:' + self.name + ' '
     ret += 'command:' + self.command + ' '
-    ret += 'enabled:' + self.enabled + ' '
+    ret += 'enabled:' + str(self.enabled) + ' '
     ret += 'repetitionInterval:' + self.repetitionInterval + ' '
     ret += 'creationDate:' + self.creationDate
     ret += ')'
@@ -88,9 +106,16 @@ class jobsDataClass():
     self.appObj = appObj
 
   def getJobServerInfo(self):
+    nextJobToExecute = self.getNextJobToExecute()
+    print('getJobServerInfo')
+    print(nextJobToExecute)
+    if nextJobToExecute is None:
+      xx = []
+    else:
+      xx = [nextJobToExecute]
     return{
       'TotalJobs': len(self.jobs),
-      'NextExecuteJob': None
+      'NextJobsToExecute': xx
     }
     
   def getJob(self, guid):
@@ -111,6 +136,7 @@ class jobsDataClass():
       return {'msg': 'Job Name already in use - ' + uniqueJobName, 'guid':''}
     self.jobs[str(job.guid)] = job
     self.jobs_name_lookup[uniqueJobName] = job.guid
+    self.nextJobToExecuteCalcRequired = True
     return {'msg': 'OK', 'guid':job.guid}
 
   def deleteJob(self, jobObj):
@@ -171,25 +197,13 @@ def registerAPI(appObj):
     'repetitionInterval': fields.String(default='',description='How the job is scheduled to run'),
   })
 
-  jobModel = appObj.flastRestPlusAPIObject.model('Job', {
-    'name': fields.String(default=''),
-    'command': fields.String(default=''),
-    'enabled': fields.Boolean(default=False,description='Is the job currently enabled'),
-    'repetitionInterval': fields.String(default='',description='How the job is scheduled to run'),
-    'nextScheduledRun': fields.String(default='',description='Next scheudled run'),
-    'guid': fields.String(default='',description='Unique identifier for this job'),
-    'creationDate': fields.DateTime(dt_format=u'iso8601', description='Time job record was created'),
-    'lastUpdateDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was changed (excluding runs)'),
-    'lastRunDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was run'),
-  })
-
   nsJobs = appObj.flastRestPlusAPIObject.namespace('jobs', description='Job Operations')
   @nsJobs.route('/')
   class jobList(Resource):
     '''Operations relating to jobs'''
 
     @nsJobs.doc('getjobs')
-    @nsJobs.marshal_with(appObj.getResultModel(jobModel))
+    @nsJobs.marshal_with(appObj.getResultModel(getJobModel(appObj)))
     @appObj.flastRestPlusAPIObject.response(200, 'Success')
     @nsJobs.param('offset', 'Number to start from')
     @nsJobs.param('pagesize', 'Results per page')
@@ -215,7 +229,7 @@ def registerAPI(appObj):
     @nsJobs.expect(jobCreationModel, validate=True)
     @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
     @appObj.flastRestPlusAPIObject.response(200, 'Success')
-    @appObj.flastRestPlusAPIObject.marshal_with(jobModel, code=200, description='Job created')
+    @appObj.flastRestPlusAPIObject.marshal_with(getJobModel(appObj), code=200, description='Job created')
     def post(self):
       '''Create Job'''
       content = request.get_json()
@@ -231,7 +245,7 @@ def registerAPI(appObj):
   class job(Resource):
     '''Show a single Job'''
     @nsJobs.doc('get_job')
-    @nsJobs.marshal_with(jobModel)
+    @nsJobs.marshal_with(getJobModel(appObj))
     def get(self, guid):
       '''Fetch a given resource'''
       try:

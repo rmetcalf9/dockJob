@@ -5,11 +5,14 @@ import uuid
 from subprocess import TimeoutExpired
 from flask_restplus import fields
 
-
+JobExecutionCreationModel = None
 def getJobExecutionCreationModel(appObj):
-  return appObj.flastRestPlusAPIObject.model('JobExecutionCreation', {
+  global JobExecutionCreationModel
+  if JobExecutionCreationModel is None:
+    JobExecutionCreationModel = appObj.flastRestPlusAPIObject.model('JobExecutionCreation', {
     'name': fields.String(default='')
   })
+  return JobExecutionCreationModel
 
 def getJobExecutionModel(appObj):
   return appObj.flastRestPlusAPIObject.model('JobExecution', {

@@ -11,10 +11,10 @@ data_simpleJobCreateParams = {
 
 class test_api(testHelperAPIClient):
 
-  def test_getServceInfo(self):
+  def test_getServcrInfo(self):
     expRes = {
       'Jobs': {
-        'NextExecuteJob': '',
+        'NextJobsToExecute': [],
         'TotalJobs': 0
       },
       'Server': {
@@ -37,22 +37,40 @@ class test_api(testHelperAPIClient):
     self.assertEqual(result.status_code, 200)
 
   def test_exectionCounter(self):
+    expResJobs = [{
+      'name': 'TestJob001',
+      'command': 'ls',
+      'enabled': True,
+      'guid': 'IGNORE',
+      'creationDate': 'IGNORE',
+      'lastRunDate': 'IGNORE',
+      'lastUpdateDate': 'IGNORE',
+      'nextScheduledRun': 'IGNORE',
+      'repetitionInterval': 'HOURLY:03'
+    }]
+    #   {"Jobs": {"NextJobsToExecute": [{"command": "ls", "creationDate": "2018-03-24T18:20:12.444284+00:00", "enabled": true, "": "e668fafb-af66-4ac7-8a5a-7ba080d1e287", "lastRunDate": null, "lastUpdateDate": "2018-03-24T18:20:12.444284+00:00", "name": "TestJob001", "nextScheduledRun": "2018-03-24T19:03:00+00:00", "repetitionInterval": "HOURLY:03"}], "TotalJobs": 1}, "Server": {"DefaultUserTimezone": "Europe/London", "ServerDatetime": "IGNORE", "ServerStartupTime": "2018-01-01T13:46:00+00:00", "TotalJobExecutions": 0}
     expRes = {
       'Jobs': {
-        'NextExecuteJob': '',
-        'TotalJobs': 12
+        'NextJobsToExecute': expResJobs,
+        'TotalJobs': 1
       },
       'Server': {
         'DefaultUserTimezone': 'Europe/London', 
         'ServerDatetime': 'IGNORE',
         'ServerStartupTime': '2018-01-01T13:46:00+00:00',
-        'TotalJobExecutions': 4
+        'TotalJobExecutions': 0
       },
     }
-    self.setupJobsAndExecutions(data_simpleJobCreateParams)
+    self.createJobs(1,data_simpleJobCreateParams)
     result = self.testClient.get('/api/serverinfo/')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     resultJSON['Server']['ServerDatetime'] = 'IGNORE'
+    resultJSON['Jobs']['NextJobsToExecute'][0]['guid'] = 'IGNORE'
+    resultJSON['Jobs']['NextJobsToExecute'][0]['creationDate'] = 'IGNORE'
+    resultJSON['Jobs']['NextJobsToExecute'][0]['lastRunDate'] = 'IGNORE'
+    resultJSON['Jobs']['NextJobsToExecute'][0]['lastUpdateDate'] = 'IGNORE'
+    resultJSON['Jobs']['NextJobsToExecute'][0]['nextScheduledRun'] = 'IGNORE'
     self.assertJSONStringsEqual(resultJSON, expRes)
+
 

@@ -18,7 +18,7 @@ class test_appObjClass(testHelperAPIClient):
 
     expRes = {
       'Jobs': {
-        'NextExecuteJob': None,
+        'NextJobsToExecute': None,
         'TotalJobs': 0
       },
       'Server': {
