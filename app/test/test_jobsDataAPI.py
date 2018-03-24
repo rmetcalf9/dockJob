@@ -365,6 +365,8 @@ class test_jobsData(testHelperAPIClient):
 
     #requery execution to check if it has been deleted
     result = self.testClient.get('/api/executions/' + testExecutionGUID)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    print(resultJSON)
     self.assertEqual(result.status_code, 400, msg='Exectuion for deleted job still in system')
 
   def createJobWithRepInterval(self, interval):

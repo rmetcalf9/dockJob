@@ -30,8 +30,6 @@ class JobExecutorClass(threading.Thread):
     self.JobExecutionLock = threading.Lock()
     self.pendingExecutions = queue.Queue() # Queue to hold GUID's of executions to run
     self.appObj = appObj
-    self.pendingExecutions = queue.Queue()
-    self.JobExecutions =  SortedDict()
     if os.getuid() != 0:
       raise Exception('Job Executor only works when run as root')
     if appObj.userforjobs == None:
@@ -129,14 +127,22 @@ class JobExecutorClass(threading.Thread):
     return execution
 
   def deleteExecutionsForJob(self, jobGUID):
+    executionsToDelete = queue.Queue()
     for cur in self.JobExecutions:
       if self.JobExecutions[cur].jobGUID == jobGUID:
-        self.deleteExecution(self.JobExecutions[cur].guid)
+        executionsToDelete.put(cur)
+
+    while not executionsToDelete.empty():
+      toDel = executionsToDelete.get()
+      self.deleteExecution(self.JobExecutions[toDel].guid)
+
 
   def deleteExecution(self, executionGUID):
    try:
      self.aquireJobExecutionLock()
-     self.JobExecutions.pop(executionGUID)
+     tmpVar = self.JobExecutions.pop(executionGUID)
+     if tmpVar is None:
+       raise Execption('Failed to delete a job execution - could not get it out of the job name lookup')
    finally:
      self.JobExecutionLock.release()
 

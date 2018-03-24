@@ -49,10 +49,10 @@ class JobExecutionClass():
     ret += 'jobGUID:' + self.jobGUID + ' '
     ret += 'jobCommand:' + self.jobCommand + ' '
     ret += 'dateCreated:' + self.dateCreated + ' '
-    ret += 'dateStarted:' + self.dateStarted + ' '
-    ret += 'dateCompleted:' + self.dateCompleted + ' '
+    ret += 'dateStarted:' + str(self.dateStarted) + ' '
+    ret += 'dateCompleted:' + str(self.dateCompleted) + ' '
     ret += 'resultReturnCode:' + str(self.resultReturnCode) + ' '
-    ret += 'resultSTDOUT:' + self.resultSTDOUT
+    ret += 'resultSTDOUT:' + str(self.resultSTDOUT)
     ret += ')'
     return ret
 
