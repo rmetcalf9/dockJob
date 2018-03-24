@@ -25,10 +25,15 @@ class JobExecutorClass(threading.Thread):
   JobExecutionLock = None
   pendingExecutions = None # Queue to hold GUID's of executions to run
 
+  totalExecutions = 0 #covered for writing by jobexecutionlock
+
   def __init__(self, appObj, skipUserCheck):
     self.JobExecutions =  SortedDict()
     self.JobExecutionLock = threading.Lock()
     self.pendingExecutions = queue.Queue() # Queue to hold GUID's of executions to run
+
+    self.totalExecutions = 0
+
     self.appObj = appObj
     if os.getuid() != 0:
       raise Exception('Job Executor only works when run as root')
@@ -121,6 +126,7 @@ class JobExecutorClass(threading.Thread):
     try:
       self.aquireJobExecutionLock()
       self.JobExecutions[execution.guid] = execution
+      self.totalExecutions += 1
     finally:
       self.JobExecutionLock.release()
     self.pendingExecutions.put(execution.guid)

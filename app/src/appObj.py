@@ -52,7 +52,8 @@ class appObjClass(APIBackendWithSwaggerAppObj):
     serverInfoServerModel = appObj.flastRestPlusAPIObject.model('ServerInfoServer', {
       'DefaultUserTimezone': fields.String(default='Europe/London', description='Timezone used by client to display times. (All API''s use UTC so client must convert)'),
       'ServerDatetime': fields.DateTime(dt_format=u'iso8601', description='Current server date time'),
-      'ServerStartupTime': fields.DateTime(dt_format=u'iso8601', description='Time the dockJob server started')
+      'ServerStartupTime': fields.DateTime(dt_format=u'iso8601', description='Time the dockJob server started'),
+      'TotalJobExecutions': fields.Integer(default='0',description='Number to jobs executed since server started')
     })
 
     return appObj.flastRestPlusAPIObject.model('ServerInfo', {
@@ -66,6 +67,7 @@ class appObjClass(APIBackendWithSwaggerAppObj):
       raise self.NotUTCException
     self.serverObj['ServerDatetime'] = curDateTime.isoformat()
     self.serverObj['ServerStartupTime'] = self.serverStartTime.isoformat()
+    self.serverObj['TotalJobExecutions'] = self.jobExecutor.totalExecutions
     return {'Server': self.serverObj, 'Jobs': self.appData['jobsData'].getJobServerInfo()}
     #return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
 
