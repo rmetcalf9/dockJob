@@ -20,7 +20,15 @@ class JobExecutorClass(threading.Thread):
   timeout = 15 #default to 15 second timeout for jobs
   appObj = None
 
+  # https://docs.python.org/3/library/asyncio-sync.html#asyncio.Lock
+  JobExecutions =  None
+  JobExecutionLock = None
+  pendingExecutions = None # Queue to hold GUID's of executions to run
+
   def __init__(self, appObj, skipUserCheck):
+    self.JobExecutions =  SortedDict()
+    self.JobExecutionLock = threading.Lock()
+    self.pendingExecutions = queue.Queue() # Queue to hold GUID's of executions to run
     self.appObj = appObj
     self.pendingExecutions = queue.Queue()
     self.JobExecutions =  SortedDict()
@@ -98,11 +106,6 @@ class JobExecutorClass(threading.Thread):
       # https://stackoverflow.com/questions/4789837/how-to-terminate-a-python-subprocess-launched-with-shell-true/4791612#4791612
       os.setsid()
     return demote
-
-  # https://docs.python.org/3/library/asyncio-sync.html#asyncio.Lock
-  JobExecutions =  SortedDict()
-  JobExecutionLock = threading.Lock()
-  pendingExecutions = queue.Queue() # Queue to hold GUID's of executions to run
 
   #Making this a function to set default params
   def aquireJobExecutionLock(self):
