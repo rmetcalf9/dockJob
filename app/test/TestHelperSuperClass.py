@@ -66,8 +66,7 @@ class testHelperAPIClient(testHelperSuperClass):
     self.testClient = appObj.flaskAppObject.test_client()
     self.testClient.testing = True 
   def tearDown(self):
-    appObj.jobExecutor.stopThreadRunning()
-    ### Testing mode the thread is never started appObj.jobExecutor.join() #wait for thread to stop
+    appObj.stopThread()
     self.testClient = None
 
   def getTotalJobs(self):

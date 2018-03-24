@@ -69,10 +69,17 @@ class appObjClass(APIBackendWithSwaggerAppObj):
     return {'Server': self.serverObj, 'Jobs': self.appData['jobsData'].getJobServerInfo()}
     #return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
 
-  #override exit gracefully to stop worker thread
-  def exit_gracefully(self, signum, frame):
+  def stopThread(self):
+    if self.jobExecutor is None:
+      return
+    if not self.jobExecutor.isAlive():
+      return
     self.jobExecutor.stopThreadRunning()
     self.jobExecutor.join()
+
+  #override exit gracefully to stop worker thread
+  def exit_gracefully(self, signum, frame):
+    self.stopThread()
     super(appObjClass, self).exit_gracefully(signum, frame)
 
 appObj = appObjClass()
