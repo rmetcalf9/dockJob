@@ -107,8 +107,6 @@ class jobsDataClass():
 
   def getJobServerInfo(self):
     nextJobToExecute = self.getNextJobToExecute()
-    print('getJobServerInfo')
-    print(nextJobToExecute)
     if nextJobToExecute is None:
       xx = []
     else:
