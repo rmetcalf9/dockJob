@@ -47,12 +47,12 @@ class testHelperSuperClass(unittest.TestCase):
     print(b)
     self.assertTrue(False, msg=msg)
 
-  def assertTimeCloseToCurrent(self, time):
+  def assertTimeCloseToCurrent(self, time, msg='Creation time is more than 3 seconds adrift'):
     if (isinstance(time, str)):
       time = from_iso8601(time)
     curTime = datetime.datetime.now(pytz.timezone("UTC"))
     time_diff = (curTime - time).total_seconds()
-    self.assertTrue(time_diff < 3, msg='Creation time is more than 3 seconds adrift')
+    self.assertTrue(time_diff < 3, msg=msg)
     
 #helper class with setup for an APIClient
 class testHelperAPIClient(testHelperSuperClass):

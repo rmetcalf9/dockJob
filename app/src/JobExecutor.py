@@ -114,7 +114,10 @@ class JobExecutorClass(threading.Thread):
   def aquireJobExecutionLock(self):
     if not self.JobExecutionLock.acquire(blocking=True, timeout=0.5): #timeout value is in seconds
       raise Exception("Timedout waiting for lock")
-    
+      
+  def releaseJobExecutionLock(self):
+    self.JobExecutionLock.release()
+
   #called when new service needs submission
   def submitJobForExecution(self, jobGUID, executionName, manual):
     #manual = True when called by jobsDataAPI and False when called from scheduler
@@ -186,8 +189,13 @@ class JobExecutorClass(threading.Thread):
       except KeyError:
         jobExecutionObj = None # if we get a key error it just means this job was deleted while it had a pending execution
       if jobExecutionObj is not None:
-        print('Executing ' + jobExecutionObj.executionName)
-        jobExecutionObj.execute(self.appObj.jobExecutor, self.JobExecutionLock)
+        print('Executing (Execution name = ' + jobExecutionObj.executionName + ')')
+        jobExecutionObj.execute(
+          self.appObj.jobExecutor, 
+          self.aquireJobExecutionLock, 
+          self.releaseJobExecutionLock,
+          self.appObj.appData['jobsData'].setJobLastRunTime
+        )
 
     #schedule any new jobs that are due to be automatically run
     #  no lock acquire required here as it is inside submitJobForExecution

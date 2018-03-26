@@ -10,6 +10,17 @@ import threading
 class test_JobExecution(testHelperAPIClient):
   JobExecutionLock = threading.Lock()
 
+  def aquireJobExecutionLock(self):
+    if not self.JobExecutionLock.acquire(blocking=True, timeout=0.5): #timeout value is in seconds
+      raise Exception("Timedout waiting for lock")
+      
+  def releaseJobExecutionLock(self):
+    self.JobExecutionLock.release()
+
+  def setJobLastRunTime(self, jobGUID, newLastRunDate):
+    pass
+
+
   def test_Create(self):
     jobObj = jobClass('TestJob123', 'echo "This is a test"', True, '')
     a = JobExecutionClass(jobObj, 'TestExecutionName', False)
@@ -22,7 +33,7 @@ class test_JobExecution(testHelperAPIClient):
   def test_run(self):
     jobObj = jobClass('TestJob123', 'echo "This is a test"', True, '')
     a = JobExecutionClass(jobObj, 'TestExecutionName', False)
-    a.execute(appObj.jobExecutor, self.JobExecutionLock)
+    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.setJobLastRunTime)
     self.assertEqual(a.stage, 'Completed')
     self.assertEqual(a.resultReturnCode, 0)
     self.assertEqual(a.resultSTDOUT, 'This is a test')
@@ -36,7 +47,7 @@ class test_JobExecution(testHelperAPIClient):
   #  a = JobExecutionClass(jobObj)
   #  appObj.jobExecutor.timeout = 1
   #  start_time = time.time()
-  #  a.execute(appObj.jobExecutor, self.JobExecutionLock)
+  #  a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.setJobLastRunTime)
   #  elapsed_time = time.time() - start_time
   #  self.assertLess(elapsed_time, 2)
   #  self.assertEqual(a.stage, 'Timeout')
@@ -47,7 +58,7 @@ class test_JobExecution(testHelperAPIClient):
   #  jobObj = jobClass('TestJob123', 'find /', True, '')
   #  a = JobExecutionClass(jobObj)
   #  appObj.jobExecutor.timeout = 1 #Increase
-  #  a.execute(appObj.jobExecutor, self.JobExecutionLock)
+  #  a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.setJobLastRunTime)
   #  self.assertEqual(a.stage, 'Completed')
   #  self.assertEqual(a.resultReturnCode, 0)
 
@@ -78,7 +89,7 @@ class test_JobExecution(testHelperAPIClient):
     resDict['dateCreated'] = 'OVERRIDE'
     resDict['guid'] = 'OVERRIDE'
     self.assertJSONStringsEqual(resDict, expPending)
-    a.execute(appObj.jobExecutor, self.JobExecutionLock)
+    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.setJobLastRunTime)
     self.assertEqual(a.stage, 'Completed')
     resDict = dict(a.__dict__)
     resDict['dateCreated'] = 'OVERRIDE'

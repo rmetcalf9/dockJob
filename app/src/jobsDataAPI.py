@@ -176,6 +176,9 @@ class jobsDataClass():
     self.nextJobToExecuteCalcRequired = False
     return self.nextJobToExecute
 
+  def setJobLastRunTime(self, jobGUID, newLastRunDate):
+    self.jobs[str(jobGUID)].lastRunDate = newLastRunDate
+
   #funciton for testing allowing us to pretend it is currently a different time
   def recaculateExecutionTimesBasedonNewTime(self, curTime):
     for jobIdx in self.jobs:
