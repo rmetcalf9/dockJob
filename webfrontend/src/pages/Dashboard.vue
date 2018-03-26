@@ -21,7 +21,8 @@
         <span slot="subtitle">Next Job due to run</span>
       </q-card-title>
       <q-card-main>
-        <table>
+        <div v-if='serverInfo.Jobs.NextJobsToExecute.length === 0'>No runs scheduled</div>
+        <table v-if='serverInfo.Jobs.NextJobsToExecute.length !== 0'>
           <tr><td align="right">Name:</td><td>
             <router-link :to="'/jobs/' + serverInfo.Jobs.NextJobsToExecute[0].guid" tag="a" class="text-grey-8">
               {{ serverInfo.Jobs.NextJobsToExecute[0].name }}
