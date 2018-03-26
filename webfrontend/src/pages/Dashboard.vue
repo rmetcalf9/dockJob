@@ -1,6 +1,6 @@
 <template>
-  <div class="layout-padding card-examples row items-start" v-if="datastoreState === 'LOGGED_IN_SERVERDATA_LOADED'">
-    <q-card inline>
+  <q-page padding class="card-examples row items-start" v-if="datastoreState === 'LOGGED_IN_SERVERDATA_LOADED'">
+    <q-card inline class="q-ma-sm">
       <q-card-title>
         Server Info
         <span slot="subtitle">Basic Server Information</span>
@@ -14,7 +14,7 @@
       </q-card-main>
     </q-card>
 
-    <q-card inline>
+    <q-card inline class="q-ma-sm">
       <q-card-title>
         Next Run
         <span slot="subtitle">Next Job due to run</span>
@@ -24,7 +24,7 @@
       </q-card-main>
     </q-card>
 
-    <q-card inline>
+    <q-card inline class="q-ma-sm">
       <q-card-title>
         Job Logs
         <span slot="subtitle">Job results</span>
@@ -34,7 +34,7 @@
       </q-card-main>
     </q-card>
 
-  </div>
+  </q-page>
 </template>
 
 <script>
