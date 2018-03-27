@@ -122,6 +122,7 @@ export default {
       if (filter !== '') {
         queryString = 'jobs/?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
       }
+      // console.log(queryString)
       globalStore.getters.apiFN('GET', queryString, undefined, callback)
     },
     openCreateJobModalDialog () {

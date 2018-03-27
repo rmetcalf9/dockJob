@@ -8,7 +8,8 @@ const state = {
     serverPagination: {
       page: 1,
       rowsNumber: 10 // specifying this determines pagination is server-side
-    }
+    },
+    filter: ''
   }
 }
 
