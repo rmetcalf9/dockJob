@@ -4,10 +4,10 @@
       title='Jobs'
       :data="jobData"
       :columns="jobTableColumns"
-      :visible-columns="visibleColumns"
-      :filter="filter"
+      :visible-columns="jobsDataTableSettings.visibleColumns"
+      :filter="jobsDataTableSettings.filter"
       row-key="name"
-      :pagination.sync="serverPagination"
+      :pagination.sync="jobsDataTableSettings.serverPagination"
       :loading="loading"
       @request="request"
       selection="single"
@@ -28,10 +28,10 @@
       <q-table-columns
         color="secondary"
         class="q-mr-sm"
-        v-model="visibleColumns"
+        v-model="jobsDataTableSettings.visibleColumns"
         :columns="jobTableColumns"
       />
-      <q-search clearable hide-underline v-model="filter" />
+      <q-search clearable hide-underline v-model="jobsDataTableSettings.filter" />
       </template>
 
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
@@ -53,6 +53,7 @@
 <script>
 import { Notify, Dialog } from 'quasar'
 import globalStore from '../store/globalStore'
+import dataTableSettings from '../store/dataTableSettings'
 import CreateJobModal from '../components/CreateJobModal'
 import callbackHelper from '../callbackHelper'
 
@@ -63,6 +64,7 @@ export default {
   data () {
     return {
       getLineArray: function (str) {
+        if (typeof (str) === 'undefined') return undefined
         var c = 0
         return str.split('\n').map(function (v) { return { p: ++c, v: v } })
       },
@@ -80,13 +82,8 @@ export default {
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobData: [],
-      filter: '',
+      filterXX: '',
       loading: false,
-      serverPagination: {
-        page: 1,
-        rowsNumber: 10 // specifying this determines pagination is server-side
-      },
-      visibleColumns: ['name', 'enabled', 'nextScheduledRun'],
       selectedSecond: []
     }
   },
@@ -94,25 +91,18 @@ export default {
     request ({ pagination, filter }) {
       var TTT = this
       TTT.loading = true
-      // console.log('request')
-      // console.log(pagination)
-      // pagination = {
-      //   descending:false
-      //   page:2
-      //   rowsNumber:10
-      //   rowsPerPage:5
-      //   sortBy:null
-      // }
-      // console.log(filter) (String)
       var callback = {
         ok: function (response) {
           // console.log(response.data.guid)
           TTT.loading = false
-          // updating pagination to reflect in the UI
-          TTT.serverPagination = pagination
 
+          // updating pagination to reflect in the UI
+          TTT.jobsDataTableSettings.serverPagination = pagination
           // we also set (or update) rowsNumber
-          TTT.serverPagination.rowsNumber = response.data.pagination.total
+          TTT.jobsDataTableSettings.serverPagination.rowsNumber = response.data.pagination.total
+          TTT.jobsDataTableSettings.serverPagination.filter = filter
+
+          dataTableSettings.commit('JOBS', TTT.jobsDataTableSettings)
 
           // then we update the rows with the fetched ones
           TTT.jobData = response.data.result
@@ -138,10 +128,11 @@ export default {
       var child = this.$refs.createJobModalDialog
       var TTTT = this
       child.openCreateJobDialog(function (newJobName) {
-        TTTT.filter = newJobName
+        TTTT.jobsDataTableSettings.filter = newJobName
+        dataTableSettings.commit('JOBS', TTTT.jobsDataTableSettings)
         TTTT.request({
-          pagination: TTTT.serverPagination, // Rows number will be overwritten when query returns
-          filter: TTTT.filter
+          pagination: TTTT.jobsDataTableSettings.serverPagination, // Rows number will be overwritten when query returns
+          filter: TTTT.jobsDataTableSettings.filter
         })
       })
     },
@@ -158,8 +149,8 @@ export default {
             // console.log(response.data.name)
             TTT.selectedSecond = []
             TTT.request({
-              pagination: TTT.serverPagination,
-              filter: TTT.filter
+              pagination: TTT.jobsDataTableSettings.serverPagination,
+              filter: TTT.jobsDataTableSettings.filter
             })
             Notify.create('Job "' + response.data.name + '" Deleted')
           },
@@ -175,13 +166,16 @@ export default {
   computed: {
     datastoreState () {
       return globalStore.getters.datastoreState
+    },
+    jobsDataTableSettings () {
+      return dataTableSettings.getters.Jobs
     }
   },
   mounted () {
     // once mounted, we need to trigger the initial server data fetch
     this.request({
-      pagination: this.serverPagination,
-      filter: this.filter
+      pagination: this.jobsDataTableSettings.serverPagination,
+      filter: this.jobsDataTableSettings.filter
     })
   }
 }
