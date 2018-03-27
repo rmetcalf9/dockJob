@@ -52,14 +52,17 @@
               @request="requestExecutionData"
             >
               <template slot="top-right" slot-scope="props">
-              <q-table-columns
-                color="secondary"
-                class="q-mr-sm"
-                v-model="visibleColumns"
-                :columns="jobTableColumns"
-              />
-              <q-search clearable hide-underline v-model="filter" />
+                <q-table-columns
+                  color="secondary"
+                  class="q-mr-sm"
+                  v-model="visibleColumns"
+                  :columns="jobTableColumns"
+                />
+                <q-search clearable hide-underline v-model="filter" />
               </template>
+              <q-td slot="body-cell-resultSTDOUT" slot-scope="props" :props="props">
+                <STDOutput :val="props.value" />
+              </q-td>
             </q-table>
     </q-item-tile>
       </q-item-main></q-item>
@@ -82,8 +85,12 @@
 import { Notify } from 'quasar'
 import globalStore from '../store/globalStore'
 import callbackHelper from '../callbackHelper'
+import STDOutput from '../components/STDOutput'
 
 export default {
+  components: {
+    STDOutput
+  },
   data () {
     return {
       createJobModalDialog: {},
