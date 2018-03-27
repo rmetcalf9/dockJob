@@ -8,6 +8,7 @@ badNumberOfModeParamaters = Exception('Bad number of paramaters passed to mode')
 badParamater = Exception('Bad paramater value')
 unknownTimezone = Exception('Unknown Timezone')
 missingTimezoneException = Exception('datetime objects passed must be timezone awear')
+curDateTimeTimezoneNotUTCException = Exception('Current Date/Time passed is not UTC')
 
 class ModeType(Enum):
   HOURLY = 1 #Single paramater which is the minute past the error
@@ -136,6 +137,8 @@ class RepetitionIntervalClass():
   def getNextOccuranceDatetime(self, curDateTime):
     if (curDateTime.tzinfo == None):
       raise missingTimezoneException
+    if (str(curDateTime.tzinfo) != 'UTC'):
+      raise curDateTimeTimezoneNotUTCException
     if (self.mode == ModeType.HOURLY):
       # Tried using localize method here but it dosen't seem to work that way
       #  this way passes the tests
@@ -149,6 +152,8 @@ class RepetitionIntervalClass():
         0,
         curDateTime.tzinfo
       )
+      #convert to UTC for comparison
+      nd = nd.astimezone(pytz.timezone('UTC'))
       if (nd <= curDateTime):
         nd = self.addTimeInUTC(nd, timedelta(hours=1))
       return nd
@@ -162,6 +167,8 @@ class RepetitionIntervalClass():
         0,
         0
       ))
+      #convert to UTC for comparison
+      nd = nd.astimezone(pytz.timezone('UTC'))
       if (nd <= curDateTime):
         nd = self.addTimeInUTC(nd, timedelta(days=1))
       #keep incrementing the day value until it falls on a valid day
@@ -170,6 +177,7 @@ class RepetitionIntervalClass():
       return nd
 
     if (self.mode == ModeType.MONTHLY):
+      # Setup time to test in timezone specified by RI
       nd = self.timezone.localize(datetime.datetime(
         curDateTime.year,
         curDateTime.month,
@@ -179,6 +187,8 @@ class RepetitionIntervalClass():
         0,
         0
       ))
+      #convert to UTC for comparison
+      nd = nd.astimezone(pytz.timezone('UTC'))
       if (nd <= curDateTime):
         year = curDateTime.year
         month = curDateTime.month + 1
@@ -194,6 +204,7 @@ class RepetitionIntervalClass():
           0,
           0
         ))
+        nd = nd.astimezone(pytz.timezone('UTC'))
       return nd
 
 

@@ -1,5 +1,5 @@
 from TestHelperSuperClass import testHelperSuperClass
-from RepetitionInterval import RepetitionIntervalClass, badModeException, badNumberOfModeParamaters, badParamater, unknownTimezone, missingTimezoneException
+from RepetitionInterval import RepetitionIntervalClass, badModeException, badNumberOfModeParamaters, badParamater, unknownTimezone, missingTimezoneException, curDateTimeTimezoneNotUTCException
 import datetime
 from datetime import timedelta
 import pytz
@@ -7,9 +7,12 @@ import pytz
 class test_RepetitionInterval(testHelperSuperClass):
   def checkNextRun(self, riOBj, curTime, expTime):
     nextRun = riOBj.getNextOccuranceDatetime(curTime)
-    if (nextRun != expTime):
-      print("Next Run:" + str(nextRun))
-      print("Expected:" + str(expTime))
+    if str(nextRun.tzinfo) != 'UTC':
+      self.assertTrue(False, msg='Repetition Interval did not return next run in UTC (' + str(nextRun.tzinfo) + ')')
+    expTimeUTC = expTime.astimezone(pytz.timezone('UTC'))
+    if (nextRun != expTimeUTC):
+      print("Next Run:" + str(nextRun) + ' (Always UTC)')
+      print("Expected:" + str(expTime) + ' (Expected UTC=' + str(expTimeUTC) + ')')
     self.assertEqual(nextRun, expTime)
 
 #-----------------------------------------------
@@ -23,27 +26,46 @@ class test_RepetitionInterval(testHelperSuperClass):
       nextRun = ri.getNextOccuranceDatetime(datetime.datetime(2016,1,5,14,2,59,0,None))
     self.checkGotRightException(context,missingTimezoneException)
 
+  def test_PassedInDatetimeMustBeUTC(self):
+    ri = RepetitionIntervalClass("HOURLY:03")
+    with self.assertRaises(Exception) as context:
+      nextRun = ri.getNextOccuranceDatetime(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('Europe/London')))
+    self.checkGotRightException(context,curDateTimeTimezoneNotUTCException)
+
   def test_nextdateHourlyModeJustBeforeMinute(self):
     ri = RepetitionIntervalClass("HOURLY:03")
-    self.checkNextRun(ri,datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('Europe/London')),datetime.datetime(2016,1,5,14,3,0,0,pytz.timezone('Europe/London')))
+    self.checkNextRun(
+      ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,5,14,2,59,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2016,1,5,14,3,0,0))
+    )
 
   def test_nextdateHourlyModeExactlyInMinute(self):
     ri = RepetitionIntervalClass("HOURLY:03")
-    self.checkNextRun(ri,datetime.datetime(2016,1,14,14,3,0,0,pytz.timezone('Europe/London')),datetime.datetime(2016,1,14,15,3,0,0,pytz.timezone('Europe/London')))
+    self.checkNextRun(ri,pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,14,3,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2016,1,14,15,3,0,0)))
 
   def test_nextdateHourlyModeJustAfterMinute(self):
     ri = RepetitionIntervalClass("HOURLY:03")
-    self.checkNextRun(ri,datetime.datetime(2016,1,14,14,3,1,0,pytz.timezone('Europe/London')),datetime.datetime(2016,1,14,15,3,0,0,pytz.timezone('Europe/London')))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,14,3,1,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2016,1,14,15,3,0,0))
+    )
 
   def test_nextdateHourlyModeLastMinuteDayBefore(self):
     ri = RepetitionIntervalClass("HOURLY:03")
-    self.checkNextRun(ri,datetime.datetime(2016,1,14,23,3,1,0,pytz.timezone('Europe/London')),datetime.datetime(2016,1,15,00,3,0,0,pytz.timezone('Europe/London')))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,23,3,1,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2016,1,15,00,3,0,0))
+    )
 
   def test_HourlyBeforeDSTJumpForward(self):
     #25 mar 2018 1am becomes 2am
     # there won't be a 1:03 so it should jump to 2:03
     ri = RepetitionIntervalClass("HOURLY:03")
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,3,25,0,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,3,25,2,3,0,0)))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,3,25,0,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2018,3,25,2,3,0,0))
+    )
 
   def test_HourlyBeforeDSTJumpBack(self):
     #29 oct 2018 2am becomes 1am
@@ -51,49 +73,85 @@ class test_RepetitionInterval(testHelperSuperClass):
     ri = RepetitionIntervalClass("HOURLY:03")
     # the time 1:03 can't be represented in Europe/London as it has two UTC values
     # so the test specifies a UTC time
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,0,30,0,0)),pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,1,3,0,0)))
+    self.checkNextRun(ri,pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,0,30,0,0)),pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,1,3,0,0)))
 
 
 # Daily Tests
 ## Every day of week
   def test_DailyEveryDayOnThatDay(self):
     ri = RepetitionIntervalClass("DAILY:03:15:+++++++:Europe/London")
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,0,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,15,3,0,0)))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,0,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,15,3,0,0))
+    )
 
   def test_DailyEveryDayOnPrevDay(self):
     ri = RepetitionIntervalClass("DAILY:03:15:+++++++:Europe/London")
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,30,15,3,0,0)))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,16,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,30,15,3,0,0))
+    )
 
 ## Only on Wednesdays
   def test_DailyEveryDayOnWed(self):
     ri = RepetitionIntervalClass("DAILY:03:15:--+----:Europe/London")
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,31,15,3,0,0)))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,16,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,31,15,3,0,0))
+    )
 
 ## Only on Fridays
   def test_DailyEveryDayOnFri(self):
     ri = RepetitionIntervalClass("DAILY:03:15:----+--:Europe/London")
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,2,15,3,0,0)))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,16,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,2,15,3,0,0))
+    )
 
 # MONTHLY Tests
   def test_MonthlyDayBefore(self):
     ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,10,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,15,3,0,0)))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,10,10,16,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,15,3,0,0))
+    )
+
+  def test_MonthlyDayBeforeBST(self):
+    ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
+    # Next run Expected result is in Europe/London
+    self.checkNextRun(
+      ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,3,27,16,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2018,4,11,15,3,0,0))
+    )
 
   def test_MonthlyOnDayTimeBefore(self):
     ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,10,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,15,3,0,0)))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,10,11,10,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,15,3,0,0))
+    )
 
   def test_MonthlyOnDayTimeAfter(self):
     ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,11,15,3,0,0)))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,10,11,16,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,11,15,3,0,0))
+    )
 
   def test_MonthlyDayAfter(self):
     ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,12,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,11,15,3,0,0)))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,10,12,16,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,11,15,3,0,0))
+    )
 
   def test_MonthlyYearRollover(self):
     ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
-    self.checkNextRun(ri,pytz.timezone('Europe/London').localize(datetime.datetime(2018,12,12,16,30,0,0)),pytz.timezone('Europe/London').localize(datetime.datetime(2019,1,11,15,3,0,0)))
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,12,12,16,30,0,0)),
+      pytz.timezone('Europe/London').localize(datetime.datetime(2019,1,11,15,3,0,0))
+    )
 
 # class init tests
   def test_initWithNoneRaisesException(self):
