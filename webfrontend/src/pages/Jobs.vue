@@ -37,6 +37,9 @@
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
         <q-btn flat color="primary" label="..." size="xs" @click="$router.push('/jobs/' + props.row.guid)" />
       </q-td>
+      <q-td slot="body-cell-command" slot-scope="props" :props="props">
+        <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
+      </q-td>
 
     </q-table>
     <CreateJobModal
@@ -59,6 +62,10 @@ export default {
   },
   data () {
     return {
+      getLineArray: function (str) {
+        var c = 0
+        return str.split('\n').map(function (v) { return { p: ++c, v: v } })
+      },
       createJobModalDialog: {},
       jobTableColumns: [
         // { name: 'guid', required: false, label: 'GUID', align: 'left', field: 'guid', sortable: false, filter: true },

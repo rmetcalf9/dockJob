@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-for="curVal in outputValArr" :key=curVal.p>{{ curVal.v }}</div>
+    <div v-for="curVal in getLineArray(val)" :key=curVal.p>{{ curVal.v }}</div>
   </div>
 </template>
 
@@ -12,15 +12,16 @@ export default {
   ],
   data () {
     return {
+      getLineArray: function (str) {
+        if (typeof (str) === 'undefined') return undefined
+        var c = 0
+        return str.split('\n').map(function (v) { return { p: ++c, v: v } })
+      }
     }
   },
   methods: {
   },
   computed: {
-    outputValArr () {
-      var c = 0
-      return this.val.split('\n').map(function (v) { return { p: ++c, v: v } })
-    }
   }
 }
 </script>

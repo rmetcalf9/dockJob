@@ -11,7 +11,7 @@
       </q-item-main></q-item>
       <q-item><q-item-main >
           <q-item-tile label>Command</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.command }}</q-item-tile>
+          <q-item-tile sublabel><div v-for="curVal in getLineArray(jobData.command)" :key=curVal.p>{{ curVal.v }}</div></q-item-tile>
       </q-item-main></q-item>
       <q-item><q-item-main >
           <q-item-tile label>Scheduled Running Enabled</q-item-tile>
@@ -37,36 +37,35 @@
           <q-item-tile label>Last Run Date</q-item-tile>
           <q-item-tile sublabel>{{ jobData.lastRunDate }}</q-item-tile>
       </q-item-main></q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Executions</q-item-tile>
-          <q-item-tile sublabel>
-            <q-table
-              title='Executions'
-              :data="jobExecutionData"
-              :columns="jobTableColumns"
-              :visible-columns="visibleColumns"
-              :filter="filter"
-              row-key="name"
-              :pagination.sync="serverPagination"
-              :loading="loading"
-              @request="requestExecutionData"
-            >
-              <template slot="top-right" slot-scope="props">
-                <q-table-columns
-                  color="secondary"
-                  class="q-mr-sm"
-                  v-model="visibleColumns"
-                  :columns="jobTableColumns"
-                />
-                <q-search clearable hide-underline v-model="filter" />
-              </template>
-              <q-td slot="body-cell-resultSTDOUT" slot-scope="props" :props="props">
-                <STDOutput :val="props.value" />
-              </q-td>
-            </q-table>
-    </q-item-tile>
-      </q-item-main></q-item>
     </q-list>
+    <q-table
+      title='Executions'
+      :data="jobExecutionData"
+      :columns="jobTableColumns"
+      :visible-columns="visibleColumns"
+      :filter="filter"
+      row-key="name"
+      :pagination.sync="serverPagination"
+      :loading="loading"
+      @request="requestExecutionData"
+    >
+      <template slot="top-right" slot-scope="props">
+        <q-table-columns
+          color="secondary"
+          class="q-mr-sm"
+          v-model="visibleColumns"
+          :columns="jobTableColumns"
+        />
+        <q-search clearable hide-underline v-model="filter" />
+      </template>
+      <q-td slot="body-cell-resultSTDOUT" slot-scope="props" :props="props">
+        <STDOutput :val="props.value" />
+      </q-td>
+      <q-td slot="body-cell-jobCommand" slot-scope="props" :props="props">
+        <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
+      </q-td>
+
+    </q-table>
     <q-btn
       color="primary"
       push
@@ -93,6 +92,11 @@ export default {
   },
   data () {
     return {
+      getLineArray: function (str) {
+        if (typeof (str) === 'undefined') return undefined
+        var c = 0
+        return str.split('\n').map(function (v) { return { p: ++c, v: v } })
+      },
       createJobModalDialog: {},
       jobTableColumns: [
         { name: 'guid', required: false, label: 'Execution GUID', align: 'left', field: 'guid', sortable: false, filter: true },
