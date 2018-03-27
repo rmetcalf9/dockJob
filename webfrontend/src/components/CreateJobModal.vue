@@ -29,20 +29,23 @@
         <q-field helper="Automatic Schedule Enabled" label="Automatic Schedule Enabled" :label-width="3">
           <q-toggle v-model="showCreateJobDialogData.enabled" />
         </q-field>
-        <q-field label="Repetition Interval" :label-width="3">
+        <q-field label="Repetition Interval" :label-width="3" v-if="showCreateJobDialogData.enabled">
           <q-select
             v-model="showCreateJobDialogData.repetitionInterval.mode"
            :options="showCreateJobDialogData.repetitionInterval.modeOptions"
            :disable="!showCreateJobDialogData.enabled"
+            v-if="showCreateJobDialogData.enabled"
           />
           <q-input v-model="showCreateJobDialogData.repetitionInterval.hour" type="number" float-label="Hour (24 hour format)"
             error-label="Hour must be a number between 0 and 23"
             :error="createJobInValidRepHour"
             :disable="createJobHourDisabled"
+            v-if="!createJobHourDisabled"
           />
           <q-input v-model="showCreateJobDialogData.repetitionInterval.minute" type="number" float-label="Minute" error-label="Minute must be a number between 0 and 59"
             :error="createJobInValidRepMinute"
             :disable="createJobMinuteDisabled"
+            v-if="!createJobMinuteDisabled"
           />
           <q-select
             toggle
@@ -51,13 +54,21 @@
             :options="showCreateJobDialogData.repetitionInterval.dayOptions"
             :error="createJobInValidDays"
             :disable="createJobDaysDisabled"
+            v-if="!createJobDaysDisabled"
             float-label="Day(s) of week"
             error-label="Minute must be a number between 0 and 59"
           />
           <q-input v-model="showCreateJobDialogData.repetitionInterval.dayofmonth" type="number" float-label="Day of Month"
             :disable="!((showCreateJobDialogData.enabled) && (showCreateJobDialogData.repetitionInterval.mode === 'MONTHLY'))"
+            v-if="((showCreateJobDialogData.enabled) && (showCreateJobDialogData.repetitionInterval.mode === 'MONTHLY'))"
           />
-          <q-input v-model="showCreateJobDialogData.repetitionInterval.timezone" float-label="Timezone" :disable="createJobTimezoneDisabled" :error="createJobInValidTimezone" />
+          <q-input
+            v-model="showCreateJobDialogData.repetitionInterval.timezone"
+            float-label="Timezone"
+            :disable="createJobTimezoneDisabled"
+            v-if="!createJobTimezoneDisabled"
+            :error="createJobInValidTimezone"
+          />
         </q-field>
 
         <q-btn
