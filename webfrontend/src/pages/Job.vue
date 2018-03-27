@@ -88,7 +88,7 @@ export default {
     return {
       createJobModalDialog: {},
       jobTableColumns: [
-        // { name: 'guid', required: false, label: 'GUID', align: 'left', field: 'guid', sortable: false, filter: true },
+        { name: 'guid', required: false, label: 'Execution GUID', align: 'left', field: 'guid', sortable: false, filter: true },
         { name: 'executionName', required: false, label: 'Name', align: 'left', field: 'executionName', sortable: false, filter: true },
         { name: 'stage', required: false, label: 'Stage', align: 'left', field: 'stage', sortable: false, filter: true },
         { name: 'resultReturnCode', required: false, label: 'Return Code', align: 'left', field: 'resultReturnCode', sortable: false, filter: true },
@@ -97,7 +97,7 @@ export default {
         { name: 'dateStarted', required: false, label: 'Start Date', align: 'left', field: 'dateStarted', sortable: false, filter: true },
         { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompleted', sortable: false, filter: true },
         { name: 'resultSTDOUT', required: false, label: 'Output', align: 'left', field: 'resultSTDOUT', sortable: false, filter: true },
-        { name: 'jobGUID', required: false, label: 'Last Job GUID', align: 'left', field: 'jobGUID', sortable: false, filter: true },
+        { name: 'jobGUID', required: false, label: 'Job GUID', align: 'left', field: 'jobGUID', sortable: false, filter: true },
         { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: false, filter: true }
       ],
       jobExecutionData: [],
