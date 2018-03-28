@@ -2,15 +2,18 @@
 
 Job scheduler  with a web UI - designed to run inside a container. I am creating this project to build myself a small light weight job scheduler. I need this because I am building a docker stack and I want to run a scheduler  inside the stack to replace the use of cron. My searches for alternatives (https://github.com/jjethwa/rundeck/issues/101) have hit a deadend, so I thought I would put together a simple API based python application.
 
- - Doesn't do https or security itself - [Kong](https://konghq.com/) will also be deployed to the stack to provide this
+# Features
+
+ - Runs commands based on a schedule
+ - 'Run now' button as well as scheduled run
+ - Web App UI developed which connects to api.
  - Works in any web context
  - Works from any port
- - Main interface is a simple json api
- - UI developed which connects to api.
  - Will run any command inside the container - but I am really focused to run wget commands. This makes use of security provided by docker networking.
+ - Doesn't do https or security itself - [Kong](https://konghq.com/) will also be deployed to the stack to provide this
+ - Main interface is a simple json api
  - Keeps logs of recent runs of jobs.
  - INITIALLY won't use a data store as a backend. On restart will lose all data, configured jobs, logs, etc.
- - 'Run now' button as well as scheduled run
 
 
 # Road map
@@ -22,7 +25,7 @@ Job scheduler  with a web UI - designed to run inside a container. I am creating
  - Design UI
  - Get UI MVP working
 
-# Running DockJob to check it out...
+# Getting started - Running DockJob to check it out...
 
 On a machine with docker installed run the following command:
 ````
@@ -35,7 +38,9 @@ In this setup there is no user authentication or https. To run with these see [c
 
  
 
-# Helping me develop dockJob
+# Contributing
+
+If you have any ideas, just open an issue and tell me what you think.
 
 A high level [description of the architecture is here](ARCHITECTURE.md).
 
@@ -59,3 +64,9 @@ To release dockjob I:
  - Run docker push metcarob/dockjob:VERSION (Replace VERSION with version number that was just built)
  - Run docker push metcarob/dockjob:latest
 
+# Related projects
+
+Here's a list of other related projects:
+ - [Kong](https://konghq.com/)
+ - [Konga](https://github.com/pantsel/konga)
+ - [Quasar Framework](http://quasar-framework.org/)
