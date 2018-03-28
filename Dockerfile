@@ -14,17 +14,25 @@ ENV APIAPP_FRONTEND /webfrontend
 ENV APIAPP_APIURL http://localhost:80/dockjobapi
 ENV APIAPP_APIDOCSURL http://localhost:80/apidocs
 ENV APIAPP_APIACCESSSECURITY '[]'
+ENV APIAPP_USERFORJOBS=dockjobuser
+ENV APIAPP_GROUPFORJOBS=dockjobgroup
+
 
 # APIAPP_MODE is not definable here as it is hardcoded to DOCKER in the shell script
 # APIAPP_VERSION is not definable here as it is read from the VERSION file inside the image
 
 EXPOSE 80
 
-RUN mkdir ${APP_DIR}
+RUN \
+  mkdir ${APP_DIR} && \
+  mkdir ${APIAPP_FRONTEND} && \
+  addgroup -S ${APIAPP_GROUPFORJOBS} && \
+  adduser -S -G ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS}
+
+
 COPY ./app/src ${APP_DIR}
 RUN pip3 install -r ${APP_DIR}/requirments.txt
 
-RUN mkdir ${APIAPP_FRONTEND}
 COPY ./webfrontend/dist/spa-mat ${APIAPP_FRONTEND}
 
 COPY ./VERSION /VERSION
