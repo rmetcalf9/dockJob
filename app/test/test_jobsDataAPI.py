@@ -131,7 +131,7 @@ class test_jobsData(testHelperAPIClient):
     result2 = self.testClient.get('/api/jobs/')
     self.assertEqual(result2.status_code, 200, msg='Fetch failed')
     result2JSON = json.loads(result2.get_data(as_text=True))
-    expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': numTestRecords}
+    expPaginationResult = {'offset': 0, 'pagesize': 100, 'total': numTestRecords}
     self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
     self.assertEqual(len(result2JSON["result"]),numTestRecords,msg="Wrong number of returned results")
     exp = dict(data_simpleJobCreateExpRes)
@@ -247,7 +247,7 @@ class test_jobsData(testHelperAPIClient):
     result2 = self.testClient.get('/api/jobs/?query=Prr')
     self.assertEqual(result2.status_code, 200, msg='Fetch failed')
     result2JSON = json.loads(result2.get_data(as_text=True))
-    expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': numShown}
+    expPaginationResult = {'offset': 0, 'pagesize': 100, 'total': numShown}
     self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
     for cur in range(0,numShown):
       exp['name'] = param2[cur]['name']
@@ -272,7 +272,7 @@ class test_jobsData(testHelperAPIClient):
     result2 = self.testClient.get('/api/jobs/?query=FEed')
     self.assertEqual(result2.status_code, 200, msg='Fetch failed')
     result2JSON = json.loads(result2.get_data(as_text=True))
-    expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': numShown}
+    expPaginationResult = {'offset': 0, 'pagesize': 100, 'total': numShown}
     self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
     for cur in range(0,numShown):
       exp['name'] = param2[cur]['name']
@@ -297,7 +297,7 @@ class test_jobsData(testHelperAPIClient):
     result2 = self.testClient.get('/api/jobs/?query=in%20filt')
     self.assertEqual(result2.status_code, 200, msg='Fetch failed')
     result2JSON = json.loads(result2.get_data(as_text=True))
-    expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': numShown}
+    expPaginationResult = {'offset': 0, 'pagesize': 100, 'total': numShown}
     self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
     for cur in range(0,numShown):
       exp['name'] = param2[cur]['name']
@@ -321,7 +321,7 @@ class test_jobsData(testHelperAPIClient):
     result2 = self.testClient.get('/api/jobs/?query=in%20fiiilt')
     self.assertEqual(result2.status_code, 200, msg='Fetch failed')
     result2JSON = json.loads(result2.get_data(as_text=True))
-    expPaginationResult = {'offset': 0, 'pagesize': 20, 'total': 0}
+    expPaginationResult = {'offset': 0, 'pagesize': 100, 'total': 0}
     self.assertJSONStringsEqual(result2JSON["pagination"], expPaginationResult);
 
   def test_submitJobForExecution(self):

@@ -12,6 +12,7 @@
       @request="request"
       selection="single"
       :selected.sync="selectedSecond"
+      :rows-per-page-options="rowsPerPageOptions"
     >
       <template slot="top-selection" slot-scope="props">
         <q-btn flat round delete icon="delete" @click="deleteJob" />
@@ -63,6 +64,7 @@ export default {
   },
   data () {
     return {
+      rowsPerPageOptions: [5, 10, 25, 50, 100, 200],
       getLineArray: function (str) {
         if (typeof (str) === 'undefined') return undefined
         var c = 0
@@ -103,6 +105,7 @@ export default {
           // we also set (or update) rowsNumber
           TTT.jobsDataTableSettings.serverPagination.rowsNumber = response.data.pagination.total
           TTT.jobsDataTableSettings.serverPagination.filter = filter
+          TTT.jobsDataTableSettings.serverPagination.rowsPerPage = response.data.pagination.pagesize
 
           dataTableSettings.commit('JOBS', TTT.jobsDataTableSettings)
 
@@ -120,9 +123,18 @@ export default {
       if (pagination.page === 0) {
         pagination.page = 1
       }
-      var queryString = 'jobs/?pagesize=' + pagination.rowsPerPage.toString() + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
-      if (filter !== '') {
-        queryString = 'jobs/?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
+      var queryString = ''
+
+      if (pagination.rowsPerPage === 0) {
+        queryString = 'jobs/'
+        if (filter !== '') {
+          queryString = 'jobs/?query=' + filter
+        }
+      } else {
+        queryString = 'jobs/?' + 'pagesize=' + pagination.rowsPerPage.toString() + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
+        if (filter !== '') {
+          queryString = 'jobs/?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
+        }
       }
       // console.log(queryString)
       globalStore.getters.apiFN('GET', queryString, undefined, callback)

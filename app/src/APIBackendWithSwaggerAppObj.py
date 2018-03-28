@@ -13,6 +13,7 @@ class APIBackendWithSwaggerAppObj():
   # Implemented in my own init
   #def __init__(self):
   #  self.appData = {}
+  pagesizemax = 200
 
   NotUTCException = Exception('Must be given UTC time')
   class ServerTerminationError(Exception):
@@ -102,9 +103,14 @@ class APIBackendWithSwaggerAppObj():
       offset = int(offset)
     pagesize = request.args.get('pagesize')
     if pagesize is None:
-      pagesize = 20
+      pagesize = 100
     else:
       pagesize = int(pagesize)
+
+    # limit rows returned per request
+    if pagesize > self.pagesizemax:
+      pagesize = self.pagesizemax
+
     output = []
     if request.args.get('query') is not None:
       origList = dict(list)
