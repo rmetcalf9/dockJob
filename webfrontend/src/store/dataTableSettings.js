@@ -7,7 +7,8 @@ const state = {
     visibleColumns: ['name', 'enabled', 'nextScheduledRun'],
     serverPagination: {
       page: 1,
-      rowsNumber: 10 // specifying this determines pagination is server-side
+      rowsNumber: 10, // specifying this determines pagination is server-side
+      rowsPerPage: 10
     },
     filter: ''
   }
