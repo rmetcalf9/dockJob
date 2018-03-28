@@ -46,7 +46,9 @@ class test_api(testHelperAPIClient):
       'lastRunDate': 'IGNORE',
       'lastUpdateDate': 'IGNORE',
       'nextScheduledRun': 'IGNORE',
-      'repetitionInterval': 'HOURLY:03'
+      'repetitionInterval': 'HOURLY:03',
+      'lastRunExecutionGUID': '',
+      'lastRunReturnCode': None
     }]
     #   {"Jobs": {"NextJobsToExecute": [{"command": "ls", "creationDate": "2018-03-24T18:20:12.444284+00:00", "enabled": true, "": "e668fafb-af66-4ac7-8a5a-7ba080d1e287", "lastRunDate": null, "lastUpdateDate": "2018-03-24T18:20:12.444284+00:00", "name": "TestJob001", "nextScheduledRun": "2018-03-24T19:03:00+00:00", "repetitionInterval": "HOURLY:03"}], "TotalJobs": 1}, "Server": {"DefaultUserTimezone": "Europe/London", "ServerDatetime": "IGNORE", "ServerStartupTime": "2018-01-01T13:46:00+00:00", "TotalJobExecutions": 0}
     expRes = {

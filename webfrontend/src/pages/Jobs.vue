@@ -75,6 +75,8 @@ export default {
         { name: 'enabled', required: false, label: 'Scheduled Running Enabled', align: 'left', field: 'enabled', sortable: false, filter: true },
         { name: 'creationDate', required: false, label: 'Created', align: 'left', field: 'creationDate', sortable: false, filter: true },
         { name: 'lastRunDate', required: false, label: 'Last Run', align: 'left', field: 'lastRunDate', sortable: false, filter: true },
+        { name: 'lastRunReturnCode', required: false, label: 'Last Run Return Code', align: 'left', field: 'lastRunReturnCode', sortable: false, filter: true },
+        { name: 'lastRunExecutionGUID', required: false, label: 'Last Execution GUID', align: 'left', field: 'lastRunExecutionGUID', sortable: false, filter: true },
         { name: 'repetitionInterval', required: false, label: 'Repetition', align: 'left', field: 'repetitionInterval', sortable: false, filter: true },
         { name: 'nextScheduledRun', required: false, label: 'Next Run', align: 'left', field: 'nextScheduledRun', sortable: false, filter: true },
         { name: 'command', required: false, label: 'Command', align: 'left', field: 'command', sortable: false, filter: true },

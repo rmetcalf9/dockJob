@@ -13,10 +13,10 @@ export APIAPP_GROUPFORJOBS=dockjobgroup
 
 export APIAPP_VERSION=
 if [ -f ${APP_DIR}/../VERSION ]; then
-  APIAPP_VERSION=$(cat ${APP_DIR}/../VERSION)
+  APIAPP_VERSION=${0}-$(cat ${APP_DIR}/../VERSION)
 fi
 if [ -f ${APP_DIR}/../../VERSION ]; then
-  APIAPP_VERSION=$(cat ${APP_DIR}/../../VERSION)
+  APIAPP_VERSION=${0}-$(cat ${APP_DIR}/../../VERSION)
 fi
 if [ E${APIAPP_VERSION} = 'E' ]; then
   echo 'Can not find version file in standard locations'

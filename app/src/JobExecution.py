@@ -26,7 +26,7 @@ def getJobExecutionModel(appObj):
     'dateStarted': fields.DateTime(dt_format=u'iso8601', description='Time the execution was started'),
     'dateCompleted': fields.DateTime(dt_format=u'iso8601', description='Time the execution was completed'),
     'resultReturnCode': fields.Integer(default=0,description='Return code or -1 for timed out'),
-    'resultSTDOUT': fields.String(default='',description='Output from the job'),
+    'resultSTDOUT': fields.String(default='',description='Output from the job')
   })
 
 
@@ -73,12 +73,12 @@ class JobExecutionClass():
     self.executionName = executionName
     self.manual = manual
 
-  def execute(self, executor, lockAcquireFn, lockReleaseFn, setLastRunDateFn):
+  def execute(self, executor, lockAcquireFn, lockReleaseFn, registerRunDetailsFn):
     lockAcquireFn()
     self.stage = 'Running'
     curDateTime = datetime.datetime.now(pytz.timezone("UTC")).isoformat()
     self.dateStarted = curDateTime
-    setLastRunDateFn(jobGUID=self.jobGUID, newLastRunDate=curDateTime)
+    registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=curDateTime, newLastRunReturnCode=None, newLastRunExecutionGUID=self.guid)
     lockReleaseFn()
     try:
       executionResult = executor.executeCommand(self.jobCommand)
@@ -88,6 +88,7 @@ class JobExecutionClass():
       self.resultSTDOUT = None
       self.stage = 'Timeout'
       self.dateCompleted = datetime.datetime.now(pytz.timezone("UTC")).isoformat()
+      registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=curDateTime, newLastRunReturnCode=self.resultReturnCode, newLastRunExecutionGUID=self.guid)
       lockReleaseFn()
       return
     lockAcquireFn()
@@ -99,6 +100,7 @@ class JobExecutionClass():
     else:
       self.stage = 'Completed'
     self.dateCompleted = datetime.datetime.now(pytz.timezone("UTC")).isoformat()
+    registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=curDateTime, newLastRunReturnCode=self.resultReturnCode, newLastRunExecutionGUID=self.guid)
     lockReleaseFn()
 
 

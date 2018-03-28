@@ -26,6 +26,8 @@ def getJobModel(appObj):
       'creationDate': fields.DateTime(dt_format=u'iso8601', description='Time job record was created'),
       'lastUpdateDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was changed (excluding runs)'),
       'lastRunDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was run'),
+      'lastRunReturnCode': fields.Integer(default=None,description='Return code for the last execution of this job or -1 for timed out'),
+      'lastRunExecutionGUID': fields.String(default='',description='Unique identifier for the last job execution for this job')
     })
   return jobModel
 
@@ -50,6 +52,8 @@ class jobClass():
   lastUpdateDate = None
   lastRunDate = None
   nextScheduledRun = None
+  lastRunReturnCode = None
+  lastRunExecutionGUID = None
 
   def __repr__(self):
     ret = 'jobClass('
@@ -75,6 +79,8 @@ class jobClass():
     self.creationDate = curTime.isoformat()
     self.lastUpdateDate = curTime.isoformat()
     self.lastRunDate = None
+    self.lastRunExecutionGUID = ''
+    self.lastRunReturnCode = None
 
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
 
@@ -176,8 +182,10 @@ class jobsDataClass():
     self.nextJobToExecuteCalcRequired = False
     return self.nextJobToExecute
 
-  def setJobLastRunTime(self, jobGUID, newLastRunDate):
+  def registerRunDetails(self, jobGUID, newLastRunDate, newLastRunReturnCode, newLastRunExecutionGUID):
     self.jobs[str(jobGUID)].lastRunDate = newLastRunDate
+    self.jobs[str(jobGUID)].lastRunReturnCode = newLastRunReturnCode
+    self.jobs[str(jobGUID)].lastRunExecutionGUID = newLastRunExecutionGUID
 
   #funciton for testing allowing us to pretend it is currently a different time
   def recaculateExecutionTimesBasedonNewTime(self, curTime):

@@ -37,6 +37,14 @@
           <q-item-tile label>Last Run Date</q-item-tile>
           <q-item-tile sublabel>{{ jobData.lastRunDate }}</q-item-tile>
       </q-item-main></q-item>
+      <q-item><q-item-main >
+          <q-item-tile label>Last Run Return Code</q-item-tile>
+          <q-item-tile sublabel>{{ jobData.lastRunReturnCode }}</q-item-tile>
+      </q-item-main></q-item>
+      <q-item><q-item-main >
+          <q-item-tile label>Last Execution GUID</q-item-tile>
+          <q-item-tile sublabel>{{ jobData.lastRunExecutionGUID }}</q-item-tile>
+      </q-item-main></q-item>
     </q-list>
     <q-table
       title='Executions'

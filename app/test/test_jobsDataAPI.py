@@ -30,6 +30,8 @@ data_simpleJobCreateExpRes = {
   "creationDate": "IGNORE", 
   "lastUpdateDate": "IGNORE",
   "lastRunDate": None,
+  "lastRunReturnCode": None,
+  "lastRunExecutionGUID": "",
 }
 data_simpleJobExecutionCreateExpRes = {
   "guid": 'IGNORE',
@@ -577,22 +579,25 @@ class test_jobsData(testHelperAPIClient):
     self.assertNotEqual(queryJobExecutionsResultJSON["result"][0]['dateStarted'], None, msg='Date started not filled in')
     self.assertNotEqual(queryJobExecutionsResultJSON["result"][0]['dateCompleted'], None, msg='Date completed not filled in')
 
-  def test_jobExecutionFillsInJobLastRunDate(self):
+  def test_jobExecutionFillsInJobLastRunDateAndReturnCode(self):
     result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleManualJobCreateParams), content_type='application/json')
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     jobGUID = resultJSON['guid']
 
     resultJSON2 = self.addExecution(jobGUID, 'TestExecutionName')
+    executionGUID = resultJSON2['guid']
 
     appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,3,55,0,pytz.timezone('UTC')))
 
     # Check Job info
-    queryJobExecutionsResult = self.testClient.get('/api/jobs/' + jobGUID)
-    self.assertEqual(queryJobExecutionsResult.status_code, 200)
-    queryJobExecutionsResultJSON = json.loads(queryJobExecutionsResult.get_data(as_text=True))
-    print(queryJobExecutionsResultJSON)
-    self.assertNotEqual(queryJobExecutionsResultJSON['lastRunDate'],None, msg='last Run Date not set against job')
-    tim = from_iso8601(queryJobExecutionsResultJSON['lastRunDate'])
+    queryJobResult = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(queryJobResult.status_code, 200)
+    queryJobResultJSON = json.loads(queryJobResult.get_data(as_text=True))
+    self.assertNotEqual(queryJobResultJSON['lastRunDate'],None, msg='last Run Date not set against job')
+    tim = from_iso8601(queryJobResultJSON['lastRunDate'])
     self.assertTimeCloseToCurrent(tim, msg='last Run date not recently set')
+
+    self.assertEqual(queryJobResultJSON['lastRunReturnCode'],0, msg='last Run return code not sucess')
+    self.assertEqual(queryJobResultJSON['lastRunExecutionGUID'],executionGUID, msg='last run Execution GUID not correct')
 

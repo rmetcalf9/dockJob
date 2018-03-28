@@ -194,7 +194,7 @@ class JobExecutorClass(threading.Thread):
           self.appObj.jobExecutor, 
           self.aquireJobExecutionLock, 
           self.releaseJobExecutionLock,
-          self.appObj.appData['jobsData'].setJobLastRunTime
+          self.appObj.appData['jobsData'].registerRunDetails
         )
 
     #schedule any new jobs that are due to be automatically run
