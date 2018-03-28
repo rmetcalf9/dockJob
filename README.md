@@ -6,6 +6,8 @@ I put images for this project into the [Docker hub](https://hub.docker.com/r/met
 
 # Features
 
+![Dockjob Dashboard Screen](./screenshots/DOCKJOB_DASHBOARD.png)
+
  - Runs commands based on a schedule
  - 'Run now' button as well as scheduled run
  - Web App UI developed which connects to api.
