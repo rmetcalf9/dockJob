@@ -49,4 +49,13 @@ I have tried to organize the project logically into sub directories and README.m
  | [Build Process](./dockerImageBuildProcess/README.md)     | ./dockerImageBuildProcess | Bash scripts which run all tests (both unit and integration) and then versions and builds the docker image                                               |
  | [Compose Examples](./composeExamples/README.md)  | ./composeExamples         | The image is designed to work in a docker swarm with Kong as a reverse proxy to provide security. This directory provides some examples of deploying it. |
 
+## My release process
+
+At the moment I have a multi stage build so it wasn't possible to use TravisCI to make an automatic build process.
+
+To release dockjob I:
+ - Run the [build process](./dockerImageBuildProcess/README.md) to create an image on my local machine
+ - Run docker login and log in to my docker hub account
+ - Run docker push metcarob/dockjob:VERSION (Replace VERSION with version number that was just built)
+ - Run docker push metcarob/dockjob:latest
 
