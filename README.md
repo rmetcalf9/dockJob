@@ -1,6 +1,6 @@
 # DockJob
 
-Job schedular with a web UI - designed to run inside a container. I am creating this project to build myself a small light weight job schedular. I need this because I am building a docker stack and I want to run a schedular inside the stack to replace the use of cron. My searches for alternatives (https://github.com/jjethwa/rundeck/issues/101) have hit a deadend, so I thought I would put together a simple API based python application.
+Job scheduler  with a web UI - designed to run inside a container. I am creating this project to build myself a small light weight job scheduler. I need this because I am building a docker stack and I want to run a scheduler  inside the stack to replace the use of cron. My searches for alternatives (https://github.com/jjethwa/rundeck/issues/101) have hit a deadend, so I thought I would put together a simple API based python application.
 
  - Doesn't do https or security itself - [Kong](https://konghq.com/) will also be deployed to the stack to provide this
  - Works in any web context
@@ -24,7 +24,17 @@ Job schedular with a web UI - designed to run inside a container. I am creating 
 
 # Running dockJob
 
-TODO Notes on how to run
+# Running DockJob for evaluation
+
+On a machine with docker installed run the following command:
+````
+docker run -d -p 80:80 -e APIAPP_APIURL='http://localhost:80/api' -e'APIAPP_APIDOCSURL=http://localhost:80/apidocs/' metcarob/dockjob
+````
+
+Visit http://localhost/frontend
+
+In this setup there is no user authentication or https. To run with these see [compose examples](./composeExamples/README.md)
+
  
 
 # Helping me develop dockJob
