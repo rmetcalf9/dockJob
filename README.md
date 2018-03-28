@@ -22,9 +22,7 @@ Job scheduler  with a web UI - designed to run inside a container. I am creating
  - Design UI
  - Get UI MVP working
 
-# Running dockJob
-
-# Running DockJob for evaluation
+# Running DockJob to check it out...
 
 On a machine with docker installed run the following command:
 ````
@@ -33,7 +31,7 @@ docker run -d -p 80:80 -e APIAPP_APIURL='http://localhost:80/api' -e'APIAPP_APID
 
 Visit http://localhost/frontend
 
-In this setup there is no user authentication or https. To run with these see [compose examples](./composeExamples/README.md)
+In this setup there is no user authentication or https. To run with these see [compose examples](./composeExamples/README.md) for information on a more robust way to deploy it.
 
  
 
@@ -50,7 +48,5 @@ I have tried to organize the project logically into sub directories and README.m
  | [Integration tests](./integrationtests/README.md) | ./integrationtests        | Set of tests which test both the Application and Webfrontend                                                                                             |
  | [Build Process](./dockerImageBuildProcess/README.md)     | ./dockerImageBuildProcess | Bash scripts which run all tests (both unit and integration) and then versions and builds the docker image                                               |
  | [Compose Examples](./composeExamples/README.md)  | ./composeExamples         | The image is designed to work in a docker swarm with Kong as a reverse proxy to provide security. This directory provides some examples of deploying it. |
-
-# TODO Running instructions (docker compose file)
 
 
