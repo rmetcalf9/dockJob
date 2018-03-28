@@ -10,7 +10,7 @@
           <tr><td align="right">Server Startup Time:</td><td>{{ serverInfo.Server.ServerStartupTime }}</td></tr>
           <tr><td align="right">Current Time on Server:</td><td>{{ serverInfo.Server.ServerDatetime }}</td></tr>
           <tr><td align="right">Total jobs setup:</td><td>{{ serverInfo.Jobs.TotalJobs }}</td></tr>
-          <tr><td align="right">Total jobs executed:</td><td>{{ serverInfo.Server.TotalJobExecutions }}</td></tr>
+          <tr><td align="right">Total job executions:</td><td>{{ serverInfo.Server.TotalJobExecutions }}</td></tr>
         </table>
       </q-card-main>
     </q-card>
@@ -35,11 +35,15 @@
 
     <q-card inline class="q-ma-sm">
       <q-card-title>
-        Job Logs
-        <span slot="subtitle">Job results</span>
+        Jobs
+        <span slot="subtitle">Job Information</span>
       </q-card-title>
       <q-card-main>
-        Successfully completed, Errored
+        <table>
+          <tr v-for="curVal in jobs" :key=curVal.k>
+            <td align="right">{{ curVal.text }}</td><td>{{ curVal.val }}</td>
+          </tr>
+        </table>
       </q-card-main>
     </q-card>
 
@@ -57,6 +61,13 @@ export default {
   methods: {
   },
   computed: {
+    jobs () {
+      return [
+        { k: 1, text: 'Jobs Never Run:', val: globalStore.getters.serverInfo.Jobs.JobsNeverRun },
+        { k: 2, text: 'Jobs Completing Sucessfully:', val: globalStore.getters.serverInfo.Jobs.JobsCompletingSucessfully },
+        { k: 3, text: 'Jobs where last execution failed:', val: globalStore.getters.serverInfo.Jobs.JobsLastExecutionFailed }
+      ]
+    },
     serverInfo () {
       return globalStore.getters.serverInfo
     },

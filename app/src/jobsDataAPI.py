@@ -35,7 +35,10 @@ def getJobModel(appObj):
 def getJobServerInfoModel(appObj):
   return appObj.flastRestPlusAPIObject.model('ServerInfoJobs', {
     'TotalJobs': fields.Integer(default='0',description='Total Jobs'),
-    'NextJobsToExecute': fields.List(fields.Nested(getJobModel(appObj)))
+    'NextJobsToExecute': fields.List(fields.Nested(getJobModel(appObj))),
+    'JobsNeverRun': fields.Integer(default='-1',description='Jobs Never Run'),
+    'JobsCompletingSucessfully': fields.Integer(default='-1',description='Jobs Completing Sucessfully'),
+    'JobsLastExecutionFailed': fields.Integer(default='-1',description='Jobs where last execution failed')
   })
 
 def uniqueJobName(name):
@@ -62,7 +65,9 @@ class jobClass():
     ret += 'command:' + self.command + ' '
     ret += 'enabled:' + str(self.enabled) + ' '
     ret += 'repetitionInterval:' + self.repetitionInterval + ' '
-    ret += 'creationDate:' + self.creationDate
+    ret += 'creationDate:' + str(self.creationDate) + ' '
+    ret += 'lastRunReturnCode:' + str(self.lastRunReturnCode) + ' '
+    ret += 'lastRunExecutionGUID:' + str(self.lastRunExecutionGUID) + ' '
     ret += ')'
     return ret
 
@@ -113,13 +118,30 @@ class jobsDataClass():
 
   def getJobServerInfo(self):
     nextJobToExecute = self.getNextJobToExecute()
+
+    # Find Job stats
+    JobsNeverRun = 0
+    JobsCompletingSucessfully = 0
+    JobsLastExecutionFailed = 0
+    for jobIdx in self.jobs:
+      if self.jobs[jobIdx].lastRunReturnCode is None:
+        JobsNeverRun += 1
+      else:
+        if self.jobs[jobIdx].lastRunReturnCode == 0:
+          JobsCompletingSucessfully += 1
+        else:
+          JobsLastExecutionFailed += 1
+
     if nextJobToExecute is None:
       xx = []
     else:
       xx = [nextJobToExecute]
     return{
       'TotalJobs': len(self.jobs),
-      'NextJobsToExecute': xx
+      'NextJobsToExecute': xx,
+      'JobsNeverRun': JobsNeverRun,
+      'JobsCompletingSucessfully': JobsCompletingSucessfully,
+      'JobsLastExecutionFailed': JobsLastExecutionFailed
     }
     
   def getJob(self, guid):

@@ -11,11 +11,14 @@ data_simpleJobCreateParams = {
 
 class test_api(testHelperAPIClient):
 
-  def test_getServcrInfo(self):
+  def test_getServerInfo(self):
     expRes = {
       'Jobs': {
         'NextJobsToExecute': [],
-        'TotalJobs': 0
+        'TotalJobs': 0,
+        'JobsNeverRun': 0,
+        'JobsCompletingSucessfully': 0,
+        'JobsLastExecutionFailed': 0
       },
       'Server': {
         'DefaultUserTimezone': 'Europe/London', 
@@ -54,7 +57,10 @@ class test_api(testHelperAPIClient):
     expRes = {
       'Jobs': {
         'NextJobsToExecute': expResJobs,
-        'TotalJobs': 1
+        'TotalJobs': 1,
+        'JobsNeverRun': 1,
+        'JobsCompletingSucessfully': 0,
+        'JobsLastExecutionFailed': 0
       },
       'Server': {
         'DefaultUserTimezone': 'Europe/London', 

@@ -4,7 +4,7 @@ import Vuex from 'vuex'
 
 const state = {
   jobs: {
-    visibleColumns: ['name', 'enabled', 'nextScheduledRun'],
+    visibleColumns: ['name', 'enabled', 'lastRunReturnCode', 'nextScheduledRun'],
     serverPagination: {
       page: 1,
       rowsNumber: 10, // specifying this determines pagination is server-side

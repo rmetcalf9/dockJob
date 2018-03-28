@@ -19,7 +19,10 @@ class test_appObjClass(testHelperAPIClient):
     expRes = {
       'Jobs': {
         'NextJobsToExecute': [],
-        'TotalJobs': 0
+        'TotalJobs': 0,
+        'JobsNeverRun': 0,
+        'JobsCompletingSucessfully': 0,
+        'JobsLastExecutionFailed': 0
       },
       'Server': {
         'DefaultUserTimezone': 'Europe/London', 
