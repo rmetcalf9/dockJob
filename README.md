@@ -20,15 +20,6 @@ I put images for this project into the [Docker hub](https://hub.docker.com/r/met
  - INITIALLY won't use a data store as a backend. On restart will lose all data, configured jobs, logs, etc.
 
 
-# Road map
-
- - Set up project DONE
- - Package API into container DONE
- - Design API
- - Get API MVP working
- - Design UI
- - Get UI MVP working
-
 # Getting started - Running DockJob to check it out...
 
 On a machine with docker installed run the following command:
