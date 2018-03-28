@@ -10,6 +10,6 @@ module.exports = {
   },
 
   // insert your locators and methods here
-  dashboardWindow: {css: '#q-app > div > div.q-layout-page-container.q-layout-transition > div'}
+  dashboardWindow: {css: '#q-app > div > div.q-layout-page-container.q-layout-transition > main'}
 
 }
