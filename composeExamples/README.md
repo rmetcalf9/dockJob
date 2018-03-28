@@ -8,6 +8,9 @@ Command to run:
 ````
 docker stack deploy --compose-file=docker-compose-standalone.yml dockjob-standalone
 ````
+Note: If you see a message that this node is not a swarm manager you may need to run docker swarm init
+
+Now visit http://localhost:80/frontend
 
 When done use 
 ````
