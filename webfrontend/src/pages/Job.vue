@@ -1,10 +1,12 @@
 <template>
   <div>
     <q-list highlight>
-      <q-item><q-item-main >
+      <q-item>
+        <q-item-main >
           <q-item-tile label>Job Name</q-item-tile>
           <q-item-tile sublabel>{{ jobData.name }}</q-item-tile>
-      </q-item-main></q-item>
+        </q-item-main>
+      </q-item>
       <q-item><q-item-main >
           <q-item-tile label>GUID</q-item-tile>
           <q-item-tile sublabel>{{ jobData.guid }}</q-item-tile>
@@ -13,15 +15,14 @@
           <q-item-tile label>Command</q-item-tile>
           <q-item-tile sublabel><div v-for="curVal in getLineArray(jobData.command)" :key=curVal.p>{{ curVal.v }}</div></q-item-tile>
       </q-item-main></q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Scheduled Running Enabled</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.enabled }}</q-item-tile>
-      </q-item-main></q-item>
-      <q-item><q-item-main >
+      <q-item>
+        <q-item-main >
           <q-item-tile label>Repetition Interval</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.repetitionInterval }}</q-item-tile>
-      </q-item-main></q-item>
-      <q-item><q-item-main >
+          <q-item-tile sublabel v-if="jobData.enabled">{{ jobData.repetitionInterval }}</q-item-tile>
+          <q-item-tile sublabel v-if="!jobData.enabled">Automatic running disabled</q-item-tile>
+        </q-item-main>
+      </q-item>
+      <q-item v-if="jobData.enabled"><q-item-main >
           <q-item-tile label>Next Scheduled Run</q-item-tile>
           <q-item-tile sublabel>{{ jobData.nextScheduledRun }}</q-item-tile>
       </q-item-main></q-item>
@@ -35,13 +36,14 @@
       </q-item-main></q-item>
       <q-item><q-item-main >
           <q-item-tile label>Last Run Date</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.lastRunDate }}</q-item-tile>
+          <q-item-tile sublabel v-if="everRun(jobData)">{{ jobData.lastRunDate }}</q-item-tile>
+          <q-item-tile sublabel v-if="!everRun(jobData)">Never run</q-item-tile>
       </q-item-main></q-item>
-      <q-item><q-item-main >
+      <q-item v-if="everRun(jobData)"><q-item-main >
           <q-item-tile label>Last Run Return Code</q-item-tile>
           <q-item-tile sublabel>{{ jobData.lastRunReturnCode }}</q-item-tile>
       </q-item-main></q-item>
-      <q-item><q-item-main >
+      <q-item v-if="everRun(jobData)"><q-item-main >
           <q-item-tile label>Last Execution GUID</q-item-tile>
           <q-item-tile sublabel>{{ jobData.lastRunExecutionGUID }}</q-item-tile>
       </q-item-main></q-item>
@@ -100,6 +102,12 @@ export default {
   },
   data () {
     return {
+      everRun: function (item) {
+        if (typeof (item.lastRunDate) === 'undefined') {
+          return false
+        }
+        return (item.lastRunDate !== null)
+      },
       getLineArray: function (str) {
         if (typeof (str) === 'undefined') return undefined
         var c = 0
