@@ -1,11 +1,12 @@
 <template>
   <div>
-    <q-list highlight>
-      <q-item>
+    <q-list >
+      <q-item highlight @click.native="editJobName">
         <q-item-main >
           <q-item-tile label>Job Name</q-item-tile>
           <q-item-tile sublabel>{{ jobData.name }}</q-item-tile>
         </q-item-main>
+        <q-item-side right icon="mode_edit" />
       </q-item>
       <q-item><q-item-main >
           <q-item-tile label>GUID</q-item-tile>
@@ -135,10 +136,25 @@ export default {
         rowsNumber: 10 // specifying this determines pagination is server-side
       },
       visibleColumns: ['executionName', 'stage', 'resultReturnCode'],
-      jobData: {}
+      jobData: {},
+      promptTextValue: ''
     }
   },
   methods: {
+    editJobName () {
+      this.promptTextValue = this.jobData.name
+      this.$q.dialog({
+        title: 'Job Name',
+        message: 'Enter new job name',
+        prompt: {
+          model: this.promptTextValue,
+          type: 'text' // optional
+        },
+        cancel: true
+      }).then(data => {
+        this.$q.notify(`You typed: "${data}"`)
+      })
+    },
     runnow () {
       var TTT = this
       if (typeof (this.jobData.name) === 'undefined') {

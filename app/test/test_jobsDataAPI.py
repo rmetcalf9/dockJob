@@ -601,3 +601,95 @@ class test_jobsData(testHelperAPIClient):
     self.assertEqual(queryJobResultJSON['lastRunReturnCode'],0, msg='last Run return code not sucess')
     self.assertEqual(queryJobResultJSON['lastRunExecutionGUID'],executionGUID, msg='last run Execution GUID not correct')
 
+  def test_updateJobName(self):
+    newJobNameValue = 'newJobNameValueXXX'
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    self.assertEqual(result.status_code, 200, msg='First job creation should have worked')
+    jobGUID = resultJSON['guid']
+    origName = resultJSON['name']
+
+    #Read back job to make sure it has correct value
+    result2 = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(result2.status_code, 200, msg='Read back record')
+    result2JSON = dict(json.loads(result2.get_data(as_text=True)))
+    self.assertJSONJobStringsEqual(resultJSON, data_simpleJobCreateExpRes);
+
+    alteredResults = dict(data_simpleJobCreateExpRes)
+    alteredResults['name'] = newJobNameValue
+    alteredResults['guid'] = jobGUID
+    alteredResults['lastUpdateDate'] = result2JSON['lastUpdateDate']
+    alteredResults['creationDate'] = result2JSON['creationDate']
+    alteredResults['lastRunDate'] = result2JSON['lastRunDate']
+    alteredResults['nextScheduledRun'] = result2JSON['nextScheduledRun']
+
+    #Update JobName to new value
+    updateNameInput = dict(data_simpleJobCreateParams)
+    updateNameInput['name'] = newJobNameValue
+    updateJobNameResult = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(updateNameInput), content_type='application/json')
+    self.assertEqual(updateJobNameResult.status_code, 200, msg='Put call did not give correct status')
+    updateJobNameResultJSON = dict(json.loads(updateJobNameResult.get_data(as_text=True)))
+    self.assertJSONJobStringsEqual(updateJobNameResultJSON, alteredResults);
+
+    #Read back job by GUID to make sure it has correct value with new jobNAme
+    result3 = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(result3.status_code, 200, msg='Read back record by guid after name change failed')
+    result3JSON = dict(json.loads(result3.get_data(as_text=True)))
+    self.assertJSONJobStringsEqual(result3JSON, alteredResults);
+
+    #Read back job by NAME works
+    result6 = self.testClient.get('/api/jobs/' + newJobNameValue)
+    self.assertEqual(result6.status_code, 200, msg='Read back record by job name after name change failed')
+    result6JSON = dict(json.loads(result6.get_data(as_text=True)))
+    self.assertJSONJobStringsEqual(result6JSON, alteredResults);
+
+    #Read back job by Old Name Fails
+    result3 = self.testClient.get('/api/jobs/' + origName)
+    self.assertEqual(result3.status_code, 400, msg='Read back record by oldname change should have failed')
+
+
+  def test_updateJobNameToInvalidValue(self):
+    newJobNameValue = 'x'
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    self.assertEqual(result.status_code, 200, msg='First job creation should have worked')
+    jobGUID = resultJSON['guid']
+    origName = resultJSON['name']
+
+    #Read back job to make sure it has correct value
+    result2 = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(result2.status_code, 200, msg='Read back record')
+    result2JSON = dict(json.loads(result2.get_data(as_text=True)))
+    self.assertJSONJobStringsEqual(resultJSON, data_simpleJobCreateExpRes);
+
+    alteredResults = dict(data_simpleJobCreateExpRes)
+    alteredResults['name'] = newJobNameValue
+    alteredResults['guid'] = jobGUID
+    alteredResults['lastUpdateDate'] = result2JSON['lastUpdateDate']
+    alteredResults['creationDate'] = result2JSON['creationDate']
+    alteredResults['lastRunDate'] = result2JSON['lastRunDate']
+    alteredResults['nextScheduledRun'] = result2JSON['nextScheduledRun']
+
+    #Update JobName to new value
+    updateNameInput = dict(data_simpleJobCreateParams)
+    updateNameInput['name'] = newJobNameValue
+    updateJobNameResult = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(updateNameInput), content_type='application/json')
+    self.assertEqual(updateJobNameResult.status_code, 400, msg='Put call did not give correct status')
+    updateJobNameResultJSON = dict(json.loads(updateJobNameResult.get_data(as_text=True)))
+
+    #Read back job by GUID to make sure it has correct value with new jobNAme
+    result3 = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(result3.status_code, 200, msg='Read back record by guid after name change failed')
+    result3JSON = dict(json.loads(result3.get_data(as_text=True)))
+    self.assertJSONJobStringsEqual(result3JSON, data_simpleJobCreateExpRes);
+
+    #Read back job by NAME works
+    result6 = self.testClient.get('/api/jobs/' + origName)
+    self.assertEqual(result6.status_code, 200, msg='Read back record by job name after name change failed')
+    result6JSON = dict(json.loads(result6.get_data(as_text=True)))
+    self.assertJSONJobStringsEqual(result6JSON, data_simpleJobCreateExpRes);
+
+
+  ## TODO change to invalid repitition interval errors
+
+

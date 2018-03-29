@@ -41,9 +41,6 @@ def getJobServerInfoModel(appObj):
     'JobsLastExecutionFailed': fields.Integer(default='-1',description='Jobs where last execution failed')
   })
 
-def uniqueJobName(name):
-  return name.strip().upper()
-
 #Class to represent a job
 class jobClass():
   guid = None
@@ -71,10 +68,12 @@ class jobClass():
     ret += ')'
     return ret
 
-
-  def __init__(self, name, command, enabled, repetitionInterval):
+  def assertValidName(name):
     if (len(name)<2):
       raise BadRequest('Job name must be more than 2 characters')
+
+  def __init__(self, name, command, enabled, repetitionInterval):
+    jobClass.assertValidName(name)
     curTime = datetime.datetime.now(pytz.timezone("UTC"))
     self.guid = str(uuid.uuid4())
     self.name = name
@@ -89,6 +88,12 @@ class jobClass():
 
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
 
+  def setNewValues(self, name, command, enabled, repetitionInterval):
+    self.name = name
+    self.command = command
+    self.enabled = enabled
+    self.repetitionInterval = repetitionInterval
+    self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
 
   def setNextScheduledRun(self, curTime):
     ri = None
@@ -101,8 +106,11 @@ class jobClass():
         ri = RepetitionIntervalClass(self.repetitionInterval)
         self.nextScheduledRun = ri.getNextOccuranceDatetime(curTime).isoformat()
 
+  def uniqueJobNameStatic(name):
+    return name.strip().upper()
+
   def uniqueName(self):
-    return uniqueJobName(self.name)
+    return jobClass.uniqueJobNameStatic(self.name)
 
 class jobsDataClass():
   # map of guid to Job
@@ -151,7 +159,7 @@ class jobsDataClass():
       raise BadRequest('Invalid Job GUID')
     return r
   def getJobByName(self, name):
-    return self.jobs[str(self.jobs_name_lookup[uniqueJobName(name)])]
+    return self.jobs[str(self.jobs_name_lookup[jobClass.uniqueJobNameStatic(name)])]
 
   # return GUID or error
   def addJob(self, job):
@@ -164,6 +172,31 @@ class jobsDataClass():
     self.jobs_name_lookup[uniqueJobName] = job.guid
     self.nextJobToExecuteCalcRequired = True
     return {'msg': 'OK', 'guid':job.guid}
+
+  def updateJob(self, jobObj, newValues):
+    jobClass.assertValidName(newValues['name'])
+    ## Check valid repetition interval
+    ri = RepetitionIntervalClass(newValues['repetitionInterval'])
+
+    oldUniqueJobName = jobObj.uniqueName()
+    newUniqueJobName = jobClass.uniqueJobNameStatic(newValues['name'])
+    if (str(jobObj.guid) not in self.jobs):
+      raise Exception('Job to update dose not exist')
+    if (oldUniqueJobName not in self.jobs_name_lookup):
+      raise Exception('Old Job Name does not exist')
+    if (newUniqueJobName in self.jobs_name_lookup):
+      raise Exception('New Job Name already in use')
+
+    # remove old unique name lookup
+    tmpVar = self.jobs_name_lookup.pop(oldUniqueJobName)
+    if tmpVar is None:
+      raise Execption('Failed to remove old unique name')
+
+    # add new unique lookup
+    self.jobs_name_lookup[newUniqueJobName] = jobObj.guid
+
+    # change values in object to new values
+    jobObj.setNewValues(newValues['name'], newValues['command'], newValues['enabled'], newValues['repetitionInterval'])
 
   def deleteJob(self, jobObj):
     uniqueJobName = jobObj.uniqueName()
@@ -303,6 +336,24 @@ def registerAPI(appObj):
           raise BadRequest('Invalid Job Identifier')
       appObj.appData['jobsData'].deleteJob(deletedJob)
       return deletedJob.__dict__
+
+    @nsJobs.doc('update_job')
+    @nsJobs.expect(jobCreationModel, validate=True)
+    @nsJobs.response(200, 'Job Updated')
+    @nsJobs.response(400, 'Validation Error')
+    @appObj.flastRestPlusAPIObject.marshal_with(getJobModel(appObj), code=200, description='Job updated')
+    def put(self, guid):
+      '''Update job'''
+      Job = None
+      try:
+        Job = appObj.appData['jobsData'].getJob(guid)
+      except:
+        try:
+          Job = appObj.appData['jobsData'].getJobByName(guid)
+        except:
+          raise BadRequest('Invalid Job Identifier')
+      appObj.appData['jobsData'].updateJob(Job, request.get_json())
+      return Job.__dict__
 
   @nsJobs.route('/<string:guid>/execution')
   @nsJobs.response(400, 'Job not found')
