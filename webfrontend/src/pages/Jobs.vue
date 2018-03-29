@@ -36,7 +36,7 @@
       </template>
 
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
-        <q-btn flat color="primary" label="..." size="xs" @click="$router.push('/jobs/' + props.row.guid)" />
+        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/jobs/' + props.row.guid)" />
       </q-td>
       <q-td slot="body-cell-command" slot-scope="props" :props="props">
         <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
