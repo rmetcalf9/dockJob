@@ -288,9 +288,12 @@ export default {
         return
       }
       this.repititionIntervalString = getRepIntervalString(this.showCreateJobDialogData)
-      if (this.repititionIntervalString === 'ERROR') {
-        Notify.create('Please review fields again.')
+      if ((this.repititionIntervalString === 'ERROR') && (this.enabled === true)) {
+        Notify.create('Please review fields again. (Repitition Interval)')
         return
+      }
+      if (this.repititionIntervalString === 'ERROR') {
+        this.repititionIntervalString = ''
       }
       this.showCreateJobDialog = false
       var TTT = this

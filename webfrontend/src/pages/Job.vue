@@ -142,51 +142,12 @@ export default {
     }
   },
   methods: {
-    callAPItoUpdate (newValues) {
-      // function to do the api call for all edit fields
-      var TTT = this
-      var callback = {
-        ok: function (response) {
-          TTT.jobData = response.data
-          Notify.create('Successfully updated job ' + response.data.name)
-        },
-        error: function (error) {
-          Notify.create('Failed to update job - ' + callbackHelper.getErrorFromResponse(error))
-        }
-      }
-      globalStore.getters.apiFN('PUT', 'jobs/' + TTT.jobData.guid, newValues, callback)
-    },
     openEditJobModalDialog () {
       var child = this.$refs.createJobModalDialog
       var TTTT = this
       child.openCreateJobDialog(function (newJob) {
         TTTT.jobData = newJob
       }, TTTT.jobData)
-    },
-    // TODO REMOVE
-    editJobName () {
-      var TTT = this
-      this.promptTextValue = this.jobData.name
-      this.$q.dialog({
-        title: 'Job Name',
-        message: 'Enter new job name',
-        prompt: {
-          model: this.promptTextValue,
-          type: 'text' // optional
-        },
-        cancel: true
-      }).then(data => {
-        if (data === TTT.jobData.name) {
-          return
-        }
-        var newVals = {
-          name: data,
-          command: TTT.jobData.command,
-          enabled: TTT.jobData.enabled,
-          repetitionInterval: TTT.jobData.repetitionInterval
-        }
-        TTT.callAPItoUpdate(newVals)
-      })
     },
     runnow () {
       var TTT = this
