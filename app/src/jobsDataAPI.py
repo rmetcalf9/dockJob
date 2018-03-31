@@ -19,7 +19,7 @@ def getJobModel(appObj):
     jobModel = appObj.flastRestPlusAPIObject.model('Job', {
       'name': fields.String(default=''),
       'command': fields.String(default=''),
-      'enabled': fields.Boolean(default=False,description='Is the job currently enabled'),
+      'enabled': fields.Boolean(default=False,description='Is auto scheduling enabled - otherwise manual run only'),
       'repetitionInterval': fields.String(default='',description='How the job is scheduled to run'),
       'nextScheduledRun': fields.String(default='',description='Next scheudled run'),
       'guid': fields.String(default='',description='Unique identifier for this job'),
@@ -71,7 +71,13 @@ class jobClass():
   def assertValidName(name):
     if (len(name)<2):
       raise BadRequest('Job name must be more than 2 characters')
-  def assertValidRepetitionInterval(ri):
+  def assertValidRepetitionInterval(ri, enabled):
+    if ri is None:
+      ri = ''
+    if ri == '':
+      if enabled:
+        raise BadRequest('Repetition interval not set but enabled is true')
+      return None
     try:
       return RepetitionIntervalClass(ri)
     except:
@@ -79,6 +85,7 @@ class jobClass():
 
   def __init__(self, name, command, enabled, repetitionInterval):
     jobClass.assertValidName(name)
+    jobClass.assertValidRepetitionInterval(repetitionInterval, enabled)
     curTime = datetime.datetime.now(pytz.timezone("UTC"))
     self.guid = str(uuid.uuid4())
     self.name = name
@@ -91,7 +98,6 @@ class jobClass():
     self.lastRunExecutionGUID = ''
     self.lastRunReturnCode = None
     self.nextScheduledRun = None
-
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
 
   def setNewValues(self, name, command, enabled, repetitionInterval):
@@ -108,7 +114,7 @@ class jobClass():
     else:
       if (self.repetitionInterval != None):
         if (self.repetitionInterval != ''):
-          ri = jobClass.assertValidRepetitionInterval(self.repetitionInterval)
+          ri = RepetitionIntervalClass(self.repetitionInterval)
           self.nextScheduledRun = ri.getNextOccuranceDatetime(curTime).isoformat()
 
   def uniqueJobNameStatic(name):
@@ -180,7 +186,7 @@ class jobsDataClass():
 
   def updateJob(self, jobObj, newValues):
     jobClass.assertValidName(newValues['name'])
-    jobClass.assertValidRepetitionInterval(newValues['repetitionInterval'])
+    jobClass.assertValidRepetitionInterval(newValues['repetitionInterval'], newValues['enabled'])
 
     oldUniqueJobName = jobObj.uniqueName()
     newUniqueJobName = jobClass.uniqueJobNameStatic(newValues['name'])

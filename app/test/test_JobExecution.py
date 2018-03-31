@@ -22,7 +22,7 @@ class test_JobExecution(testHelperAPIClient):
 
 
   def test_Create(self):
-    jobObj = jobClass('TestJob123', 'echo "This is a test"', True, '')
+    jobObj = jobClass('TestJob123', 'echo "This is a test"', False, '')
     a = JobExecutionClass(jobObj, 'TestExecutionName', False)
     tim = from_iso8601(a.dateCreated)
     self.assertTimeCloseToCurrent(tim)
@@ -31,7 +31,7 @@ class test_JobExecution(testHelperAPIClient):
     self.assertEqual(a.jobCommand, jobObj.command)
 
   def test_run(self):
-    jobObj = jobClass('TestJob123', 'echo "This is a test"', True, '')
+    jobObj = jobClass('TestJob123', 'echo "This is a test"', False, '')
     a = JobExecutionClass(jobObj, 'TestExecutionName', False)
     a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails)
     self.assertEqual(a.stage, 'Completed')
@@ -63,7 +63,7 @@ class test_JobExecution(testHelperAPIClient):
   #  self.assertEqual(a.resultReturnCode, 0)
 
   def test_dictOut(self):
-    jobObj = jobClass('TestJob123', 'echo "This is a test"', True, '')
+    jobObj = jobClass('TestJob123', 'echo "This is a test"', False, '')
     expPending = {
       'guid': 'OVERRIDE',
       'stage': 'Pending',

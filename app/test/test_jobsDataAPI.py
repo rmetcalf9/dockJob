@@ -18,7 +18,7 @@ data_simpleManualJobCreateParams = {
   "name": "TestJob",
   "repetitionInterval": "",
   "command": "ls",
-  "enabled": True
+  "enabled": False
 }
 data_simpleJobCreateExpRes = {
   "guid": 'IGNORE', 
@@ -98,7 +98,7 @@ class test_jobsData(testHelperAPIClient):
       "name": "TestJob",
       "repetitionInterval": '',
       "command": "ls",
-      "enabled": True
+      "enabled": False
     }
     result = self.testClient.post('/api/jobs/', data=json.dumps(params), content_type='application/json')
     self.assertEqual(result.status_code, 200, msg='Empty repitition interval not accepted')
@@ -523,7 +523,7 @@ class test_jobsData(testHelperAPIClient):
   def test_oldRunLogsArePurgedAfter1Week(self):
     #This will add a job, manually run it check it has a execution log then run loop iteration after purge interval later and then recheck execution log to make sure it has gone
     result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleManualJobCreateParams), content_type='application/json')
-    self.assertEqual(result.status_code, 200)
+    self.assertEqual(result.status_code, 200, msg='Wrong status ' + str(result))
     resultJSON = json.loads(result.get_data(as_text=True))
     jobGUID = resultJSON['guid']
 
