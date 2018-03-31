@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-list >
-      <q-item highlight @click.native="editJobName">
+      <q-item highlight @click.native="openEditJobModalDialog">
         <q-item-main >
           <q-item-tile label>Job {{ jobData.name }}</q-item-tile>
           <q-item-tile sublabel>{{ jobData.guid }}</q-item-tile>
@@ -83,8 +83,11 @@
       push
       @click="runnow"
     >Run Now</q-btn>
+    <CreateJobModal
+      ref="createJobModalDialog"
+      v-model="createJobModalDialog"
+    />
   </div>
-
 </template>
 
 <script>
@@ -92,9 +95,11 @@ import { Notify } from 'quasar'
 import globalStore from '../store/globalStore'
 import callbackHelper from '../callbackHelper'
 import STDOutput from '../components/STDOutput'
+import CreateJobModal from '../components/CreateJobModal'
 
 export default {
   components: {
+    CreateJobModal,
     STDOutput
   },
   data () {
@@ -151,6 +156,14 @@ export default {
       }
       globalStore.getters.apiFN('PUT', 'jobs/' + TTT.jobData.guid, newValues, callback)
     },
+    openEditJobModalDialog () {
+      var child = this.$refs.createJobModalDialog
+      var TTTT = this
+      child.openCreateJobDialog(function (newJob) {
+        TTTT.jobData = newJob
+      }, TTTT.jobData)
+    },
+    // TODO REMOVE
     editJobName () {
       var TTT = this
       this.promptTextValue = this.jobData.name

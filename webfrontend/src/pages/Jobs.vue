@@ -142,7 +142,8 @@ export default {
     openCreateJobModalDialog () {
       var child = this.$refs.createJobModalDialog
       var TTTT = this
-      child.openCreateJobDialog(function (newJobName) {
+      child.openCreateJobDialog(function (newJob) {
+        var newJobName = newJob.name
         TTTT.jobsDataTableSettings.filter = newJobName
         dataTableSettings.commit('JOBS', TTTT.jobsDataTableSettings)
         TTTT.request({

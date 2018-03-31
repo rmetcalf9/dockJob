@@ -10,7 +10,7 @@
           icon="keyboard_arrow_left"
         />
         <q-toolbar-title>
-          Create New Job
+          {{ displayValues.dialogTitle }}
         </q-toolbar-title>
       </q-toolbar>
 
@@ -73,7 +73,7 @@
 
         <q-btn
           color="primary"
-          label="Create"
+          :label="displayValues.okButtonText"
           :disable="!createJobValidAll"
           @click="createJobMethod"
         />
@@ -158,7 +158,9 @@ function pad (num, size) {
 }
 
 function getRepIntervalString (dialogData) {
-  if (!dialogData.enabled) return ''
+  // Even if it is disabled still output the RI string
+  // if (!dialogData.enabled) return ''
+
   if (dialogData.repetitionInterval.mode === 'HOURLY') {
     return 'HOURLY:' + pad(dialogData.repetitionInterval.minute, 2)
   }
@@ -195,6 +197,13 @@ function getRepIntervalString (dialogData) {
 export default {
   data () {
     return {
+      displayValues: {
+        dialogTitle: '',
+        okButtonText: '',
+        sucessMessage: '',
+        failMessage: ''
+      },
+      origJobObject: null,
       showCreateJobDialog: false,
       showCreateJobDialogData: initShowCreateJobDialogData(),
       repititionIntervalString: '',
@@ -202,11 +211,76 @@ export default {
     }
   },
   methods: {
-    openCreateJobDialog (confirmFunction) {
+    openCreateJobDialog (confirmFunction, origJobObject = undefined) {
       // console.log('openCreateJobDialog')
       this.showCreateJobDialogData = initShowCreateJobDialogData()
       this.showCreateJobDialog = true
       this.createdOKCallback = confirmFunction
+      this.origJobObject = origJobObject
+      if (typeof (this.origJobObject) !== 'undefined') {
+        // Edit mode
+        this.displayValues = {
+          dialogTitle: 'Edit Job ' + origJobObject.name,
+          okButtonText: 'Update',
+          sucessMessage: 'Successfully updated job ',
+          failMessage: 'Failed to update job - '
+        }
+        this.showCreateJobDialogData.jobname = origJobObject.name
+        this.showCreateJobDialogData.command = origJobObject.command
+        if (typeof (origJobObject.enabled) !== 'undefined') {
+          this.showCreateJobDialogData.enabled = origJobObject.enabled
+        }
+        if ((typeof (origJobObject.repetitionInterval) !== 'undefined') && (origJobObject.repetitionInterval !== '')) {
+          var arr = []
+          if (this.origJobObject.repetitionInterval.startsWith('DAILY')) {
+            arr = this.origJobObject.repetitionInterval.split(':')
+            this.showCreateJobDialogData.repetitionInterval.mode = 'DAILY'
+            this.showCreateJobDialogData.repetitionInterval.minute = arr[1]
+            this.showCreateJobDialogData.repetitionInterval.hour = arr[2]
+            var dayArr = []
+            for (var c = 0; c < 7; c++) {
+              if (arr[3][c] === '+') {
+                dayArr.push(c)
+              }
+            }
+            this.showCreateJobDialogData.repetitionInterval.days = dayArr
+            this.showCreateJobDialogData.repetitionInterval.timezone = arr[4]
+
+            // not overriding defaults
+            this.showCreateJobDialogData.repetitionInterval.dayofmonth = 1
+          } else if (this.origJobObject.repetitionInterval.startsWith('MONTHLY')) {
+            arr = this.origJobObject.repetitionInterval.split(':')
+            this.showCreateJobDialogData.repetitionInterval.mode = 'MONTHLY'
+            this.showCreateJobDialogData.repetitionInterval.minute = arr[1]
+            this.showCreateJobDialogData.repetitionInterval.hour = arr[2]
+            this.showCreateJobDialogData.repetitionInterval.timezone = arr[4]
+            this.showCreateJobDialogData.repetitionInterval.dayofmonth = arr[3]
+
+            // not overriding defaults
+            this.showCreateJobDialogData.repetitionInterval.days = []
+          } else if (this.origJobObject.repetitionInterval.startsWith('HOURLY')) {
+            arr = this.origJobObject.repetitionInterval.split(':')
+            this.showCreateJobDialogData.repetitionInterval.mode = 'HOURLY'
+            this.showCreateJobDialogData.repetitionInterval.minute = arr[1]
+
+            // Not overriding defaults
+            // this.showCreateJobDialogData.repetitionInterval.hour = 1
+            // this.showCreateJobDialogData.repetitionInterval.days = []
+            // this.showCreateJobDialogData.repetitionInterval.timezone = arr[4]
+            // this.showCreateJobDialogData.repetitionInterval.dayofmonth = arr[3]
+          } else {
+            console.log('Unrecognised type - "' + origJobObject.repetitionInterval + '"')
+          }
+        }
+      } else {
+        // Create mode
+        this.displayValues = {
+          dialogTitle: 'Create New Job',
+          okButtonText: 'Create',
+          sucessMessage: 'Successfully created job ',
+          failMessage: 'Failed to create job - '
+        }
+      }
     },
     createJobMethod () {
       if (!this.createJobValidAll) {
@@ -223,23 +297,36 @@ export default {
       var callback = {
         ok: function (response) {
           if (typeof (TTT.createdOKCallback) !== 'undefined') {
-            TTT.createdOKCallback(response.data.name)
+            TTT.createdOKCallback(response.data)
           }
-          Notify.create('Successfully created job ' + response.data.name)
+          Notify.create(TTT.displayValues.sucessMessage + response.data.name)
         },
         error: function (error) {
-          Notify.create('Failed to create job - ' + callbackHelper.getErrorFromResponse(error))
+          Notify.create(TTT.displayValues.failMessage + callbackHelper.getErrorFromResponse(error))
         }
       }
-      globalStore.getters.apiFN('POST', 'jobs/',
-        {
-          'name': this.showCreateJobDialogData.jobname,
-          'enabled': this.showCreateJobDialogData.enabled,
-          'command': this.showCreateJobDialogData.command,
-          'repetitionInterval': this.repititionIntervalString
-        },
-        callback
-      )
+      if (typeof (this.origJobObject) !== 'undefined') {
+        console.log('writing ri to ' + this.repititionIntervalString)
+        globalStore.getters.apiFN('PUT', 'jobs/' + this.origJobObject.guid,
+          {
+            'name': this.showCreateJobDialogData.jobname,
+            'enabled': this.showCreateJobDialogData.enabled,
+            'command': this.showCreateJobDialogData.command,
+            'repetitionInterval': this.repititionIntervalString
+          },
+          callback
+        )
+      } else {
+        globalStore.getters.apiFN('POST', 'jobs/',
+          {
+            'name': this.showCreateJobDialogData.jobname,
+            'enabled': this.showCreateJobDialogData.enabled,
+            'command': this.showCreateJobDialogData.command,
+            'repetitionInterval': this.repititionIntervalString
+          },
+          callback
+        )
+      }
     }
   },
   computed: {
