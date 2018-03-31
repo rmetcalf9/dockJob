@@ -71,6 +71,11 @@ class jobClass():
   def assertValidName(name):
     if (len(name)<2):
       raise BadRequest('Job name must be more than 2 characters')
+  def assertValidRepetitionInterval(ri):
+    try:
+      return RepetitionIntervalClass(ri)
+    except:
+      raise BadRequest('Invalid Repetition Interval')
 
   def __init__(self, name, command, enabled, repetitionInterval):
     jobClass.assertValidName(name)
@@ -85,6 +90,7 @@ class jobClass():
     self.lastRunDate = None
     self.lastRunExecutionGUID = ''
     self.lastRunReturnCode = None
+    self.nextScheduledRun = None
 
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
 
@@ -97,14 +103,13 @@ class jobClass():
 
   def setNextScheduledRun(self, curTime):
     ri = None
-    if (self.repetitionInterval != None):
-      if (self.repetitionInterval != ''):
-        try:
-          ri = RepetitionIntervalClass(self.repetitionInterval)
-        except:
-          raise BadRequest('Invalid Repetition Interval')
-        ri = RepetitionIntervalClass(self.repetitionInterval)
-        self.nextScheduledRun = ri.getNextOccuranceDatetime(curTime).isoformat()
+    if self.enabled == False:
+      self.nextScheduledRun = None
+    else:
+      if (self.repetitionInterval != None):
+        if (self.repetitionInterval != ''):
+          ri = jobClass.assertValidRepetitionInterval(self.repetitionInterval)
+          self.nextScheduledRun = ri.getNextOccuranceDatetime(curTime).isoformat()
 
   def uniqueJobNameStatic(name):
     return name.strip().upper()
@@ -175,8 +180,7 @@ class jobsDataClass():
 
   def updateJob(self, jobObj, newValues):
     jobClass.assertValidName(newValues['name'])
-    ## Check valid repetition interval
-    ri = RepetitionIntervalClass(newValues['repetitionInterval'])
+    jobClass.assertValidRepetitionInterval(newValues['repetitionInterval'])
 
     oldUniqueJobName = jobObj.uniqueName()
     newUniqueJobName = jobClass.uniqueJobNameStatic(newValues['name'])
@@ -184,16 +188,21 @@ class jobsDataClass():
       raise Exception('Job to update dose not exist')
     if (oldUniqueJobName not in self.jobs_name_lookup):
       raise Exception('Old Job Name does not exist')
-    if (newUniqueJobName in self.jobs_name_lookup):
-      raise Exception('New Job Name already in use')
 
-    # remove old unique name lookup
-    tmpVar = self.jobs_name_lookup.pop(oldUniqueJobName)
-    if tmpVar is None:
-      raise Execption('Failed to remove old unique name')
+    # Only change the name lookup if there actually is a change
+    if oldUniqueJobName != newUniqueJobName:
+      if (newUniqueJobName in self.jobs_name_lookup):
+        raise Exception('New Job Name already in use')
+      # remove old unique name lookup
+      tmpVar = self.jobs_name_lookup.pop(oldUniqueJobName)
+      if tmpVar is None:
+        raise Execption('Failed to remove old unique name')
+      # add new unique lookup
+      self.jobs_name_lookup[newUniqueJobName] = jobObj.guid
 
-    # add new unique lookup
-    self.jobs_name_lookup[newUniqueJobName] = jobObj.guid
+    # set recaculation of repetition interval values
+    if jobObj.repetitionInterval == newValues['repetitionInterval']:
+      self.nextJobToExecuteCalcRequired = True
 
     # change values in object to new values
     jobObj.setNewValues(newValues['name'], newValues['command'], newValues['enabled'], newValues['repetitionInterval'])
@@ -220,6 +229,7 @@ class jobsDataClass():
   #  - Adding Job
   #  - Delete job if it is the next to execute
   #  - Executing a job
+  #  - Editing a job
   # None is a valid next job to execute but when it 
   nextJobToExecute = None
   nextJobToExecuteCalcRequired = True
