@@ -142,9 +142,7 @@ export default {
       var TTT = this
       var callback = {
         ok: function (response) {
-          if (typeof (TTT.createdOKCallback) !== 'undefined') {
-            TTT.createdOKCallback(response.data.name)
-          }
+          TTT.jobData = response.data
           Notify.create('Successfully updated job ' + response.data.name)
         },
         error: function (error) {
