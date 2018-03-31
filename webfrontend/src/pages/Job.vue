@@ -3,15 +3,11 @@
     <q-list >
       <q-item highlight @click.native="editJobName">
         <q-item-main >
-          <q-item-tile label>Job Name</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.name }}</q-item-tile>
+          <q-item-tile label>Job {{ jobData.name }}</q-item-tile>
+          <q-item-tile sublabel>{{ jobData.guid }}</q-item-tile>
         </q-item-main>
         <q-item-side right icon="mode_edit" />
       </q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>GUID</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.guid }}</q-item-tile>
-      </q-item-main></q-item>
       <q-item><q-item-main >
           <q-item-tile label>Command</q-item-tile>
           <q-item-tile sublabel><div v-for="curVal in getLineArray(jobData.command)" :key=curVal.p>{{ curVal.v }}</div></q-item-tile>
