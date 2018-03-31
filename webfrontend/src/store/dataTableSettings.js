@@ -11,12 +11,24 @@ const state = {
       rowsPerPage: 10
     },
     filter: ''
+  },
+  jobExecutions: {
+    visibleColumns: ['executionName', 'stage', 'resultReturnCode'],
+    serverPagination: {
+      page: 1,
+      rowsNumber: 10, // specifying this determines pagination is server-side
+      rowsPerPage: 10
+    },
+    filter: ''
   }
 }
 
 export const mutations = {
   JOBS (state, jobs) {
     state.jobs = jobs
+  },
+  JOBEXECUTIONS (state, jobExecutions) {
+    state.jobExecutions = jobExecutions
   }
 }
 
@@ -26,6 +38,9 @@ export const actions = {
 const getters = {
   Jobs: (state, getters) => {
     return state.jobs
+  },
+  jobExecutions: (state, getters) => {
+    return state.jobExecutions
   }
 }
 

@@ -86,7 +86,6 @@ export default {
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobData: [],
-      filterXX: '',
       loading: false,
       selectedSecond: []
     }

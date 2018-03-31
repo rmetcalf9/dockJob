@@ -49,21 +49,22 @@
       title='Executions'
       :data="jobExecutionData"
       :columns="jobTableColumns"
-      :visible-columns="visibleColumns"
-      :filter="filter"
+      :visible-columns="jobExecutionsDataTableSettings.visibleColumns"
+      :filter="jobExecutionsDataTableSettings.filter"
       row-key="name"
-      :pagination.sync="serverPagination"
+      :pagination.sync="jobExecutionsDataTableSettings.serverPagination"
       :loading="loading"
       @request="requestExecutionData"
+      :rows-per-page-options="rowsPerPageOptions"
     >
       <template slot="top-right" slot-scope="props">
         <q-table-columns
           color="secondary"
           class="q-mr-sm"
-          v-model="visibleColumns"
+          v-model="jobExecutionsDataTableSettings.visibleColumns"
           :columns="jobTableColumns"
         />
-        <q-search clearable hide-underline v-model="filter" />
+        <q-search clearable hide-underline v-model="jobExecutionsDataTableSettings.filter" />
       </template>
       <q-td slot="body-cell-resultSTDOUT" slot-scope="props" :props="props">
         <STDOutput :val="props.value" />
@@ -93,6 +94,7 @@
 <script>
 import { Notify } from 'quasar'
 import globalStore from '../store/globalStore'
+import dataTableSettings from '../store/dataTableSettings'
 import callbackHelper from '../callbackHelper'
 import STDOutput from '../components/STDOutput'
 import CreateJobModal from '../components/CreateJobModal'
@@ -104,6 +106,7 @@ export default {
   },
   data () {
     return {
+      rowsPerPageOptions: [5, 10, 25, 50, 100, 200],
       everRun: function (item) {
         if (typeof (item.lastRunDate) === 'undefined') {
           return false
@@ -130,13 +133,7 @@ export default {
         { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: false, filter: true }
       ],
       jobExecutionData: [],
-      filter: '',
       loading: false,
-      serverPagination: {
-        page: 1,
-        rowsNumber: 10 // specifying this determines pagination is server-side
-      },
-      visibleColumns: ['executionName', 'stage', 'resultReturnCode'],
       jobData: {},
       promptTextValue: ''
     }
@@ -192,8 +189,8 @@ export default {
       }
       globalStore.getters.apiFN('GET', 'jobs/' + this.$route.params.jobGUID, undefined, callback)
       this.requestExecutionData({
-        pagination: this.serverPagination,
-        filter: this.filter
+        pagination: this.jobExecutionsDataTableSettings.serverPagination,
+        filter: this.jobExecutionsDataTableSettings.filter
       })
     },
     requestExecutionData ({ pagination, filter }) {
@@ -203,11 +200,13 @@ export default {
         ok: function (response) {
           // console.log(response.data.guid)
           TTT.loading = false
-          // updating pagination to reflect in the UI
-          TTT.serverPagination = pagination
 
+          // updating pagination to reflect in the UI
+          TTT.jobExecutionsDataTableSettings.serverPagination = pagination
           // we also set (or update) rowsNumber
-          TTT.serverPagination.rowsNumber = response.data.pagination.total
+          TTT.jobExecutionsDataTableSettings.serverPagination.rowsNumber = response.data.pagination.total
+          TTT.jobExecutionsDataTableSettings.serverPagination.filter = filter
+          TTT.jobExecutionsDataTableSettings.serverPagination.rowsPerPage = response.data.pagination.pagesize
 
           // then we update the rows with the fetched ones
           TTT.jobExecutionData = response.data.result
@@ -223,16 +222,29 @@ export default {
       if (pagination.page === 0) {
         pagination.page = 1
       }
-      var queryString = 'jobs/' + this.$route.params.jobGUID + '/execution?pagesize=' + pagination.rowsPerPage.toString() + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
-      if (filter !== '') {
-        queryString = 'jobs/' + this.$route.params.jobGUID + '/execution?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
+
+      var queryString = ''
+      if (pagination.rowsPerPage === 0) {
+        queryString = 'jobs/' + this.$route.params.jobGUID + '/execution'
+        if (filter !== '') {
+          queryString = 'jobs/' + this.$route.params.jobGUID + '/execution?query=' + filter
+        }
+      } else {
+        queryString = 'jobs/' + this.$route.params.jobGUID + '/execution?pagesize=' + pagination.rowsPerPage.toString() + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
+        if (filter !== '') {
+          queryString = 'jobs/' + this.$route.params.jobGUID + '/execution?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
+        }
       }
+      // console.log(queryString)
       globalStore.getters.apiFN('GET', queryString, undefined, callback)
     }
   },
   computed: {
     datastoreState () {
       return globalStore.getters.datastoreState
+    },
+    jobExecutionsDataTableSettings () {
+      return dataTableSettings.getters.jobExecutions
     }
   },
   mounted () {
