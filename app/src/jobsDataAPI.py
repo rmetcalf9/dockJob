@@ -386,9 +386,7 @@ def registerAPI(appObj):
     @nsJobs.doc('getjobexecutions')
     @nsJobs.marshal_with(appObj.getResultModel(getJobExecutionModel(appObj)))
     @appObj.flastRestPlusAPIObject.response(200, 'Success')
-    @nsJobs.param('offset', 'Number to start from')
-    @nsJobs.param('pagesize', 'Results per page')
-    @nsJobs.param('query', 'Search Filter')
+    @appObj.addStandardSortParams(nsJobs)
     def get(self, guid):
       '''Get Job Executions'''
       def outputJobExecution(item):
