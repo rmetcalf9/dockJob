@@ -4,8 +4,7 @@ import Vuex from 'vuex'
 import { date } from 'quasar'
 
 const state = {
-  usersTimezone: 'UNSET',
-  timestampFormat: 'DD-MMM-YY HH:mm:ss'
+  timestampFormat: 'YYYY-MM-DD HH:mm:ss Z'
 }
 
 export const mutations = {
@@ -28,8 +27,10 @@ const getters = {
         return null
       }
       var d = Date.parse(iso8601String)
-      return date.formatDate(d, state.timestampFormat)
       // During testing this displayed in my local timezone
+      // decided to allow the quasar/browser formatting to determine the timezone
+      // and not make it user selectable.
+      return date.formatDate(d, state.timestampFormat)
     }
   }
 }
