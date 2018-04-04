@@ -35,3 +35,8 @@ sudo run_app_developer.sh
 ````
 
 If the development instance is inside a virtual machine then run_app_developer_workClient.sh may help as it sets the connection URL's and ports to different values.
+
+You can also automatically inject some test data into the development instance using the following script:
+````
+./insert_example_jobs.sh
+````

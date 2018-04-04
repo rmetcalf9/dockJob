@@ -57,6 +57,7 @@ import globalStore from '../store/globalStore'
 import dataTableSettings from '../store/dataTableSettings'
 import CreateJobModal from '../components/CreateJobModal'
 import callbackHelper from '../callbackHelper'
+import userSettings from '../store/userSettings'
 
 export default {
   components: {
@@ -75,14 +76,14 @@ export default {
         // { name: 'guid', required: false, label: 'GUID', align: 'left', field: 'guid', sortable: false, filter: true },
         { name: 'name', required: true, label: 'Job Name', align: 'left', field: 'name', sortable: false, filter: true },
         { name: 'enabled', required: false, label: 'Scheduled Running Enabled', align: 'left', field: 'enabled', sortable: false, filter: true },
-        { name: 'creationDate', required: false, label: 'Created', align: 'left', field: 'creationDate', sortable: false, filter: true },
-        { name: 'lastRunDate', required: false, label: 'Last Run', align: 'left', field: 'lastRunDate', sortable: false, filter: true },
+        { name: 'creationDate', required: false, label: 'Created', align: 'left', field: 'creationDateString', sortable: false, filter: true },
+        { name: 'lastRunDate', required: false, label: 'Last Run', align: 'left', field: 'lastRunDateString', sortable: false, filter: true },
         { name: 'lastRunReturnCode', required: false, label: 'Last Run Return Code', align: 'left', field: 'lastRunReturnCode', sortable: false, filter: true },
         { name: 'lastRunExecutionGUID', required: false, label: 'Last Execution GUID', align: 'left', field: 'lastRunExecutionGUID', sortable: false, filter: true },
         { name: 'repetitionInterval', required: false, label: 'Repetition', align: 'left', field: 'repetitionInterval', sortable: false, filter: true },
-        { name: 'nextScheduledRun', required: false, label: 'Next Run', align: 'left', field: 'nextScheduledRun', sortable: false, filter: true },
+        { name: 'nextScheduledRun', required: false, label: 'Next Run', align: 'left', field: 'nextScheduledRunString', sortable: false, filter: true },
         { name: 'command', required: false, label: 'Command', align: 'left', field: 'command', sortable: false, filter: true },
-        { name: 'lastUpdateDate', required: false, label: 'Last Update', align: 'left', field: 'lastUpdateDate', sortable: false, filter: true },
+        { name: 'lastUpdateDate', required: false, label: 'Last Update', align: 'left', field: 'lastUpdateDateString', sortable: false, filter: true },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobData: [],
@@ -110,6 +111,13 @@ export default {
 
           // then we update the rows with the fetched ones
           TTT.jobData = response.data.result
+          TTT.jobData.map(function (obj) {
+            obj.creationDateString = userSettings.getters.userTimeStringFN(obj.creationDate)
+            obj.nextScheduledRunString = userSettings.getters.userTimeStringFN(obj.nextScheduledRun)
+            obj.lastUpdateDateString = userSettings.getters.userTimeStringFN(obj.lastUpdateDate)
+            obj.lastRunDateString = userSettings.getters.userTimeStringFN(obj.lastRunDate)
+            return obj
+          })
 
           // finally we tell QTable to exit the "loading" state
           TTT.loading = false
