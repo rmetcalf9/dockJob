@@ -25,3 +25,13 @@ The following command will run unit tests and wait for any file to change then r
 ./continous_test.sh
 ````
 
+## Running  Development-Instance
+
+As well as running in testing mode the python application can be run outside of the docker container. As it relies on enviroment variables to be set some bash scripts are included to help with this.
+
+For most developers the following script will run a local instance:
+````
+sudo run_app_developer.sh
+````
+
+If the development instance is inside a virtual machine then run_app_developer_workClient.sh may help as it sets the connection URL's and ports to different values.
