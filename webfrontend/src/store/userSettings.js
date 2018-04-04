@@ -1,10 +1,11 @@
 // Global Store - contains server information, and user information
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { date } from 'quasar'
 
 const state = {
   usersTimezone: 'UNSET',
-  timestampFormat: 'XXX'
+  timestampFormat: 'DD-MMM-YY HH:mm:ss'
 }
 
 export const mutations = {
@@ -18,6 +19,7 @@ export const actions = {
 
 const getters = {
   userTimeStringFN: (state, getters) => {
+    // uses quasar dateutils http://quasar-framework.org/components/date-utils.html
     return function (iso8601String) {
       if (typeof (iso8601String) === 'undefined') {
         return undefined
@@ -25,7 +27,9 @@ const getters = {
       if (iso8601String === null) {
         return null
       }
-      return 'TODO' + state.usersTimezone + ':' + state.timestampFormat + ':' + iso8601String
+      var d = Date.parse(iso8601String)
+      return date.formatDate(d, state.timestampFormat)
+      // During testing this displayed in my local timezone
     }
   }
 }
