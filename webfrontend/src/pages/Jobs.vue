@@ -58,6 +58,7 @@ import dataTableSettings from '../store/dataTableSettings'
 import CreateJobModal from '../components/CreateJobModal'
 import callbackHelper from '../callbackHelper'
 import userSettings from '../store/userSettings'
+import restcallutils from '../restcallutils'
 
 export default {
   components: {
@@ -130,21 +131,18 @@ export default {
       if (pagination.page === 0) {
         pagination.page = 1
       }
-      var queryString = ''
 
-      if (pagination.rowsPerPage === 0) {
-        queryString = 'jobs/'
-        if (filter !== '') {
-          queryString = 'jobs/?query=' + filter
-        }
-      } else {
-        queryString = 'jobs/?' + 'pagesize=' + pagination.rowsPerPage.toString() + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
-        if (filter !== '') {
-          queryString = 'jobs/?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
-        }
+      var queryParams = []
+
+      if (filter !== '') {
+        queryParams['query'] = filter
       }
-      // console.log(queryString)
-      globalStore.getters.apiFN('GET', queryString, undefined, callback)
+      if (pagination.rowsPerPage !== 0) {
+        queryParams['pagesize'] = pagination.rowsPerPage.toString()
+        queryParams['offset'] = (pagination.rowsPerPage * (pagination.page - 1)).toString()
+      }
+
+      globalStore.getters.apiFN('GET', restcallutils.buildQueryString('jobs/', queryParams), undefined, callback)
     },
     openCreateJobModalDialog () {
       var child = this.$refs.createJobModalDialog
