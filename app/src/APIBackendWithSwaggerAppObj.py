@@ -4,6 +4,7 @@ import signal
 from FlaskRestSubclass import FlaskRestSubclass
 from flask_restplus import fields
 from webfrontendAPI import webfrontendBP, registerAPI as registerWebFrontendAPI
+import functools
 
 #I need jobs to be stored in order so pagination works
 from sortedcontainers import SortedDict
@@ -127,6 +128,11 @@ class APIBackendWithSwaggerAppObj():
     for cur in range(offset, (pagesize + offset)):
       if (cur<len(list)):
         output.append(outputFN(list[list.keys()[cur]]))
+
+    if request.args.get('sort') is not None:
+      for curSortKey in request.args.get('sort').split(",")[::-1]:
+        print(curSortKey)
+
     return {
       'pagination': {
         'offset': offset,
@@ -146,4 +152,17 @@ class APIBackendWithSwaggerAppObj():
       'pagination': fields.Nested(paginationModel),
       'result': fields.List(fields.Nested(recordModel)),
     })
-    
+
+  # decorator to add the standard sort params
+  def addStandardSortParams(self, namespace):
+    def addStandardSortParamsDec(funct):
+      @functools.wraps(funct)
+      @namespace.param('offset', 'Number to start from')
+      @namespace.param('pagesize', 'Results per page')
+      @namespace.param('query', 'Search Filter')
+      @namespace.param('sort', 'Comma seperated list of sort keys. (Postfixed with :desc or :asc if required)')
+      def _(*args, **kwargs):
+          return funct(*args, **kwargs)
+      return _
+    return addStandardSortParamsDec
+
