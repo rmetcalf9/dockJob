@@ -112,7 +112,6 @@ class APIBackendWithSwaggerAppObj():
     if pagesize > self.pagesizemax:
       pagesize = self.pagesizemax
 
-    output = []
     if request.args.get('query') is not None:
       origList = SortedDict(list)
       list = SortedDict()
@@ -125,10 +124,14 @@ class APIBackendWithSwaggerAppObj():
       for cur in origList:
         if includeItem(origList[cur]):
           list[cur]=origList[cur]
-    for cur in range(offset, (pagesize + offset)):
-      if (cur<len(list)):
-        output.append(outputFN(list[list.keys()[cur]]))
 
+    # we now have "list" which is a filtered down list of things we need to return
+    #construct a list of keys to the object, all null
+    sortedKeys = []
+    for cur in list:
+      sortedKeys.append(cur)
+
+    #Sort sortedKeys
     if request.args.get('sort') is not None:
       def getSortTuple(key):
         #sort keys are case sensitive
@@ -144,10 +147,12 @@ class APIBackendWithSwaggerAppObj():
             return {'name': kk[0], 'desc': False}
         raise Exception('Invalid sort key - ' + key)
 
-      def genSortKeyGenFn(sortkey):
+      def genSortKeyGenFn(listBeingSorted, sortkey):
         def sortKeyGenFn(ite):
           try:
-            return ite[sortkey]
+            # print(sortkey)
+            # print(outputFN(listBeingSorted[ite])[sortkey])
+            return outputFN(listBeingSorted[ite])[sortkey]
           except KeyError:
             raise Exception('Sort key ' + sortkey + ' not found')
         return sortKeyGenFn
@@ -155,7 +160,13 @@ class APIBackendWithSwaggerAppObj():
       # sort by every sort key one at a time starting with the least significant
       for curSortKey in request.args.get('sort').split(",")[::-1]:
         sk = getSortTuple(curSortKey)
-        output.sort(key=genSortKeyGenFn(sk['name']), reverse=sk['desc'])
+        sortedKeys.sort(key=genSortKeyGenFn(list, sk['name']), reverse=sk['desc'])
+
+    output = []
+    for cur in range(offset, (pagesize + offset)):
+      if (cur<len(list)):
+        output.append(outputFN(list[sortedKeys[cur]]))
+        #output.append(outputFN(list[list.keys()[sortedKeys[cur]]]))
 
     return {
       'pagination': {
