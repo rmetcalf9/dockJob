@@ -93,7 +93,7 @@ class jobClass():
       return self.lastRunReturnCode
     if item == 'lastRunExecutionGUID':
       return self.lastRunExecutionGUID
-    raise Exception('Invalid subscript for JobClass')
+    raise KeyError
 
   def assertValidName(name):
     if (len(name)<2):
