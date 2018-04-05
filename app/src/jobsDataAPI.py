@@ -8,6 +8,7 @@ import datetime
 import pytz
 from RepetitionInterval import RepetitionIntervalClass
 from JobExecution import getJobExecutionCreationModel, getJobExecutionModel
+import enum
 
 #I need jobs to be stored in order so pagination works
 from sortedcontainers import SortedDict
@@ -67,6 +68,32 @@ class jobClass():
     ret += 'lastRunExecutionGUID:' + str(self.lastRunExecutionGUID) + ' '
     ret += ')'
     return ret
+
+  # required for sort to work as this function returns the sort key value
+  def __getitem__(self, item):
+    if item == 'guid':
+      return self.guid
+    if item == 'name':
+      return self.name
+    if item == 'command':
+      return self.command
+    if item == 'enabled':
+      return self.enabled
+    if item == 'repetitionInterval':
+      return self.repetitionInterval
+    if item == 'creationDate':
+      return self.creationDate
+    if item == 'lastUpdateDate':
+      return self.lastUpdateDate
+    if item == 'lastRunDate':
+      return self.lastRunDate
+    if item == 'nextScheduledRun':
+      return self.nextScheduledRun
+    if item == 'lastRunReturnCode':
+      return self.lastRunReturnCode
+    if item == 'lastRunExecutionGUID':
+      return self.lastRunExecutionGUID
+    raise Exception('Invalid subscript for JobClass')
 
   def assertValidName(name):
     if (len(name)<2):

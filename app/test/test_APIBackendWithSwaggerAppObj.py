@@ -55,17 +55,19 @@ def dictToArr(dict):
 
 class test_APIBackendWithSwaggerAppObj(testHelperSuperClass):
 
-  def assertGetPaginatedResult(self, requestVals, filterFN, expOutput):
+  def assertGetPaginatedResult(self, requestVals, outputFN, filterFN, expOutput, inpData=testArray):
     def filterFNInt(item, whereClauseText):
       return True
     if filterFN is None:
       filterFN = filterFNInt
-    def outputFN(item):
+    def outputFNInt(item):
       return item
+    if outputFN is None:
+      outputFN = outputFNInt
     request = mockRequest(requestVals)
     res = APIBackendWithSwaggerAppObj.getPaginatedResult(
       mockAppObj,
-      testArray, 
+      inpData, 
       outputFN, 
       request,
       filterFN
@@ -83,25 +85,36 @@ class test_APIBackendWithSwaggerAppObj(testHelperSuperClass):
 #************ Tests below (helpers above) *****************************
 
   def test_getPaginatedResult_simple(self):
-    self.assertGetPaginatedResult({},None,testArray)
+    self.assertGetPaginatedResult({},None,None,testArray)
 
   def test_getPaginatedResult_filterOnlyOdd(self):
     def filterFN(item, whereClauseText):
       return ((item['K5'] % 2) == 1)
-    self.assertGetPaginatedResult({ 'query': 'AAA'},filterFN,testArrayOddOnly)
+    self.assertGetPaginatedResult({ 'query': 'AAA'},None,filterFN,testArrayOddOnly)
 
   def test_getPaginatedResult_sortIntKeyDesc(self):
-    self.assertGetPaginatedResult({ 'sort': 'K5:desc'},None,testArrayReversed)
+    self.assertGetPaginatedResult({ 'sort': 'K5:desc'},None,None,testArrayReversed)
   def test_getPaginatedResult_sortIntKeyAsc(self):
-    self.assertGetPaginatedResult({ 'sort': 'K5:asc'},None,testArray)
+    self.assertGetPaginatedResult({ 'sort': 'K5:asc'},None,None,testArray)
   def test_getPaginatedResult_sortIntKey(self):
-    self.assertGetPaginatedResult({ 'sort': 'K5'},None,testArray)
+    self.assertGetPaginatedResult({ 'sort': 'K5'},None,None,testArray)
   def test_getPaginatedResult_sortStringKey2Desc(self):
-    self.assertGetPaginatedResult({ 'sort': 'K2:desc'},None,testArray)
+    self.assertGetPaginatedResult({ 'sort': 'K2:desc'},None,None,testArray)
   def test_getPaginatedResult_sortStringKey2Asc(self):
-    self.assertGetPaginatedResult({ 'sort': 'K2:asc'},None,testArrayReversed)
+    self.assertGetPaginatedResult({ 'sort': 'K2:asc'},None,None,testArrayReversed)
   def test_getPaginatedResult_sortStringKey2(self):
-    self.assertGetPaginatedResult({ 'sort': 'K2'},None,testArrayReversed)
+    self.assertGetPaginatedResult({ 'sort': 'K2'},None,None,testArrayReversed)
 
   def test_getPaginatedResult_MultiKeySort(self):
-    self.assertGetPaginatedResult({ 'sort': 'K3,K5'},None,testArrayTwoKey)
+    self.assertGetPaginatedResult({ 'sort': 'K3,K5'},None,None,testArrayTwoKey)
+
+  def test_getPaginatedResult_functionAccess(self):
+    obj = SortedDict()
+    num = 0
+    def outputFN(item):
+      return testArray[item]
+
+    for curKey in testArray:
+      obj[num]=curKey
+      num = num + 1
+    self.assertGetPaginatedResult({'sort': 'K5:desc'},outputFN,None,testArrayReversed,inpData=obj)
