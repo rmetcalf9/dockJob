@@ -75,16 +75,16 @@ export default {
       createJobModalDialog: {},
       jobTableColumns: [
         // { name: 'guid', required: false, label: 'GUID', align: 'left', field: 'guid', sortable: false, filter: true },
-        { name: 'name', required: true, label: 'Job Name', align: 'left', field: 'name', sortable: false, filter: true },
-        { name: 'enabled', required: false, label: 'Scheduled Running Enabled', align: 'left', field: 'enabled', sortable: false, filter: true },
-        { name: 'creationDate', required: false, label: 'Created', align: 'left', field: 'creationDateString', sortable: false, filter: true },
-        { name: 'lastRunDate', required: false, label: 'Last Run', align: 'left', field: 'lastRunDateString', sortable: false, filter: true },
-        { name: 'lastRunReturnCode', required: false, label: 'Last Run Return Code', align: 'left', field: 'lastRunReturnCode', sortable: false, filter: true },
-        { name: 'lastRunExecutionGUID', required: false, label: 'Last Execution GUID', align: 'left', field: 'lastRunExecutionGUID', sortable: false, filter: true },
-        { name: 'repetitionInterval', required: false, label: 'Repetition', align: 'left', field: 'repetitionInterval', sortable: false, filter: true },
-        { name: 'nextScheduledRun', required: false, label: 'Next Run', align: 'left', field: 'nextScheduledRunString', sortable: false, filter: true },
-        { name: 'command', required: false, label: 'Command', align: 'left', field: 'command', sortable: false, filter: true },
-        { name: 'lastUpdateDate', required: false, label: 'Last Update', align: 'left', field: 'lastUpdateDateString', sortable: false, filter: true },
+        { name: 'name', required: true, label: 'Job Name', align: 'left', field: 'name', sortable: true, filter: true },
+        { name: 'enabled', required: false, label: 'Scheduled Running Enabled', align: 'left', field: 'enabled', sortable: true, filter: true },
+        { name: 'creationDate', required: false, label: 'Created', align: 'left', field: 'creationDateString', sortable: true, filter: true },
+        { name: 'lastRunDate', required: false, label: 'Last Run', align: 'left', field: 'lastRunDateString', sortable: true, filter: true },
+        { name: 'lastRunReturnCode', required: false, label: 'Last Run Return Code', align: 'left', field: 'lastRunReturnCode', sortable: true, filter: true },
+        { name: 'lastRunExecutionGUID', required: false, label: 'Last Execution GUID', align: 'left', field: 'lastRunExecutionGUID', sortable: true, filter: true },
+        { name: 'repetitionInterval', required: false, label: 'Repetition', align: 'left', field: 'repetitionInterval', sortable: true, filter: true },
+        { name: 'nextScheduledRun', required: false, label: 'Next Run', align: 'left', field: 'nextScheduledRunString', sortable: true, filter: true },
+        { name: 'command', required: false, label: 'Command', align: 'left', field: 'command', sortable: true, filter: true },
+        { name: 'lastUpdateDate', required: false, label: 'Last Update', align: 'left', field: 'lastUpdateDateString', sortable: true, filter: true },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobData: [],
@@ -141,8 +141,17 @@ export default {
         queryParams['pagesize'] = pagination.rowsPerPage.toString()
         queryParams['offset'] = (pagination.rowsPerPage * (pagination.page - 1)).toString()
       }
+      if (pagination.sortBy !== null) {
+        var postfix = ''
+        if (pagination.descending) {
+          postfix = ':desc'
+        }
+        queryParams['sort'] = pagination.sortBy + postfix
+      }
 
-      globalStore.getters.apiFN('GET', restcallutils.buildQueryString('jobs/', queryParams), undefined, callback)
+      var queryString = restcallutils.buildQueryString('jobs/', queryParams)
+      // console.log(queryString)
+      globalStore.getters.apiFN('GET', queryString, undefined, callback)
     },
     openCreateJobModalDialog () {
       var child = this.$refs.createJobModalDialog

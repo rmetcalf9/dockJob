@@ -8,7 +8,9 @@ const state = {
     serverPagination: {
       page: 1,
       rowsNumber: 10, // specifying this determines pagination is server-side
-      rowsPerPage: 10
+      rowsPerPage: 10,
+      sortBy: null,
+      descending: false
     },
     filter: ''
   },
@@ -17,7 +19,9 @@ const state = {
     serverPagination: {
       page: 1,
       rowsNumber: 10, // specifying this determines pagination is server-side
-      rowsPerPage: 10
+      rowsPerPage: 10,
+      sortBy: null,
+      descending: false
     },
     filter: ''
   }
