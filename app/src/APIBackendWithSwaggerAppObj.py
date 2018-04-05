@@ -114,7 +114,7 @@ class APIBackendWithSwaggerAppObj():
 
     output = []
     if request.args.get('query') is not None:
-      origList = dict(list)
+      origList = SortedDict(list)
       list = SortedDict()
       where_clauses = request.args.get('query').strip().upper().split(" ")
       def includeItem(item):
@@ -130,8 +130,32 @@ class APIBackendWithSwaggerAppObj():
         output.append(outputFN(list[list.keys()[cur]]))
 
     if request.args.get('sort') is not None:
+      def getSortTuple(key):
+        #sort keys are case sensitive
+        kk = key.split(":")
+        if len(kk)==0:
+          raise Exception('Invalid sort key')
+        elif len(kk)==1:
+          return {'name': kk[0], 'desc': False}
+        elif len(kk)==2:
+          if kk[1].lower() == 'desc':
+            return {'name': kk[0], 'desc': True}
+          elif kk[1].lower() == 'asc':
+            return {'name': kk[0], 'desc': False}
+        raise Exception('Invalid sort key - ' + key)
+
+      def genSortKeyGenFn(sortkey):
+        def sortKeyGenFn(ite):
+          try:
+            return ite[sortkey]
+          except KeyError:
+            raise Exception('Sort key ' + sortkey + ' not found')
+        return sortKeyGenFn
+
+      # sort by every sort key one at a time starting with the least significant
       for curSortKey in request.args.get('sort').split(",")[::-1]:
-        print(curSortKey)
+        sk = getSortTuple(curSortKey)
+        output.sort(key=genSortKeyGenFn(sk['name']), reverse=sk['desc'])
 
     return {
       'pagination': {
