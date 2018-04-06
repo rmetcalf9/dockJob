@@ -152,7 +152,14 @@ class APIBackendWithSwaggerAppObj():
           try:
             # print(sortkey)
             # print(outputFN(listBeingSorted[ite])[sortkey])
-            return outputFN(listBeingSorted[ite])[sortkey]
+            ret = outputFN(listBeingSorted[ite])[sortkey]
+            if ret is None:
+              return ''
+            if isinstance(ret, bool):
+              if ret:
+                return 'True'
+              return 'False'
+            return ret
           except KeyError:
             raise Exception('Sort key ' + sortkey + ' not found')
         return sortKeyGenFn
