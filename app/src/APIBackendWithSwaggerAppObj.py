@@ -155,6 +155,8 @@ class APIBackendWithSwaggerAppObj():
             ret = outputFN(listBeingSorted[ite])[sortkey]
             if ret is None:
               return ''
+            if isinstance(ret, int):
+              return ('000000000000000000000000000000000000000000000000000' + str(ret))[-50:]
             if isinstance(ret, bool):
               if ret:
                 return 'True'

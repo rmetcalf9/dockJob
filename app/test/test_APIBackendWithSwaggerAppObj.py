@@ -31,7 +31,7 @@ class jobClassXX():
 
 
 testArray =  SortedDict()
-testArray[0] = {'id': '123ab1', 'K2': 'V9', 'K3': True, 'K4': False, 'K5': 1}
+testArray[0] = {'id': '123ab1', 'K2': 'V9', 'K3': True, 'K4': False, 'K5': ''}
 testArray[1] = {'id': '123ab2', 'K2': 'V8', 'K3': False, 'K4': False, 'K5': 2}
 testArray[2] = {'id': '123ab3', 'K2': 'V7', 'K3': True, 'K4': False, 'K5': 3}
 testArray[3] = {'id': '123ab4', 'K2': 'V6', 'K3': None, 'K4': False, 'K5': 4}
@@ -50,11 +50,11 @@ testArrayReversed[4] = testArray[1]
 testArrayReversed[5] = testArray[0]
 testArrayTwoKey =  SortedDict() #1,3,5,2,4,6
 testArrayTwoKey[0] = testArray[3]
-testArrayTwoKey[1] = testArray[1]
-testArrayTwoKey[2] = testArray[5]
-testArrayTwoKey[3] = testArray[0]
-testArrayTwoKey[4] = testArray[2]
-testArrayTwoKey[5] = testArray[4]
+testArrayTwoKey[1] = testArray[0]
+testArrayTwoKey[2] = testArray[2]
+testArrayTwoKey[3] = testArray[4]
+testArrayTwoKey[4] = testArray[1]
+testArrayTwoKey[5] = testArray[5]
 testArraySecondPageReversed = SortedDict()
 testArraySecondPageReversed[0] = testArray[2]
 testArraySecondPageReversed[1] = testArray[1]
@@ -105,7 +105,10 @@ class test_APIBackendWithSwaggerAppObj(testHelperSuperClass):
 
   def test_getPaginatedResult_filterOnlyOdd(self):
     def filterFN(item, whereClauseText):
-      return ((item['K5'] % 2) == 1)
+      n = item['K5']
+      if n == '':
+        n = 1
+      return ((n % 2) == 1)
     self.assertGetPaginatedResult({ 'query': 'AAA'},None,filterFN,testArrayOddOnly,total=3)
 
   def test_getPaginatedResult_sortIntKeyDesc(self):
