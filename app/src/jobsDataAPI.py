@@ -69,32 +69,6 @@ class jobClass():
     ret += ')'
     return ret
 
-  # required for sort to work as this function returns the sort key value
-  def __getitem__(self, item):
-    if item == 'guid':
-      return self.guid
-    if item == 'name':
-      return self.name
-    if item == 'command':
-      return self.command
-    if item == 'enabled':
-      return self.enabled
-    if item == 'repetitionInterval':
-      return self.repetitionInterval
-    if item == 'creationDate':
-      return self.creationDate
-    if item == 'lastUpdateDate':
-      return self.lastUpdateDate
-    if item == 'lastRunDate':
-      return self.lastRunDate
-    if item == 'nextScheduledRun':
-      return self.nextScheduledRun
-    if item == 'lastRunReturnCode':
-      return self.lastRunReturnCode
-    if item == 'lastRunExecutionGUID':
-      return self.lastRunExecutionGUID
-    raise KeyError
-
   def assertValidName(name):
     if (len(name)<2):
       raise BadRequest('Job name must be more than 2 characters')
@@ -316,7 +290,7 @@ def registerAPI(appObj):
     def get(self):
       '''Get Jobs'''
       def outputJob(item):
-        return appObj.appData['jobsData'].jobs[item]
+        return appObj.appData['jobsData'].jobs[item].__dict__
       def filterJob(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
         if appObj.appData['jobsData'].jobs[item].name.upper().find(whereClauseText) != -1:
           return True

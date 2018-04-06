@@ -24,20 +24,9 @@ class mockRequest():
 class jobClassXX():
   guid = None
   name = None
-  def __getitem__(self, item):
-    if item == 'guid':
-      return self.guid
-    if item == 'name':
-      return self.name
   def __init__(self, name, guid):
     self.name = name
     self.guid = guid
-  #def __repr__(self):
-  #  ret = 'jobClass('
-  #  ret += 'guid:' + self.guid + ' '
-  #  ret += 'name:' + self.name + ' '
-  #  ret += ')'
-  #  return ret
 
 
 
@@ -107,8 +96,6 @@ class test_APIBackendWithSwaggerAppObj(testHelperSuperClass):
       },
       'result': dictToArr(expOutput)
     }
-    ## TODO Why are we getting jobClassXX here?
-    print(res)
     self.assertJSONStringsEqual(res,expRes)
 
 #************ Tests below (helpers above) *****************************
@@ -164,9 +151,12 @@ class test_APIBackendWithSwaggerAppObj(testHelperSuperClass):
       jobs_name_lookup[cur.name] = cur.guid
 
     def outputJob(item):
-      return jobsReal[item]
+      return jobsReal[item].__dict__
 
     expOutput = SortedDict()
+    expOutput[0] = {'guid': '1', 'name': 'a'}
+    expOutput[1] = {'guid': '2', 'name': 'b'}
+    expOutput[2] = {'guid': '3', 'name': 'c'}
 
     self.assertGetPaginatedResult({'sort': 'name'},outputJob,None,expOutput,inpData=jobs_name_lookup)
 
