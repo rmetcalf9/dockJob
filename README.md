@@ -58,7 +58,8 @@ To release dockjob I:
  - Run the [build process](./dockerImageBuildProcess/README.md) to create an image on my local machine
  - Make sure I remember to stop the dev server instances before testing the container
  - Run the application standalone and make sure I can view it
- - Go into compose examples and run https example and make sure I can log in to the application
+ - Go into compose examples and run https basic auth example and make sure I can log in to the application (A temp version of the compose file must be produced with hard coded version number as the latest tag will not point to the right version even though docker images shows that it does.)
+ - Rename milestone
  - Update RELEASE.md (pointing at the milestone)
  - Run docker login and log in to my docker hub account
  - Run docker push metcarob/dockjob:VERSION (Replace VERSION with version number that was just built)

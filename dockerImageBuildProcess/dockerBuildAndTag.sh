@@ -15,6 +15,30 @@ if [[ `${CMD_GIT} status --porcelain` ]]; then
   exit 1
 fi
 
+echo "Executing Quasar webfrontend build"
+cd ${DOCKJOB_GITROOT}/webfrontend
+if [ -d ./dist ]; then
+  rm -rf dist
+fi
+if [ -d ./dist ]; then
+  echo "ERROR - failed to delete dist directory"
+  cd ${START_DIR}
+  exit 1
+fi
+eval ${CMD_QUASAR} build
+RES=$?
+if [ ${RES} -ne 0 ]; then
+  cd ${START_DIR}
+  echo ""
+  echo "Quasar build failed"
+  exit 1
+fi
+if [ ! -d ./dist ]; then
+  echo "ERROR - build command didn't create webfrontend/dist directory"
+  cd ${START_DIR}
+  exit 1
+fi
+
 VERSIONFILE=${DOCKJOB_GITROOT}/VERSION
 cd ${START_DIR}
 ./bumpVersion.sh ${VERSIONFILE}

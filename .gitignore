@@ -1,2 +1,4 @@
 __pycache__
 integrationtests/output
+
+composeExamples/buildTest.yml
