@@ -56,6 +56,10 @@ At the moment I have a multi stage build so it wasn't possible to use TravisCI t
 
 To release dockjob I:
  - Run the [build process](./dockerImageBuildProcess/README.md) to create an image on my local machine
+ - Make sure I remember to stop the dev server instances before testing the container
+ - Run the application standalone and make sure I can view it
+ - Go into compose examples and run https example and make sure I can log in to the application
+ - Update RELEASE.md (pointing at the milestone)
  - Run docker login and log in to my docker hub account
  - Run docker push metcarob/dockjob:VERSION (Replace VERSION with version number that was just built)
  - Run docker push metcarob/dockjob:latest
@@ -66,3 +70,4 @@ Here's a list of other related projects:
  - [Kong](https://konghq.com/)
  - [Konga](https://github.com/pantsel/konga)
  - [Quasar Framework](http://quasar-framework.org/)
+ - [baseapp_for_restapi_backend_with_swagger](https://github.com/rmetcalf9/baseapp_for_restapi_backend_with_swagger) - My own library of shared utilities created so I can use this method of making API backends mutiple times.
