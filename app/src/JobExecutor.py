@@ -214,7 +214,13 @@ class JobExecutorClass(threading.Thread):
       self.aquireJobExecutionLock()
       for curJobExecution in self.JobExecutions:
         if self.JobExecutions[curJobExecution].dateCompleted is not None:
-          if from_iso8601(self.JobExecutions[curJobExecution].dateCompleted) < timeToPurgeBefore:
+          try:
+            tim = from_iso8601(self.JobExecutions[curJobExecution].dateCompleted)
+          except:
+            print('Error converting dateCompleted value: ' + self.JobExecutions[curJobExecution].dateCompleted)
+            print('Job execution: ' + self.JobExecutions[curJobExecution].guid)
+            raise
+          if tim < timeToPurgeBefore:
             toPurge.put(curJobExecution)
       while not toPurge.empty():
         toDel = toPurge.get()

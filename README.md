@@ -59,6 +59,7 @@ To release dockjob I:
  - Make sure I remember to stop the dev server instances before testing the container
  - Run the application standalone and make sure I can view it
  - Go into compose examples and run https basic auth example and make sure I can log in to the application (A temp version of the compose file must be produced with hard coded version number as the latest tag will not point to the right version even though docker images shows that it does.)
+ - When testing clear the browser cache to ensure webapp is latest version (seeing webservice version number not matching isn't good enough.)
  - Rename milestone
  - Update RELEASE.md (pointing at the milestone)
  - Run docker login and log in to my docker hub account
