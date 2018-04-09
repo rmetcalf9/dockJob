@@ -21,11 +21,11 @@ fi
 
 ii=$(docker images | grep metcarob/dockjob)
 if [ 0 -ne ${#ii} ]; then
-  echo 'Error metcarob/dockjob images remain'
+  echo '\nError metcarob/dockjob images remain'
   exit 1
 fi
 
-echo 'completed sucessfully'
+echo '\n${0} completed sucessfully'
 
 exit 0
 
