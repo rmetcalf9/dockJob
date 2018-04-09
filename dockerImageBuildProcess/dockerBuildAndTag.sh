@@ -67,6 +67,14 @@ ${CMD_GIT} add -A
 ${CMD_GIT} commit -m "version ${VERSIONNUM}"
 ${CMD_GIT} tag -a "${VERSIONNUM}" -m "version ${VERSIONNUM}"
 ${CMD_GIT} push
+RES=$?
+if [ ${RES} -ne 0 ]; then
+  cd ${START_DIR}
+  echo ""
+  echo "Failed to push to git. You need to run git push and git push --tags commands to complete"
+  exit 1
+fi
+
 ${CMD_GIT} push --tags
 ${CMD_DOCKER} tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}
 
