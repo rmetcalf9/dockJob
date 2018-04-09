@@ -6,7 +6,7 @@
 
 import pytz
 
-from APIBackendWithSwaggerAppObj import APIBackendWithSwaggerAppObj
+from baseapp_for_restapi_backend_with_swagger import appObj
 from serverInfoAPI import registerAPI as registerMainApi
 from jobsDataAPI import registerAPI as registerJobsApi, resetData as resetJobsData, getJobServerInfoModel
 from jobExecutionsDataAPI import registerAPI as registerJobExecutionsApi
@@ -17,7 +17,7 @@ import time
 MissingUserForJobsException = Exception('Missing user for Jobs (set APIAPP_USERFORJOBS)')
 MissingGroupForJobsException = Exception('Missing group for Jobs (set APIAPP_GROUPFORJOBS)')
 
-class appObjClass(APIBackendWithSwaggerAppObj):
+class appObjClass(appObj):
   jobExecutor = None
   userforjobs = None
   groupforjobs = None
