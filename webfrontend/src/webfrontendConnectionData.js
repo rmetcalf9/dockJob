@@ -23,8 +23,7 @@ function tryLocation (locationList, callback) {
           apiurl: 'http://localhost:80/api',
           apiaccesssecurity: [] // all supported auth types. Can be empty, or JSON: basic-auth, jwt
           // Empty list means no auth type
-          //  { type: 'basic-auth' } - webfrontend will prompt user for username and password
-          //  ...
+          //  values documented here https://github.com/rmetcalf9/dockJob/blob/master/ENVVARIABLES.md
         }
         var basicAuthData = {
           version: 'Development-basicAuthData',

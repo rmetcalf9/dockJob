@@ -43,6 +43,7 @@ import {
   Notify
 } from 'quasar'
 import globalStore from '../store/globalStore'
+import basicauthlogintogetjwttokenstore from '../store/basicauthlogintogetjwttoken'
 
 export default {
   components: {
@@ -64,7 +65,8 @@ export default {
       usernamePass: {
         username: '',
         password: ''
-      }
+      },
+      authmethod: undefined
     }
   },
   computed: {
@@ -113,7 +115,9 @@ export default {
         this.tabs.xxx = false
         for (var i = 0; i < globalStore.getters.connectionData.apiaccesssecurity.length; i++) {
           var curAuthMethod = globalStore.getters.connectionData.apiaccesssecurity[i]
+          this.authmethod = curAuthMethod
           if (curAuthMethod.type === 'basic-auth') this.tabs.usernamePass = true
+          if (curAuthMethod.type === 'basic-auth-login-toget-jwttoken') this.tabs.usernamePass = true
         }
         for (var tab in this.tabs) {
           if (this.tabs[tab]) {
@@ -145,7 +149,34 @@ export default {
         username: this.usernamePass.username,
         password: this.usernamePass.password
       }
-      globalStore.dispatch('login', {callback: callback, accessCredentials: accessCredentials})
+      if (this.authmethod.type === 'basic-auth-login-toget-jwttoken') {
+        // Redirect API function to allow jwt token store to check for token expiry
+        globalStore.commit('SET_APIFN',
+          function callDockjobAPI (apiurl, dockJobAccessCredentials, method, pathWithoutStartingSlash, postdata, callback) {
+            basicauthlogintogetjwttokenstore.dispatch('callAPI', {
+              apifn: TTT.$callDockjobAPI,
+              apiurl: apiurl,
+              dockJobAccessCredentials: dockJobAccessCredentials,
+              method: method,
+              pathWithoutStartingSlash: pathWithoutStartingSlash,
+              postdata: postdata,
+              callback: callback
+            })
+          }
+        )
+        // Vue Store will call the login service and set cookie
+        var callback2 = {
+          ok: function (response) {
+            globalStore.dispatch('login', {callback: callback, accessCredentials: undefined})
+          },
+          error: function (response) {
+            callback.error(response)
+          }
+        }
+        basicauthlogintogetjwttokenstore.dispatch('login', {callback: callback2, username: this.usernamePass.username, password: this.usernamePass.password, authmethod: this.authmethod})
+      } else {
+        globalStore.dispatch('login', {callback: callback, accessCredentials: accessCredentials})
+      }
     }
   },
   created () {
