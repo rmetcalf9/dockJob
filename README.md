@@ -30,7 +30,7 @@ docker run -d -p 80:80 -e APIAPP_APIURL='http://localhost:80/api' -e'APIAPP_APID
 
 Visit http://localhost/frontend
 
-In this setup there is no user authentication or https. To run with these see [compose examples](./composeExamples/README.md) for information on a more robust way to deploy it.
+In this setup there is no user authentication or https. To run with these see [compose examples](./composeExamples/README.md) for information on a more robust way to deploy it and [Enviroment Variables](ENVVARIABLES.md) for documentation of possible enviroment variables that can be used as settings.
 
  
 
