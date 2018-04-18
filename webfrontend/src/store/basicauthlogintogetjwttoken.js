@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 
 import axios from 'axios'
 import callbackHelper from '../callbackHelper'
+import { Cookies } from 'quasar'
 
 const state = {
   username: undefined,
@@ -48,9 +49,8 @@ export const actions = {
     axios(config).then(
       (response) => {
         commit('SET_TOKEN', response.data)
-        // TODO Consider adding an expiry to this cookie
-        var cookie = escape(state.authmethod.cookiename) + '=' + escape(state.token.JWTToken) + ';'
-        document.cookie = cookie
+        // Not adding expire to the cookie as we are making it a session cookie
+        Cookies.set(state.authmethod.cookiename, state.token.JWTToken, {secure: true})
         params.callback.ok(response)
       },
       (response) => {
@@ -59,8 +59,36 @@ export const actions = {
     )
   },
   callAPI ({commit, state, dispatch}, params) {
-    console.log('TODO Implement API 222')
-    params.apifn(params.apiurl, params.dockJobAccessCredentials, params.method, params.pathWithoutStartingSlash, params.postdata, params.callback)
+    if (!Cookies.has(state.authmethod.cookiename)) {
+      console.log('ERROR in basicauthlogintogetjwttoken.js -> callAPI')
+      console.log('No cookie present - user needs to log in should never get here')
+      callbackHelper.callbackWithSimpleError(params.callback, 'No security cookie present')
+    } else {
+      var callback2 = {
+        ok: params.callback.ok,
+        error: function (response) {
+          if (typeof (response.response) !== 'undefined') {
+            if (typeof (response.response.status) !== 'undefined') {
+              if (response.response.status === 401) {
+                console.log('Got 401 on first service call - trying to get a new token')
+                var paramsToSendTogetJWT = {
+                  callback: {
+                    ok: function (response) {
+                      // Second call callback function is the origional callback function because that will have no retry
+                      params.apifn(params.apiurl, params.dockJobAccessCredentials, params.method, params.pathWithoutStartingSlash, params.postdata, params.callback)
+                    },
+                    error: params.callback.error
+                  }
+                }
+                dispatch('getJWT', paramsToSendTogetJWT)
+              }
+            }
+          }
+          params.callback.error(response)
+        }
+      }
+      params.apifn(params.apiurl, params.dockJobAccessCredentials, params.method, params.pathWithoutStartingSlash, params.postdata, callback2)
+    }
   }
 }
 
