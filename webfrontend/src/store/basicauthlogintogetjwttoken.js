@@ -37,6 +37,12 @@ export const actions = {
     commit('SET_USERNAMEANDPASSWORDANDAUTHMETHOD', {username: params.username, password: params.password, authmethod: params.authmethod})
     dispatch('getJWT', params)
   },
+  logout ({commit, state, dispatch}, params) {
+    if (!Cookies.has(state.authmethod.cookiename)) {
+      Cookies.remove(state.authmethod.cookiename)
+    }
+    commit('SET_TOKEN', undefined)
+  },
   getJWT ({commit, state, dispatch}, params) {
     var config = {
       method: 'get',

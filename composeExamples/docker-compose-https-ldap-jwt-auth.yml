@@ -94,8 +94,8 @@ services:
       restart_policy:
         condition: on-failure
     environment:
-      - LOGINEP_LDAP_HOST=unixldap.cc.ic.ac.uk
-      - LOGINEP_LDAP_PORT=636
+      - LOGINEP_LDAP_HOST=unixldap.somehost.uk
+      - LOGINEP_LDAP_PORT=546
       - LOGINEP_USER_BASE_DN=ou=People,ou=everyone,dc=somehost,dc=com
       - LOGINEP_GROUP_BASE_DN=ou=Group,ou=everyone,dc=somehost,dc=com
       - LOGINEP_SYNCACL=soa_tech_monitoring

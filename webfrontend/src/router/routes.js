@@ -1,4 +1,5 @@
 import globalStore from '../store/globalStore'
+import basicauthlogintogetjwttokenstore from '../store/basicauthlogintogetjwttoken'
 
 function defaultBeforeNavFn (to, from, next, pageTitle) {
   globalStore.commit('SET_PAGE_TITLE', pageTitle)
@@ -55,7 +56,13 @@ export default [
           console.log(response.message)
         }
       }
-      globalStore.dispatch('logout', {callback: callback})
+      var cb = {
+        ok: function (response) {
+          basicauthlogintogetjwttokenstore.dispatch('logout', {callback: callback})
+        },
+        error: callback.error
+      }
+      globalStore.dispatch('logout', {callback: cb})
     }
   },
   { // Always leave this as last one
