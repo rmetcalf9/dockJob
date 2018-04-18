@@ -50,7 +50,8 @@ export const actions = {
       (response) => {
         commit('SET_TOKEN', response.data)
         // Not adding expire to the cookie as we are making it a session cookie
-        Cookies.set(state.authmethod.cookiename, state.token.JWTToken, {secure: true})
+        //  expire can ounly be quoted in days
+        Cookies.set(state.authmethod.cookiename, state.token.JWTToken, {secure: true, path: '/'})
         params.callback.ok(response)
       },
       (response) => {
@@ -67,20 +68,23 @@ export const actions = {
       var callback2 = {
         ok: params.callback.ok,
         error: function (response) {
-          if (typeof (response.response) !== 'undefined') {
-            if (typeof (response.response.status) !== 'undefined') {
-              if (response.response.status === 401) {
-                console.log('Got 401 on first service call - trying to get a new token')
-                var paramsToSendTogetJWT = {
-                  callback: {
-                    ok: function (response) {
-                      // Second call callback function is the origional callback function because that will have no retry
-                      params.apifn(params.apiurl, params.dockJobAccessCredentials, params.method, params.pathWithoutStartingSlash, params.postdata, params.callback)
-                    },
-                    error: params.callback.error
+          if (typeof (response.orig) !== 'undefined') {
+            if (typeof (response.orig.response) !== 'undefined') {
+              if (typeof (response.orig.response.status) !== 'undefined') {
+                if (response.orig.response.status === 401) {
+                  console.log('Got 401 on first service call - trying to get a new token')
+                  var paramsToSendTogetJWT = {
+                    callback: {
+                      ok: function (response) {
+                        // Second call callback function is the origional callback function because that will have no retry
+                        params.apifn(params.apiurl, params.dockJobAccessCredentials, params.method, params.pathWithoutStartingSlash, params.postdata, params.callback)
+                      },
+                      error: params.callback.error
+                    }
                   }
+                  dispatch('getJWT', paramsToSendTogetJWT)
+                  return
                 }
-                dispatch('getJWT', paramsToSendTogetJWT)
               }
             }
           }
