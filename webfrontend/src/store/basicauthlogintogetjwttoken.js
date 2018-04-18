@@ -38,10 +38,14 @@ export const actions = {
     dispatch('getJWT', params)
   },
   logout ({commit, state, dispatch}, params) {
-    if (!Cookies.has(state.authmethod.cookiename)) {
+    if (Cookies.has(state.authmethod.cookiename)) {
+      // Note- remove cookie not working so we settle for blanking out the value and setting it to expire
+      Cookies.set(state.authmethod.cookiename, 'X', {secure: true, path: '/', expire: -1})
+      Cookies.set(state.authmethod.cookiename, '', {secure: true, path: '/', expire: -1})
       Cookies.remove(state.authmethod.cookiename)
     }
     commit('SET_TOKEN', undefined)
+    params.callback.ok(undefined)
   },
   getJWT ({commit, state, dispatch}, params) {
     var config = {
