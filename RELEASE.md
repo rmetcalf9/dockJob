@@ -1,5 +1,11 @@
 # Release Log
 
+## 0.2.2
+
+Bug fixes
+https://github.com/rmetcalf9/dockJob/milestone/3?closed=1
+
+
 ## 0.2.1
 
 Adding feature to support Ldap -> JWT login.
