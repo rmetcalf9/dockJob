@@ -57,7 +57,7 @@ At the moment I have a multi stage build so it wasn't possible to use TravisCI t
 To release dockjob I:
  - Run the [build process](./dockerImageBuildProcess/README.md) to create an image on my local machine
  - Make sure I remember to stop the dev server instances before testing the container
- - Run the application standalone and make sure I can view it
+ - Launch the image with a docker run command and make sure it starts and the logs display correct version number
  - Go into compose examples and run https basic auth example and make sure I can log in to the application (A temp version of the compose file must be produced with hard coded version number as the latest tag will not point to the right version even though docker images shows that it does.)
  - When testing clear the browser cache to ensure webapp is latest version (seeing webservice version number not matching isn't good enough.)
  - Rename milestone
@@ -65,6 +65,7 @@ To release dockjob I:
  - Run docker login and log in to my docker hub account
  - Run docker push metcarob/dockjob:VERSION (Replace VERSION with version number that was just built)
  - Run docker push metcarob/dockjob:latest
+ - Create new next milestone
 
 # Related projects
 
