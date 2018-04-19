@@ -18,3 +18,10 @@ APIAPP_APIACCESSSECURITY must be valid JSON representing the way the frontend sh
  | [] | An empty array means that no authroization is needed to call the API's. |
  | [ { type: 'basic-auth' } ] | Basic auth means the user should be prompted for a username and password and this added to API calls as a basic authroization header. |
  | [ { type: 'basic-auth-login-toget-jwttoken', loginurl: 'https://x/login/', cookiename: 'jwt-auth-cookie' } ] | Call a login endpoint to get a JWT token which is then supplied to the API's as a cookie |
+
+## Docker container helper variables
+
+ | Name | Example Value | Meaning |
+ | ---- | ------------- | ------- |
+ | DOCKERRUN_USERHOSTFILE | /run/secrets/webservices_hostname | This points to a file inside the container; probally supplied as a secret or config. If this variable is present the file is read into the contents of an enviroment variable 'DOCKERRUN_USERHOST'. All other enviroment variables starting with APIAPP_ can refer to DOCKERRUN_USERHOST. (If specifying in docker compose files preceed with two $'s.)  |
+

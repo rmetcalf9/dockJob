@@ -59,3 +59,22 @@ Now visit https://** YOU HOST **:443/frontend
 The username and password is sampleuser - this can be changed in the compose file. I expect most deployments would migrate this password into a docker secret.
 
 Use the docker stack rm command to stop the services.
+
+# Dockjob with external hostname passed in via a secret
+
+The application requires knowldege of the external url the users use to access the service. This is so the frontend app can correctly call the API. In my use case for dockJob I have a docker secret set up with the external host name. (This drives the SSL certificate process) It is useful for me that dockJob can pick up the hostname from this secret. Unfortunatly it is required in mutiple enviroment variables in different ways. To resolve this I have implemented a method that will allow another enviroment variables to be refered to. This compose file demos this.
+
+To use it create a secret:
+````
+echo "somefunnyhostname.com" | docker secret create webservices_hostname -
+````
+
+Execute the compose file
+````
+docker stack deploy --compose-file=docker-compose-hostname-from-secret.yml dockjob-hnsecret
+````
+
+Finally use the docker logs command and verify the values were set correctly.
+
+
+
