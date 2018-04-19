@@ -13,6 +13,14 @@ const state = {
   token: undefined
 }
 
+var isCookieSetFN = function () {
+  var r = Cookies.has(state.authmethod.cookiename)
+  if (r === false) {
+    return false
+  }
+  return Cookies.get(state.authmethod.cookiename) !== ''
+}
+
 export const mutations = {
   SET_USERNAMEANDPASSWORDANDAUTHMETHOD (state, values) {
     state.username = values.username
@@ -38,7 +46,7 @@ export const actions = {
     dispatch('getJWT', params)
   },
   logout ({commit, state, dispatch}, params) {
-    if (Cookies.has(state.authmethod.cookiename)) {
+    if (isCookieSetFN()) {
       // Note- remove cookie not working so we settle for blanking out the value and setting it to expire
       Cookies.set(state.authmethod.cookiename, 'X', {secure: true, path: '/', expire: -1})
       Cookies.set(state.authmethod.cookiename, '', {secure: true, path: '/', expire: -1})
