@@ -1,5 +1,10 @@
 # Release Log
 
+## 0.2.3
+
+Adding feature to allow me to integrate more easily with other projects.
+https://github.com/rmetcalf9/dockJob/milestone/4?closed=1
+
 ## 0.2.2
 
 Bug fixes
