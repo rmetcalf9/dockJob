@@ -38,9 +38,6 @@ services:
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=kong-database
     command: kong migrations up
-    deploy:
-      restart_policy:
-        condition: on-failure
 
   kong:
     #tried changing to kong:0.12.0-alpine but didn't work as health check needs curl
