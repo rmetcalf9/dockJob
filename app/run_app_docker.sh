@@ -33,7 +33,7 @@ if [ E${DOCKERRUN_USERHOSTFILE} != 'E' ]; then
   C=0
   for i in ${VARSTOUPDATE}; do
     ((C++))
-    eval ${i}
+    eval "${i}"
   done
   echo "  ${C} variables evaluated"
 fi
