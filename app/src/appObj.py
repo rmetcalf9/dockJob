@@ -6,7 +6,7 @@
 
 import pytz
 
-from baseapp_for_restapi_backend_with_swagger import appObj
+from baseapp_for_restapi_backend_with_swagger import AppObjBaseClass as parAppObj, readFromEnviroment
 from serverInfoAPI import registerAPI as registerMainApi
 from jobsDataAPI import registerAPI as registerJobsApi, resetData as resetJobsData, getJobServerInfoModel
 from jobExecutionsDataAPI import registerAPI as registerJobExecutionsApi
@@ -14,10 +14,7 @@ from flask_restplus import fields
 from JobExecutor import JobExecutorClass
 import time
 
-MissingUserForJobsException = Exception('Missing user for Jobs (set APIAPP_USERFORJOBS)')
-MissingGroupForJobsException = Exception('Missing group for Jobs (set APIAPP_GROUPFORJOBS)')
-
-class appObjClass(appObj):
+class appObjClass(parAppObj):
   jobExecutor = None
   userforjobs = None
   groupforjobs = None
@@ -33,9 +30,10 @@ class appObjClass(appObj):
       self.jobExecutor = None
     super(appObjClass, self).init(env)
     resetJobsData(self)
-    self.userforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, MissingUserForJobsException, None)
-    self.groupforjobs = self.globalParamObject.readFromEnviroment(env, 'APIAPP_GROUPFORJOBS', None, MissingGroupForJobsException, None)
-    skipUserCheck = self.globalParamObject.readFromEnviroment(env, 'APIAPP_SKIPUSERCHECK', False, MissingGroupForJobsException, None)
+
+    self.userforjobs = readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, None)
+    self.groupforjobs = readFromEnviroment(env, 'APIAPP_GROUPFORJOBS', None, None)
+    skipUserCheck = readFromEnviroment(env, 'APIAPP_SKIPUSERCHECK', False, [False, True])
     self.jobExecutor = JobExecutorClass(self, skipUserCheck)
 
     #When we are testing we will launch the loop iterations manually

@@ -1,6 +1,7 @@
 #tests for appObj
 from TestHelperSuperClass import testHelperAPIClient
-from appObj import appObj, appObjClass, MissingUserForJobsException, MissingGroupForJobsException
+from appObj import appObj, appObjClass
+from baseapp_for_restapi_backend_with_swagger import getInvalidEnvVarParamaterException
 import pytz
 import datetime
 import json
@@ -52,7 +53,7 @@ class test_appObjClass(testHelperAPIClient):
     }
     with self.assertRaises(Exception) as context:
       appObj.init(env, self.standardStartupTime)
-    self.checkGotRightException(context,MissingUserForJobsException)
+    self.checkGotRightException(context,getInvalidEnvVarParamaterException('APIAPP_USERFORJOBS'))
 
   def test_missingUserForJobs(self):
     env = {
@@ -65,5 +66,50 @@ class test_appObjClass(testHelperAPIClient):
     }
     with self.assertRaises(Exception) as context:
       appObj.init(env, self.standardStartupTime)
-    self.checkGotRightException(context,MissingGroupForJobsException)
+    self.checkGotRightException(context,getInvalidEnvVarParamaterException('APIAPP_GROUPFORJOBS'))
+
+  def test_InvalidSkipUserCheck(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-3.3.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurlxxx:45/aa/bb/cc',
+      'APIAPP_APIACCESSSECURITY': '[]',
+      'APIAPP_USERFORJOBS': 'root',
+      'APIAPP_GROUPFORJOBS': 'root',
+      'APIAPP_SKIPUSERCHECK': 'INVALIDVALUE'
+    }
+    with self.assertRaises(Exception) as context:
+      appObj.init(env, self.standardStartupTime)
+    self.checkGotRightException(context,getInvalidEnvVarParamaterException('APIAPP_SKIPUSERCHECK'))
+
+  def test_TrueSkipUserCheck(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-3.3.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurlxxx:45/aa/bb/cc',
+      'APIAPP_APIACCESSSECURITY': '[]',
+      'APIAPP_USERFORJOBS': 'root',
+      'APIAPP_GROUPFORJOBS': 'root',
+      'APIAPP_SKIPUSERCHECK': 'True'
+    }
+    with self.assertRaises(Exception) as context:
+      appObj.init(env, self.standardStartupTime)
+    self.checkGotRightException(context,getInvalidEnvVarParamaterException('APIAPP_SKIPUSERCHECK'))
+
+  def test_FalseSkipUserCheck(self):
+    env = {
+      'APIAPP_MODE': 'DOCKER',
+      'APIAPP_VERSION': 'TEST-3.3.3',
+      'APIAPP_FRONTEND': '../app',
+      'APIAPP_APIURL': 'http://apiurlxxx:45/aa/bb/cc',
+      'APIAPP_APIACCESSSECURITY': '[]',
+      'APIAPP_USERFORJOBS': 'root',
+      'APIAPP_GROUPFORJOBS': 'root',
+      'APIAPP_SKIPUSERCHECK': 'False'
+    }
+    with self.assertRaises(Exception) as context:
+      appObj.init(env, self.standardStartupTime)
+    self.checkGotRightException(context,getInvalidEnvVarParamaterException('APIAPP_SKIPUSERCHECK'))
 

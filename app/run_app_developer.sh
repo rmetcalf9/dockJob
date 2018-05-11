@@ -5,7 +5,7 @@ APP_DIR=.
 export APIAPP_MODE=DEVELOPER
 export APIAPP_FRONTEND=_
 export APIAPP_APIURL=http://localhost/api
-export APIAPP_APIDOCSURL=http://localhost/apidocs/
+export APIAPP_APIDOCSURL=http://localhost/apidocs
 export APIAPP_APIACCESSSECURITY=[]
 export APIAPP_USERFORJOBS=dockjobuser
 export APIAPP_GROUPFORJOBS=dockjobgroup
@@ -26,3 +26,4 @@ fi
 
 #Python app reads parameters from environment variables
 python3 ./src/app.py
+
