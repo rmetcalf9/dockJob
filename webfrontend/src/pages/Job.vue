@@ -99,6 +99,7 @@ import callbackHelper from '../callbackHelper'
 import STDOutput from '../components/STDOutput'
 import CreateJobModal from '../components/CreateJobModal'
 import userSettings from '../store/userSettings'
+import restcallutils from '../restcallutils'
 
 function addDateStringsToJobData (obj) {
   obj.creationDateString = userSettings.getters.userTimeStringFN(obj.creationDate)
@@ -129,17 +130,17 @@ export default {
       },
       createJobModalDialog: {},
       jobTableColumns: [
-        { name: 'guid', required: false, label: 'Execution GUID', align: 'left', field: 'guid', sortable: false, filter: true },
-        { name: 'executionName', required: false, label: 'Name', align: 'left', field: 'executionName', sortable: false, filter: true },
-        { name: 'stage', required: false, label: 'Stage', align: 'left', field: 'stage', sortable: false, filter: true },
-        { name: 'resultReturnCode', required: false, label: 'Return Code', align: 'left', field: 'resultReturnCode', sortable: false, filter: true },
-        { name: 'manual', required: false, label: 'Manual Run', align: 'left', field: 'manual', sortable: false, filter: true },
-        { name: 'dateCreated', required: false, label: 'Creation Date', align: 'left', field: 'dateCreatedString', sortable: false, filter: true },
-        { name: 'dateStarted', required: false, label: 'Start Date', align: 'left', field: 'dateStartedString', sortable: false, filter: true },
-        { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompletedString', sortable: false, filter: true },
-        { name: 'resultSTDOUT', required: false, label: 'Output', align: 'left', field: 'resultSTDOUT', sortable: false, filter: true },
-        { name: 'jobGUID', required: false, label: 'Job GUID', align: 'left', field: 'jobGUID', sortable: false, filter: true },
-        { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: false, filter: true }
+        { name: 'guid', required: false, label: 'Execution GUID', align: 'left', field: 'guid', sortable: true, filter: true },
+        { name: 'executionName', required: false, label: 'Name', align: 'left', field: 'executionName', sortable: true, filter: true },
+        { name: 'stage', required: false, label: 'Stage', align: 'left', field: 'stage', sortable: true, filter: true },
+        { name: 'resultReturnCode', required: false, label: 'Return Code', align: 'left', field: 'resultReturnCode', sortable: true, filter: true },
+        { name: 'manual', required: false, label: 'Manual Run', align: 'left', field: 'manual', sortable: true, filter: true },
+        { name: 'dateCreated', required: false, label: 'Creation Date', align: 'left', field: 'dateCreatedString', sortable: true, filter: true },
+        { name: 'dateStarted', required: false, label: 'Start Date', align: 'left', field: 'dateStartedString', sortable: true, filter: true },
+        { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompletedString', sortable: true, filter: true },
+        { name: 'resultSTDOUT', required: false, label: 'Output', align: 'left', field: 'resultSTDOUT', sortable: true, filter: true },
+        { name: 'jobGUID', required: false, label: 'Job GUID', align: 'left', field: 'jobGUID', sortable: true, filter: true },
+        { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: true, filter: true }
       ],
       jobExecutionData: [],
       loading: false,
@@ -238,18 +239,24 @@ export default {
         pagination.page = 1
       }
 
-      var queryString = ''
-      if (pagination.rowsPerPage === 0) {
-        queryString = 'jobs/' + this.$route.params.jobGUID + '/execution'
-        if (filter !== '') {
-          queryString = 'jobs/' + this.$route.params.jobGUID + '/execution?query=' + filter
-        }
-      } else {
-        queryString = 'jobs/' + this.$route.params.jobGUID + '/execution?pagesize=' + pagination.rowsPerPage.toString() + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
-        if (filter !== '') {
-          queryString = 'jobs/' + this.$route.params.jobGUID + '/execution?pagesize=' + pagination.rowsPerPage.toString() + '&query=' + filter + '&offset=' + (pagination.rowsPerPage * (pagination.page - 1)).toString()
-        }
+      var queryParams = []
+
+      if (filter !== '') {
+        queryParams['query'] = filter
       }
+      if (pagination.rowsPerPage !== 0) {
+        queryParams['pagesize'] = pagination.rowsPerPage.toString()
+        queryParams['offset'] = (pagination.rowsPerPage * (pagination.page - 1)).toString()
+      }
+      if (pagination.sortBy !== null) {
+        var postfix = ''
+        if (pagination.descending) {
+          postfix = ':desc'
+        }
+        queryParams['sort'] = pagination.sortBy + postfix
+      }
+
+      var queryString = restcallutils.buildQueryString('jobs/' + this.$route.params.jobGUID + '/execution', queryParams)
       // console.log(queryString)
       globalStore.getters.apiFN('GET', queryString, undefined, callback)
     }
