@@ -163,7 +163,7 @@ export default {
       }
       var callback = {
         ok: function (response) {
-          Notify.create('Job Execution Request Sent')
+          Notify.create({color: 'positive', detail: 'Job Execution Request Sent'})
           // this.refreshJobData() No point doing this immediately
         },
         error: function (error) {

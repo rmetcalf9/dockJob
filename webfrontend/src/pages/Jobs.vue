@@ -182,7 +182,7 @@ export default {
               pagination: TTT.jobsDataTableSettings.serverPagination,
               filter: TTT.jobsDataTableSettings.filter
             })
-            Notify.create('Job "' + response.data.name + '" Deleted')
+            Notify.create({color: 'positive', detail: 'Job "' + response.data.name + '" Deleted'})
           },
           error: function (error) {
             TTT.loading = false

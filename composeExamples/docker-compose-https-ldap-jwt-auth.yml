@@ -123,9 +123,9 @@ services:
     #image: dockjobdev
     environment:
       #- APIAPP_APIURL=https://cat-sdts.metcarob-home.com/dockjobapi
-      #- APIAPP_APIDOCSURL=https://cat-sdts.metcarob-home.com/dockjobapidocs/
+      #- APIAPP_APIDOCSURL=https://cat-sdts.metcarob-home.com/dockjobapidocs
       - APIAPP_APIURL=https://somefunnyhostname.com:5443/dockjobapi
-      - APIAPP_APIDOCSURL=https://somefunnyhostname.com:5443/dockjobapidocs/
+      - APIAPP_APIDOCSURL=https://somefunnyhostname.com:5443/dockjobapidocs
       - "APIAPP_APIACCESSSECURITY=[{\"type\": \"basic-auth-login-toget-jwttoken\", \"loginurl\": \"https://somefunnyhostname.com:5443/login/\", \"cookiename\": \"jwt-auth-cookie\" }]"
     deploy:
       restart_policy:

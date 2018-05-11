@@ -302,7 +302,7 @@ export default {
           if (typeof (TTT.createdOKCallback) !== 'undefined') {
             TTT.createdOKCallback(response.data)
           }
-          Notify.create(TTT.displayValues.sucessMessage + response.data.name)
+          Notify.create({color: 'positive', detail: TTT.displayValues.sucessMessage + response.data.name})
         },
         error: function (error) {
           Notify.create(TTT.displayValues.failMessage + callbackHelper.getErrorFromResponse(error))
