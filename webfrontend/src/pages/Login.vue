@@ -135,12 +135,15 @@ export default {
       console.log('TODO deal with state ' + globalStore.getters.datastoreState)
     },
     usernamePassLogin () {
+      Loading.show()
       var TTT = this
-      var callback = {
+      var callbackToMoveUserToDashboard = {
         ok: function (response) {
+          Loading.hide()
           TTT.$router.replace(TTT.$route.query.redirect || '/')
         },
         error: function (response) {
+          Loading.hide()
           Notify.create(response.message)
         }
       }
@@ -167,15 +170,15 @@ export default {
         // Vue Store will call the login service and set cookie
         var callback2 = {
           ok: function (response) {
-            globalStore.dispatch('login', {callback: callback, accessCredentials: undefined})
+            globalStore.dispatch('login', {callback: callbackToMoveUserToDashboard, accessCredentials: undefined})
           },
           error: function (response) {
-            callback.error(response)
+            callbackToMoveUserToDashboard.error(response)
           }
         }
         basicauthlogintogetjwttokenstore.dispatch('login', {callback: callback2, username: this.usernamePass.username, password: this.usernamePass.password, authmethod: this.authmethod})
       } else {
-        globalStore.dispatch('login', {callback: callback, accessCredentials: accessCredentials})
+        globalStore.dispatch('login', {callback: callbackToMoveUserToDashboard, accessCredentials: accessCredentials})
       }
     }
   },
