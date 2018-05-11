@@ -391,7 +391,7 @@ def registerAPI(appObj):
     def get(self, guid):
       '''Get Job Executions'''
       def outputJobExecution(item):
-        return item
+        return item.__dict__
       def filterJobExecution(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
         return True
       return appObj.getPaginatedResult(

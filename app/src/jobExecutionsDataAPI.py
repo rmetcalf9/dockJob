@@ -16,10 +16,11 @@ def registerAPI(appObj):
     @nsJobExecutions.param('offset', 'Number to start from')
     @nsJobExecutions.param('pagesize', 'Results per page')
     @nsJobExecutions.param('query', 'Search Filter')
+    @appObj.addStandardSortParams(nsJobExecutions)
     def get(self):
       '''Get Job Executions'''
       def outputJobExecution(item):
-        return item
+        return item.__dict__
       def filterJobExecution(item, whereClauseText):
         return True
       return appObj.getPaginatedResult(
