@@ -2,6 +2,21 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+// using a function to return different instances
+function defaultTableSettings () {
+  return {
+    visibleColumns: ['executionName', 'stage', 'resultReturnCode'],
+    serverPagination: {
+      page: 1,
+      rowsNumber: 10, // specifying this determines pagination is server-side
+      rowsPerPage: 10,
+      sortBy: null,
+      descending: false
+    },
+    filter: ''
+  }
+}
+
 const state = {
   jobs: {
     visibleColumns: ['name', 'enabled', 'lastRunReturnCode', 'nextScheduledRun'],
@@ -14,17 +29,8 @@ const state = {
     },
     filter: ''
   },
-  jobExecutions: {
-    visibleColumns: ['executionName', 'stage', 'resultReturnCode'],
-    serverPagination: {
-      page: 1,
-      rowsNumber: 10, // specifying this determines pagination is server-side
-      rowsPerPage: 10,
-      sortBy: null,
-      descending: false
-    },
-    filter: ''
-  }
+  jobExecutions: defaultTableSettings(),
+  prefixedDataTableSettings: {}
 }
 
 export const mutations = {
@@ -45,6 +51,15 @@ const getters = {
   },
   jobExecutions: (state, getters) => {
     return state.jobExecutions
+  },
+  prefixedDataTableSetting: (state, getters) => {
+    // This stops cacheing taking place
+    return function (key) {
+      if (typeof (state.prefixedDataTableSettings[key]) === 'undefined') {
+        state.prefixedDataTableSettings[key] = defaultTableSettings()
+      }
+      return state.prefixedDataTableSettings[key]
+    }
   }
 }
 

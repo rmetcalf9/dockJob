@@ -72,8 +72,12 @@
       <q-td slot="body-cell-jobCommand" slot-scope="props" :props="props">
         <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
       </q-td>
-
     </q-table>
+    <ExecutionTable
+      title="Executions Table"
+      DataTableSettingsPrefix='jobExecutionSingleJobDataTableSettings'
+    >
+    </ExecutionTable>
     <q-btn
       color="primary"
       push
@@ -97,6 +101,7 @@ import globalStore from '../store/globalStore'
 import dataTableSettings from '../store/dataTableSettings'
 import callbackHelper from '../callbackHelper'
 import STDOutput from '../components/STDOutput'
+import ExecutionTable from '../components/ExecutionTable'
 import CreateJobModal from '../components/CreateJobModal'
 import userSettings from '../store/userSettings'
 import restcallutils from '../restcallutils'
@@ -112,7 +117,8 @@ function addDateStringsToJobData (obj) {
 export default {
   components: {
     CreateJobModal,
-    STDOutput
+    STDOutput,
+    ExecutionTable
   },
   data () {
     return {
