@@ -71,16 +71,15 @@ RES=$?
 if [ ${RES} -ne 0 ]; then
   cd ${START_DIR}
   echo ""
-  echo "Failed to push to git. You need to run git push and git push --tags commands to complete"
+  echo "Failed to push to git. You need to run the following commands manually to complete:"f
+  echo " git push"
+  echo " git push --tags"
+  echo " ${CMD_DOCKER} tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}"
   exit 1
 fi
 
 ${CMD_GIT} push --tags
 ${CMD_DOCKER} tag ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}
-
-# push it
-#${CMD_DOCKER} push ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:latest
-#${CMD_DOCKER} push ${DOCKER_USERNAME}/${DOCKER_IMAGENAME}:${VERSIONNUM}
 
 
 echo "Script Complete"
