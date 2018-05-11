@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-for="curVal in getLineArray(val)" :key=curVal.p>{{ curVal.v }}</div>
+    <div v-for="curVal in getLineArray(val, 3)" :key=curVal.p>{{ curVal.v }}</div>
   </div>
 </template>
 
@@ -12,10 +12,18 @@ export default {
   ],
   data () {
     return {
-      getLineArray: function (str) {
+      // Function will return an array of lines. If there is more than the max it will add a '...' as the last line
+      getLineArray: function (str, maxNumOfLinesToShow) {
         if (typeof (str) === 'undefined') return undefined
         var c = 0
-        return str.split('\n').map(function (v) { return { p: ++c, v: v } })
+        var lines = str.split('\n').map(function (v) { return { p: ++c, v: v } })
+        if (lines.length > maxNumOfLinesToShow) {
+          lines = lines.filter(function (v) {
+            return v.p <= maxNumOfLinesToShow
+          })
+          lines = lines.concat([{ p: ++c, v: '...' }])
+        }
+        return lines
       }
     }
   },
