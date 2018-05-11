@@ -22,7 +22,6 @@ def getJobModel(appObj):
       'command': fields.String(default=''),
       'enabled': fields.Boolean(default=False,description='Is auto scheduling enabled - otherwise manual run only'),
       'repetitionInterval': fields.String(default='',description='How the job is scheduled to run'),
-      #'nextScheduledRun': fields.String(default='',description='Next scheudled run'),
       'nextScheduledRun': fields.DateTime(dt_format=u'iso8601', description='Next scheudled run'),
       'guid': fields.String(default='',description='Unique identifier for this job'),
       'creationDate': fields.DateTime(dt_format=u'iso8601', description='Time job record was created'),
