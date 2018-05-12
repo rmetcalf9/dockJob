@@ -46,6 +46,7 @@
       </q-item-main></q-item>
     </q-list>
     <ExecutionTable
+      ref="ExecutionTable"
       title="Executions Table"
       DataTableSettingsPrefix='jobExecutions'
       :apiPath="'jobs/' + this.$route.params.jobGUID + '/execution'"
@@ -71,12 +72,10 @@
 <script>
 import { Notify } from 'quasar'
 import globalStore from '../store/globalStore'
-import dataTableSettings from '../store/dataTableSettings'
 import callbackHelper from '../callbackHelper'
 import ExecutionTable from '../components/ExecutionTable'
 import CreateJobModal from '../components/CreateJobModal'
 import userSettings from '../store/userSettings'
-import restcallutils from '../restcallutils'
 
 function addDateStringsToJobData (obj) {
   obj.creationDateString = userSettings.getters.userTimeStringFN(obj.creationDate)
@@ -160,75 +159,12 @@ export default {
         }
       }
       globalStore.getters.apiFN('GET', 'jobs/' + this.$route.params.jobGUID, undefined, callback)
-      this.requestExecutionData({
-        pagination: this.jobExecutionsDataTableSettings.serverPagination,
-        filter: this.jobExecutionsDataTableSettings.filter
-      })
-    },
-    requestExecutionData ({ pagination, filter }) {
-      var TTT = this
-      TTT.loading = true
-      var callback = {
-        ok: function (response) {
-          // console.log(response.data.guid)
-          TTT.loading = false
-
-          // updating pagination to reflect in the UI
-          TTT.jobExecutionsDataTableSettings.serverPagination = pagination
-          // we also set (or update) rowsNumber
-          TTT.jobExecutionsDataTableSettings.serverPagination.rowsNumber = response.data.pagination.total
-          TTT.jobExecutionsDataTableSettings.serverPagination.filter = filter
-          TTT.jobExecutionsDataTableSettings.serverPagination.rowsPerPage = response.data.pagination.pagesize
-
-          // then we update the rows with the fetched ones
-          TTT.jobExecutionData = response.data.result
-          TTT.jobExecutionData.map(function (obj) {
-            obj.dateCreatedString = userSettings.getters.userTimeStringFN(obj.dateCreated)
-            obj.dateStartedString = userSettings.getters.userTimeStringFN(obj.dateStarted)
-            obj.dateCompletedString = userSettings.getters.userTimeStringFN(obj.dateCompleted)
-            return obj
-          })
-
-          // finally we tell QTable to exit the "loading" state
-          TTT.loading = false
-        },
-        error: function (error) {
-          TTT.loading = false
-          Notify.create('Job query failed - ' + callbackHelper.getErrorFromResponse(error))
-        }
-      }
-      if (pagination.page === 0) {
-        pagination.page = 1
-      }
-
-      var queryParams = []
-
-      if (filter !== '') {
-        queryParams['query'] = filter
-      }
-      if (pagination.rowsPerPage !== 0) {
-        queryParams['pagesize'] = pagination.rowsPerPage.toString()
-        queryParams['offset'] = (pagination.rowsPerPage * (pagination.page - 1)).toString()
-      }
-      if (pagination.sortBy !== null) {
-        var postfix = ''
-        if (pagination.descending) {
-          postfix = ':desc'
-        }
-        queryParams['sort'] = pagination.sortBy + postfix
-      }
-
-      var queryString = restcallutils.buildQueryString('jobs/' + this.$route.params.jobGUID + '/execution', queryParams)
-      // console.log(queryString)
-      globalStore.getters.apiFN('GET', queryString, undefined, callback)
+      this.$refs.ExecutionTable.refreshData()
     }
   },
   computed: {
     datastoreState () {
       return globalStore.getters.datastoreState
-    },
-    jobExecutionsDataTableSettings () {
-      return dataTableSettings.getters.jobExecutions
     }
   },
   mounted () {

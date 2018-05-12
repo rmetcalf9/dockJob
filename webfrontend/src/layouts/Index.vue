@@ -33,6 +33,10 @@
           <q-item-side icon="rowing" />
           <q-item-main label="Jobs" sublabel="" />
         </q-item>
+        <q-item to="/executions">
+          <q-item-side icon="play_arrow" />
+          <q-item-main label="Executions" sublabel="" />
+        </q-item>
         <hr v-if="loginRequiredByServer">
         <q-item to="/logout" v-if="loginRequiredByServer">
           <q-item-side icon="exit_to_app" />

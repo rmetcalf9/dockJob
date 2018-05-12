@@ -40,14 +40,6 @@ import globalStore from '../store/globalStore'
 import STDOutput from '../components/STDOutput'
 import dataTableSettings from '../store/dataTableSettings'
 
-function addDateStringsToJobData (obj) {
-  obj.creationDateString = userSettings.getters.userTimeStringFN(obj.creationDate)
-  obj.nextScheduledRunString = userSettings.getters.userTimeStringFN(obj.nextScheduledRun)
-  obj.lastUpdateDateString = userSettings.getters.userTimeStringFN(obj.lastUpdateDate)
-  obj.lastRunDateString = userSettings.getters.userTimeStringFN(obj.lastRunDate)
-  return obj
-}
-
 export default {
   components: {
     STDOutput
@@ -61,13 +53,13 @@ export default {
     return {
       rowsPerPageOptions: [5, 10, 25, 50, 100, 200],
       jobTableColumns: [
+        { name: 'dateStarted', required: false, label: 'Start Date', align: 'left', field: 'dateStartedString', sortable: true, filter: true },
         { name: 'guid', required: false, label: 'Execution GUID', align: 'left', field: 'guid', sortable: true, filter: true },
         { name: 'executionName', required: false, label: 'Name', align: 'left', field: 'executionName', sortable: true, filter: true },
         { name: 'stage', required: false, label: 'Stage', align: 'left', field: 'stage', sortable: true, filter: true },
         { name: 'resultReturnCode', required: false, label: 'Return Code', align: 'left', field: 'resultReturnCode', sortable: true, filter: true },
         { name: 'manual', required: false, label: 'Manual Run', align: 'left', field: 'manual', sortable: true, filter: true },
         { name: 'dateCreated', required: false, label: 'Creation Date', align: 'left', field: 'dateCreatedString', sortable: true, filter: true },
-        { name: 'dateStarted', required: false, label: 'Start Date', align: 'left', field: 'dateStartedString', sortable: true, filter: true },
         { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompletedString', sortable: true, filter: true },
         { name: 'resultSTDOUT', required: false, label: 'Output', align: 'left', field: 'resultSTDOUT', sortable: true, filter: true },
         { name: 'jobGUID', required: false, label: 'Job GUID', align: 'left', field: 'jobGUID', sortable: true, filter: true },
@@ -78,19 +70,7 @@ export default {
     }
   },
   methods: {
-    refreshJobData () {
-      var TTT = this
-      var callback = {
-        ok: function (response) {
-          TTT.jobData = addDateStringsToJobData(response.data)
-          globalStore.commit('SET_PAGE_TITLE', 'Job ' + TTT.jobData.name)
-        },
-        error: function (error) {
-          Notify.create('Job query failed - ' + callbackHelper.getErrorFromResponse(error))
-          this.jobData = {}
-        }
-      }
-      globalStore.getters.apiFN('GET', 'jobs/' + this.$route.params.jobGUID, undefined, callback)
+    refreshData () {
       this.requestExecutionData({
         pagination: this.DataTableSettingsComputed.serverPagination,
         filter: this.DataTableSettingsComputed.filter
@@ -167,7 +147,7 @@ export default {
   },
   mounted () {
     // once mounted, we need to trigger the initial server data fetch
-    this.refreshJobData()
+    this.refreshData()
   }
 }
 </script>

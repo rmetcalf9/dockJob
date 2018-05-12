@@ -9,13 +9,13 @@ import Vuex from 'vuex'
 // using a function to return different instances
 function defaultTableSettings () {
   return {
-    visibleColumns: ['executionName', 'stage', 'resultReturnCode'],
+    visibleColumns: ['dateStarted', 'executionName', 'stage', 'resultReturnCode'],
     serverPagination: {
       page: 1,
       rowsNumber: 10, // specifying this determines pagination is server-side
       rowsPerPage: 10,
-      sortBy: null,
-      descending: false
+      sortBy: 'dateStarted',
+      descending: true
     },
     filter: ''
   }
