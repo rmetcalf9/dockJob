@@ -2,6 +2,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+// Prefixed settings commented out. I was not able to find a way of passing
+//  prefixed settings to a component. Instead components use if statements to
+//  select the settings they use
+
 // using a function to return different instances
 function defaultTableSettings () {
   return {
@@ -29,8 +33,8 @@ const state = {
     },
     filter: ''
   },
-  jobExecutions: defaultTableSettings(),
-  prefixedDataTableSettings: {}
+  jobExecutions: defaultTableSettings()
+  // prefixedDataTableSettings: {}
 }
 
 export const mutations = {
@@ -51,16 +55,16 @@ const getters = {
   },
   jobExecutions: (state, getters) => {
     return state.jobExecutions
-  },
-  prefixedDataTableSetting: (state, getters) => {
-    // This stops cacheing taking place
-    return function (key) {
-      if (typeof (state.prefixedDataTableSettings[key]) === 'undefined') {
-        state.prefixedDataTableSettings[key] = defaultTableSettings()
-      }
-      return state.prefixedDataTableSettings[key]
-    }
   }
+  // prefixedDataTableSetting: (state, getters) => {
+  // This stops cacheing taking place
+  //  return function (key) {
+  //    if (typeof (state.prefixedDataTableSettings[key]) === 'undefined') {
+  //      state.prefixedDataTableSettings[key] = defaultTableSettings()
+  //    }
+  //    return state.prefixedDataTableSettings[key]
+  //  }
+  // }
 }
 
 Vue.use(Vuex)

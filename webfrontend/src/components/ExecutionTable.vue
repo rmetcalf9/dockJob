@@ -54,7 +54,8 @@ export default {
   },
   props: [
     'title',
-    'DataTableSettingsPrefix'
+    'DataTableSettingsPrefix',
+    'apiPath'
   ],
   data () {
     return {
@@ -148,15 +149,18 @@ export default {
         queryParams['sort'] = pagination.sortBy + postfix
       }
 
-      // TODO Paramaterise this URL
-      var queryString = restcallutils.buildQueryString('jobs/' + this.$route.params.jobGUID + '/execution', queryParams)
+      // Paramaterise this URL
+      var queryString = restcallutils.buildQueryString(this.apiPath, queryParams)
       // console.log(queryString)
       globalStore.getters.apiFN('GET', queryString, undefined, callback)
     }
   },
   computed: {
     DataTableSettingsComputed () {
-      return dataTableSettings.getters.jobExecutions
+      if (this.DataTableSettingsPrefix === 'jobExecutions') {
+        return dataTableSettings.getters.jobExecutions
+      }
+      return undefined
       // return dataTableSettings.getters.prefixedDataTableSetting(this.DataTableSettingsPrefix)
     }
 

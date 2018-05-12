@@ -47,7 +47,8 @@
     </q-list>
     <ExecutionTable
       title="Executions Table"
-      DataTableSettingsPrefix='jobExecutionSingleJobDataTableSettings'
+      DataTableSettingsPrefix='jobExecutions'
+      :apiPath="'jobs/' + this.$route.params.jobGUID + '/execution'"
     >
     </ExecutionTable>
     <q-btn
