@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-for="curVal in getLineArray(val, 3)" :key=curVal.p @click="expandOutput">{{ curVal.v }}</div>
+    <div v-for="curVal in getLineArray(val, maxLinesToShow)" :key=curVal.p @click="expandOutput">{{ curVal.v }}</div>
     <q-modal v-model="showOutputDialog" :content-css="{minWidth: '80vw', minHeight: '80vh'}">
       <q-modal-layout>
         <q-toolbar slot="header">
@@ -68,7 +68,8 @@ function copyTextToClipboard (text) {
 
 export default {
   props: [
-    'val'
+    'val',
+    'maxLinesToShow'
   ],
   data () {
     return {

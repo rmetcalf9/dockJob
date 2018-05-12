@@ -22,10 +22,13 @@
         <q-search clearable hide-underline v-model="DataTableSettingsComputed.filter" />
       </template>
       <q-td slot="body-cell-resultSTDOUT" slot-scope="props" :props="props">
-        <STDOutput :val="props.value" />
+        <STDOutput :val="props.value" maxLinesToShow=3 />
       </q-td>
       <q-td slot="body-cell-jobCommand" slot-scope="props" :props="props">
         <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
+      </q-td>
+      <q-td slot="body-cell-..." slot-scope="props" :props="props">
+        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/executions/' + props.row.guid)" />
       </q-td>
     </q-table>
   </div>
@@ -63,7 +66,8 @@ export default {
         { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompletedString', sortable: true, filter: true },
         { name: 'resultSTDOUT', required: false, label: 'Output', align: 'left', field: 'resultSTDOUT', sortable: true, filter: true },
         { name: 'jobGUID', required: false, label: 'Job GUID', align: 'left', field: 'jobGUID', sortable: true, filter: true },
-        { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: true, filter: true }
+        { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: true, filter: true },
+        { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobExecutionData: [],
       loading: false

@@ -42,7 +42,8 @@ export default [
       { path: 'dashboard', component: () => import('pages/Dashboard'), beforeEnter (to, from, next) { dashboardBeforeNav(to, from, next, 'Dashboard') } },
       { path: 'jobs', component: () => import('pages/Jobs'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Jobs') } },
       { path: 'jobs/:jobGUID', component: () => import('pages/Job'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Job <<GUID>>') } },
-      { path: 'executions', component: () => import('pages/Executions'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Executions') } }
+      { path: 'executions', component: () => import('pages/Executions'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Executions') } },
+      { path: 'executions/:executionGUID', component: () => import('pages/Execution'), beforeEnter (to, from, next) { defaultBeforeNavFn(to, from, next, 'Execution <<GUID>>') } }
     ]
   },
   { path: '/login', component: () => import('pages/Login') }, // Can't redirect to common preload or we will get endless loop
