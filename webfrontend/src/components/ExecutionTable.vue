@@ -7,19 +7,19 @@
       row-key="name"
       :loading="loading"
       @request="requestExecutionData"
-      :visible-columns="DataTableSettings.visibleColumns"
-      :filter="DataTableSettings.filter"
-      :pagination.sync="DataTableSettings.serverPagination"
+      :visible-columns="DataTableSettingsComputed.visibleColumns"
+      :filter="DataTableSettingsComputed.filter"
+      :pagination.sync="DataTableSettingsComputed.serverPagination"
       :rows-per-page-options="rowsPerPageOptions"
     >
       <template slot="top-right" slot-scope="props">
         <q-table-columns
           color="secondary"
           class="q-mr-sm"
-          v-model="DataTableSettings.visibleColumns"
+          v-model="DataTableSettingsComputed.visibleColumns"
           :columns="jobTableColumns"
         />
-        <q-search clearable hide-underline v-model="DataTableSettings.filter" />
+        <q-search clearable hide-underline v-model="DataTableSettingsComputed.filter" />
       </template>
       <q-td slot="body-cell-resultSTDOUT" slot-scope="props" :props="props">
         <STDOutput :val="props.value" />
@@ -91,8 +91,8 @@ export default {
       }
       globalStore.getters.apiFN('GET', 'jobs/' + this.$route.params.jobGUID, undefined, callback)
       this.requestExecutionData({
-        pagination: this.DataTableSettings.serverPagination,
-        filter: this.DataTableSettings.filter
+        pagination: this.DataTableSettingsComputed.serverPagination,
+        filter: this.DataTableSettingsComputed.filter
       })
     },
     requestExecutionData ({ pagination, filter }) {
@@ -104,11 +104,11 @@ export default {
           TTT.loading = false
 
           // updating pagination to reflect in the UI
-          TTT.DataTableSettings.serverPagination = pagination
+          TTT.DataTableSettingsComputed.serverPagination = pagination
           // we also set (or update) rowsNumber
-          TTT.DataTableSettings.serverPagination.rowsNumber = response.data.pagination.total
-          TTT.DataTableSettings.serverPagination.filter = filter
-          TTT.DataTableSettings.serverPagination.rowsPerPage = response.data.pagination.pagesize
+          TTT.DataTableSettingsComputed.serverPagination.rowsNumber = response.data.pagination.total
+          TTT.DataTableSettingsComputed.serverPagination.filter = filter
+          TTT.DataTableSettingsComputed.serverPagination.rowsPerPage = response.data.pagination.pagesize
 
           // then we update the rows with the fetched ones
           TTT.jobExecutionData = response.data.result
@@ -155,8 +155,9 @@ export default {
     }
   },
   computed: {
-    DataTableSettings () {
-      return dataTableSettings.getters.prefixedDataTableSetting(this.DataTableSettingsPrefix)
+    DataTableSettingsComputed () {
+      return dataTableSettings.getters.jobExecutions
+      // return dataTableSettings.getters.prefixedDataTableSetting(this.DataTableSettingsPrefix)
     }
 
   },

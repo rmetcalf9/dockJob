@@ -45,34 +45,6 @@
           <q-item-tile sublabel>{{ jobData.lastRunExecutionGUID }}</q-item-tile>
       </q-item-main></q-item>
     </q-list>
-    <q-table
-      title='Executions'
-      :data="jobExecutionData"
-      :columns="jobTableColumns"
-      :visible-columns="jobExecutionsDataTableSettings.visibleColumns"
-      :filter="jobExecutionsDataTableSettings.filter"
-      row-key="name"
-      :pagination.sync="jobExecutionsDataTableSettings.serverPagination"
-      :loading="loading"
-      @request="requestExecutionData"
-      :rows-per-page-options="rowsPerPageOptions"
-    >
-      <template slot="top-right" slot-scope="props">
-        <q-table-columns
-          color="secondary"
-          class="q-mr-sm"
-          v-model="jobExecutionsDataTableSettings.visibleColumns"
-          :columns="jobTableColumns"
-        />
-        <q-search clearable hide-underline v-model="jobExecutionsDataTableSettings.filter" />
-      </template>
-      <q-td slot="body-cell-resultSTDOUT" slot-scope="props" :props="props">
-        <STDOutput :val="props.value" />
-      </q-td>
-      <q-td slot="body-cell-jobCommand" slot-scope="props" :props="props">
-        <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
-      </q-td>
-    </q-table>
     <ExecutionTable
       title="Executions Table"
       DataTableSettingsPrefix='jobExecutionSingleJobDataTableSettings'
@@ -100,7 +72,6 @@ import { Notify } from 'quasar'
 import globalStore from '../store/globalStore'
 import dataTableSettings from '../store/dataTableSettings'
 import callbackHelper from '../callbackHelper'
-import STDOutput from '../components/STDOutput'
 import ExecutionTable from '../components/ExecutionTable'
 import CreateJobModal from '../components/CreateJobModal'
 import userSettings from '../store/userSettings'
@@ -117,7 +88,6 @@ function addDateStringsToJobData (obj) {
 export default {
   components: {
     CreateJobModal,
-    STDOutput,
     ExecutionTable
   },
   data () {
@@ -135,21 +105,6 @@ export default {
         return str.split('\n').map(function (v) { return { p: ++c, v: v } })
       },
       createJobModalDialog: {},
-      jobTableColumns: [
-        { name: 'guid', required: false, label: 'Execution GUID', align: 'left', field: 'guid', sortable: true, filter: true },
-        { name: 'executionName', required: false, label: 'Name', align: 'left', field: 'executionName', sortable: true, filter: true },
-        { name: 'stage', required: false, label: 'Stage', align: 'left', field: 'stage', sortable: true, filter: true },
-        { name: 'resultReturnCode', required: false, label: 'Return Code', align: 'left', field: 'resultReturnCode', sortable: true, filter: true },
-        { name: 'manual', required: false, label: 'Manual Run', align: 'left', field: 'manual', sortable: true, filter: true },
-        { name: 'dateCreated', required: false, label: 'Creation Date', align: 'left', field: 'dateCreatedString', sortable: true, filter: true },
-        { name: 'dateStarted', required: false, label: 'Start Date', align: 'left', field: 'dateStartedString', sortable: true, filter: true },
-        { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompletedString', sortable: true, filter: true },
-        { name: 'resultSTDOUT', required: false, label: 'Output', align: 'left', field: 'resultSTDOUT', sortable: true, filter: true },
-        { name: 'jobGUID', required: false, label: 'Job GUID', align: 'left', field: 'jobGUID', sortable: true, filter: true },
-        { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: true, filter: true }
-      ],
-      jobExecutionData: [],
-      loading: false,
       jobData: {},
       promptTextValue: ''
     }
