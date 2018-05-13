@@ -3,8 +3,12 @@
     <q-list >
       <q-item>
         <q-item-main >
-          <q-item-tile label>Execution Name:
+          <q-item-tile label v-if='executionData.executionName.length > 0'>Execution Name:
             {{ executionData.executionName }}
+            <span v-if='executionData.manual'>(Manual Run - {{ executionData.stage }})</span>
+            <span v-if='!executionData.manual'>(Scheduled Run - {{ executionData.stage }})</span>
+          </q-item-tile>
+          <q-item-tile label v-if='executionData.executionName.length === 0'>Unnamed execution
             <span v-if='executionData.manual'>(Manual Run - {{ executionData.stage }})</span>
             <span v-if='!executionData.manual'>(Scheduled Run - {{ executionData.stage }})</span>
           </q-item-tile>
