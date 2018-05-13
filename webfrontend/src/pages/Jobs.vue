@@ -41,6 +41,11 @@
       <q-td slot="body-cell-command" slot-scope="props" :props="props">
         <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
       </q-td>
+      <q-td slot="body-cell-lastRunExecutionGUID" slot-scope="props" :props="props">
+        <router-link :to="'/executions/' + props.value" tag="a" class="text-grey-8">
+          {{ props.value }}
+        </router-link>
+      </q-td>
 
     </q-table>
     <CreateJobModal
