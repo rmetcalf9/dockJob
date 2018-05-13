@@ -2,6 +2,7 @@ from enum import Enum
 import datetime
 from datetime import timedelta
 import pytz
+from sortedcontainers import SortedDict
 
 badModeException = Exception('Bad Mode')
 badNumberOfModeParamaters = Exception('Bad number of paramaters passed to mode')
@@ -33,6 +34,7 @@ class ModeType(Enum):
 class RepetitionIntervalClass():
   mode = None;
   minute = -1;
+  hourlyModeMinutes = SortedDict() # In hourly mode mutiple minutes can be specified
   hour = -1; #hour in 24 hour format
   dayOfMonth = -1; #only used in monthly mode
   timezone = pytz.timezone("UTC")
@@ -42,6 +44,8 @@ class RepetitionIntervalClass():
   daysForDaily = [False,False,False,False,False,False,False]
 
   def __init__(self, intervalString):
+    self.hourlyModeMinutes = SortedDict()
+
     if (None == intervalString):
       raise badModeException
     a = intervalString.split(":")
@@ -59,17 +63,30 @@ class RepetitionIntervalClass():
     self.mode = modeType
 
     #minute is always there and is always first param
-    self.minute = a[1].strip()
-    if (" " in self.minute):
-      raise badParamater
-    try:
-      self.minute = int(self.minute)
-    except ValueError:
-      raise badParamater
-    if (self.minute < 0):
-      raise badParamater
-    if (self.minute > 59):
-      raise badParamater
+    if (modeType == modeType.HOURLY):
+      for curMinuteValSTR in a[1].split(","):
+        curMinuteVal = -1
+        try:
+          curMinuteVal = int(curMinuteValSTR)
+        except ValueError:
+          raise badParamater
+        if (curMinuteVal < 0):
+          raise badParamater
+        if (curMinuteVal > 59):
+          raise badParamater
+        self.hourlyModeMinutes[curMinuteVal] = curMinuteVal
+    else:
+      self.minute = a[1].strip()
+      if (" " in self.minute):
+        raise badParamater
+      try:
+        self.minute = int(self.minute)
+      except ValueError:
+        raise badParamater
+      if (self.minute < 0):
+        raise badParamater
+      if (self.minute > 59):
+        raise badParamater
 
     #work out hour always second param if it is there
     if (modeType.getExpectedNumParams() > 1):
@@ -133,6 +150,39 @@ class RepetitionIntervalClass():
   def isValidDay(self, datetimeVal):
     return self.daysForDaily[datetimeVal.weekday()]
 
+  def _getNextOccuranceDatetimeForHourlyModeForParticularMinute(self, curDateTime, minute):
+    # Tried using localize method here but it dosen't seem to work that way
+    #  this way passes the tests
+    nd = datetime.datetime(
+      curDateTime.year,
+      curDateTime.month,
+      curDateTime.day,
+      curDateTime.hour,
+      minute,
+      0,
+      0,
+      curDateTime.tzinfo
+    )
+    #convert to UTC for comparison
+    nd = nd.astimezone(pytz.timezone('UTC'))
+    if (nd <= curDateTime):
+      nd = self.addTimeInUTC(nd, timedelta(hours=1))
+    return nd
+
+  def _getNextOccuranceDatetimeForHourlyMode(self, curDateTime):
+    minRetVal = pytz.timezone('UTC').localize(datetime.datetime(4016,1,14,13,0,1,0))
+    cc = True
+    for curMinute in self.hourlyModeMinutes:
+      print("Calling with minute " + str(curMinute))
+      rv = self._getNextOccuranceDatetimeForHourlyModeForParticularMinute(curDateTime, curMinute)
+      if rv < minRetVal:
+        minRetVal = rv
+        print(rv)
+        cc = False
+    if cc:
+      raise Exception("Algroythm Error")
+    return minRetVal
+
   #Returns the next time that the repetition interval defines according to the current datetime passed in
   def getNextOccuranceDatetime(self, curDateTime):
     if (curDateTime.tzinfo == None):
@@ -140,23 +190,7 @@ class RepetitionIntervalClass():
     if (str(curDateTime.tzinfo) != 'UTC'):
       raise curDateTimeTimezoneNotUTCException
     if (self.mode == ModeType.HOURLY):
-      # Tried using localize method here but it dosen't seem to work that way
-      #  this way passes the tests
-      nd = datetime.datetime(
-        curDateTime.year,
-        curDateTime.month,
-        curDateTime.day,
-        curDateTime.hour,
-        self.minute,
-        0,
-        0,
-        curDateTime.tzinfo
-      )
-      #convert to UTC for comparison
-      nd = nd.astimezone(pytz.timezone('UTC'))
-      if (nd <= curDateTime):
-        nd = self.addTimeInUTC(nd, timedelta(hours=1))
-      return nd
+      return self._getNextOccuranceDatetimeForHourlyMode(curDateTime)
     if (self.mode == ModeType.DAILY):
       nd = self.timezone.localize(datetime.datetime(
         curDateTime.year,

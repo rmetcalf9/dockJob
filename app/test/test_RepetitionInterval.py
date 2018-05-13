@@ -54,8 +54,8 @@ class test_RepetitionInterval(testHelperSuperClass):
   def test_nextdateHourlyModeLastMinuteDayBefore(self):
     ri = RepetitionIntervalClass("HOURLY:03")
     self.checkNextRun(ri,
-      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,23,3,1,0)),
-      pytz.timezone('Europe/London').localize(datetime.datetime(2016,1,15,00,3,0,0))
+      curTime=pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,23,3,1,0)),
+      expTime=pytz.timezone('Europe/London').localize(datetime.datetime(2016,1,15,00,3,0,0))
     )
 
   def test_HourlyBeforeDSTJumpForward(self):
@@ -75,6 +75,93 @@ class test_RepetitionInterval(testHelperSuperClass):
     # so the test specifies a UTC time
     self.checkNextRun(ri,pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,0,30,0,0)),pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,1,3,0,0)))
 
+  def test_hourlySingleDigitMinute(self):
+    ri = RepetitionIntervalClass("HOURLY:3")
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,23,3,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,00,3,0,0))
+    )
+
+  def test_hourlyZeroMinute(self):
+    ri = RepetitionIntervalClass("HOURLY:0")
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,23,3,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,00,0,0,0))
+    )
+
+  def test_hourlyDoubleZeroMinute(self):
+    ri = RepetitionIntervalClass("HOURLY:00")
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,23,3,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,00,0,0,0))
+    )
+
+  def test_hourlyInvalidMinute(self):
+    with self.assertRaises(Exception) as context:
+      ri = RepetitionIntervalClass("HOURLY:60")
+    self.checkGotRightException(context,badParamater)
+
+  def test_hourlyFourTimesPerHour(self):
+    ri = RepetitionIntervalClass("HOURLY:0,15,30,45")
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,15,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,16,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,30,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,31,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,45,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,46,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,14,0,0,0))
+    )
+
+  def test_hourlyFourTimesPerHourMutipleSameValues(self):
+    ri = RepetitionIntervalClass("HOURLY:0,15,30,45,45")
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,15,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,16,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,30,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,31,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,45,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,46,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,14,0,0,0))
+    )
+
+  def test_hourlyFourTimesPerHourWrongORder(self):
+    ri = RepetitionIntervalClass("HOURLY:0,30,15,45")
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,15,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,16,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,30,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,31,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,45,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,46,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,14,0,0,0))
+    )
+
+  def test_hourlyFourTimesPerHourInvalid(self):
+    with self.assertRaises(Exception) as context:
+      ri = RepetitionIntervalClass("HOURLY:0,30,61,45")
+    self.checkGotRightException(context,badParamater)
 
 # Daily Tests
 ## Every day of week
