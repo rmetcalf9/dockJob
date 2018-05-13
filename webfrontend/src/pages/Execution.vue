@@ -14,7 +14,11 @@
       <q-item>
         <q-item-main >
           <q-item-tile label>Job: {{ jobData.name }}</q-item-tile>
-          <q-item-tile sublabel>{{ executionData.jobGUID }}</q-item-tile>
+          <q-item-tile sublabel>
+            <router-link :to="'/jobs/' + executionData.jobGUID" tag="a" class="text-grey-8">
+              {{ executionData.jobGUID }}
+            </router-link>
+          </q-item-tile>
         </q-item-main>
       </q-item>
       <q-item>
