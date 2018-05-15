@@ -3,7 +3,7 @@
     <ExecutionTable
       ref="ExecutionTable"
       title="Executions Table"
-      DataTableSettingsPrefix='jobExecutions'
+      DataTableSettingsPrefix='Executions'
       :apiPath="'executions/'"
     >
     </ExecutionTable>

@@ -144,6 +144,9 @@ export default {
       if (this.DataTableSettingsPrefix === 'jobExecutions') {
         return dataTableSettings.getters.jobExecutions
       }
+      if (this.DataTableSettingsPrefix === 'Executions') {
+        return dataTableSettings.getters.Executions
+      }
       return undefined
       // return dataTableSettings.getters.prefixedDataTableSetting(this.DataTableSettingsPrefix)
     }

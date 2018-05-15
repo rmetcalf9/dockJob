@@ -33,7 +33,8 @@ const state = {
     },
     filter: ''
   },
-  jobExecutions: defaultTableSettings()
+  jobExecutions: defaultTableSettings(),
+  Executions: defaultTableSettings()
   // prefixedDataTableSettings: {}
 }
 
@@ -55,6 +56,9 @@ const getters = {
   },
   jobExecutions: (state, getters) => {
     return state.jobExecutions
+  },
+  Executions: (state, getters) => {
+    return state.Executions
   }
   // prefixedDataTableSetting: (state, getters) => {
   // This stops cacheing taking place
