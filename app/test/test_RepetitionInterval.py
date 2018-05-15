@@ -376,6 +376,10 @@ class test_RepetitionInterval(testHelperSuperClass):
       ri = RepetitionIntervalClass("MONTHLY:03:15:1,2,11,,13:Europe/London")
     self.checkGotRightException(context,badParamater)
 
+  def test_monthlyWithDOMZeroWillError(self):
+    with self.assertRaises(Exception) as context:
+      ri = RepetitionIntervalClass("MONTHLY:03:15:1,0,13:Europe/London")
+    self.checkGotRightException(context,badParamater)
 
 # class init tests
   def test_initWithNoneRaisesException(self):

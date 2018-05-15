@@ -129,7 +129,7 @@ class RepetitionIntervalClass():
         self.dayOfMonth = a[3].strip()
         if (" " in self.dayOfMonth):
           raise badParamater
-        self.dayOfMonth = self.getIntArrayFromCommaListWithRangeCheck(a[3],0,31)
+        self.dayOfMonth = self.getIntArrayFromCommaListWithRangeCheck(a[3],1,31)
 
     #if it is there the 4th paramter is always the timezone the passed in date is.
     if (modeType.getExpectedNumParams() > 3):
