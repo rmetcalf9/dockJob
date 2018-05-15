@@ -172,7 +172,7 @@ class test_RepetitionInterval(testHelperSuperClass):
       ri = RepetitionIntervalClass("HOURLY:0,30,61,45")
     self.checkGotRightException(context,badParamater)
 
-  def test_HourlyWithMutipleCommasWIllError(self):
+  def test_HourlyWithMutipleCommasWillError(self):
     with self.assertRaises(Exception) as context:
       ri = RepetitionIntervalClass("HOURLY:0,15,,30,45")
     self.checkGotRightException(context,badParamater)
@@ -293,6 +293,89 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('UTC').localize(datetime.datetime(2018,12,12,16,30,0,0)),
       pytz.timezone('Europe/London').localize(datetime.datetime(2019,1,11,15,3,0,0))
     )
+
+  def test_monthlyFourTimesPerMonth(self):
+    ri = RepetitionIntervalClass("MONTHLY:02:15:3,5,10,15:Europe/London")
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,1,13,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,3,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,3,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,5,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,5,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,10,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,10,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,2,3,15,2,0,0))
+    )
+    self.assertEqual(ri.__str__(),'MONTHLY:02:15:03,05,10,15:Europe/London')
+
+  def test_monthlyFourTimesPerMonthMutipleSameValues(self):
+    ri = RepetitionIntervalClass("MONTHLY:02:15:3,5,10,15,15,15,15,15:Europe/London")
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,1,13,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,3,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,3,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,5,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,5,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,10,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,10,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,2,3,15,2,0,0))
+    )
+    self.assertEqual(ri.__str__(),'MONTHLY:02:15:03,05,10,15:Europe/London')
+
+  def test_monthlyFourTimesPerMonthWrongOrder(self):
+    ri = RepetitionIntervalClass("MONTHLY:02:15:3,10,000005,15:Europe/London")
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,1,13,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,3,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,3,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,5,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,5,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,10,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,10,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,15,2,0,0))
+    )
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,17,0,1,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2016,2,3,15,2,0,0))
+    )
+    self.assertEqual(ri.__str__(),'MONTHLY:02:15:03,05,10,15:Europe/London')
+
+  def test_monthlyFourTimesPerMonthInvalid(self):
+    with self.assertRaises(Exception) as context:
+      ri = RepetitionIntervalClass("MONTHLY:03:15:1,2,11,33:Europe/London")
+    self.checkGotRightException(context,badParamater)
+
+  def test_monthlyWithMutipleCommasWillError(self):
+    with self.assertRaises(Exception) as context:
+      ri = RepetitionIntervalClass("MONTHLY:03:15:1,2,11,,13:Europe/London")
+    self.checkGotRightException(context,badParamater)
+
 
 # class init tests
   def test_initWithNoneRaisesException(self):

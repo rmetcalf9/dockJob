@@ -36,15 +36,31 @@ class RepetitionIntervalClass():
   minute = -1;
   hourlyModeMinutes = SortedDict() # In hourly mode mutiple minutes can be specified
   hour = -1; #hour in 24 hour format
-  dayOfMonth = -1; #only used in monthly mode
+  dayOfMonth = SortedDict(); #only used in monthly mode
   timezone = pytz.timezone("UTC")
 
   ##Array represent days to run pos 0 = Monday, 1 = Tuesday .. 6 = Sunday
   ## matches datetime.weekday function
   daysForDaily = [False,False,False,False,False,False,False]
 
+  def getIntArrayFromCommaListWithRangeCheck(self, commaListStr, minVal, maxVal):
+    returnVal = SortedDict()
+    for curValSTR in commaListStr.split(","):
+      curVal = minVal - 1
+      try:
+        curVal = int(curValSTR)
+      except ValueError:
+        raise badParamater
+      if (curVal < minVal):
+        raise badParamater
+      if (curVal > maxVal):
+        raise badParamater
+      returnVal[curVal] = curVal
+    return returnVal
+
   def __init__(self, intervalString):
     self.hourlyModeMinutes = SortedDict()
+    self.dayOfMonth = SortedDict()
 
     if (None == intervalString):
       raise badModeException
@@ -64,17 +80,7 @@ class RepetitionIntervalClass():
 
     #minute is always there and is always first param
     if (modeType == modeType.HOURLY):
-      for curMinuteValSTR in a[1].split(","):
-        curMinuteVal = -1
-        try:
-          curMinuteVal = int(curMinuteValSTR)
-        except ValueError:
-          raise badParamater
-        if (curMinuteVal < 0):
-          raise badParamater
-        if (curMinuteVal > 59):
-          raise badParamater
-        self.hourlyModeMinutes[curMinuteVal] = curMinuteVal
+      self.hourlyModeMinutes = self.getIntArrayFromCommaListWithRangeCheck(a[1],0,59)
     else:
       self.minute = a[1].strip()
       if (" " in self.minute):
@@ -123,14 +129,7 @@ class RepetitionIntervalClass():
         self.dayOfMonth = a[3].strip()
         if (" " in self.dayOfMonth):
           raise badParamater
-        try:
-          self.dayOfMonth = int(self.dayOfMonth)
-        except ValueError:
-          raise badParamater
-        if (self.dayOfMonth < 0):
-          raise badParamater
-        if (self.dayOfMonth > 31):
-          raise badParamater
+        self.dayOfMonth = self.getIntArrayFromCommaListWithRangeCheck(a[3],0,31)
 
     #if it is there the 4th paramter is always the timezone the passed in date is.
     if (modeType.getExpectedNumParams() > 3):
@@ -182,6 +181,50 @@ class RepetitionIntervalClass():
       raise Exception("Algroythm Error")
     return minRetVal
 
+  def _getNextOccuranceDatetimeForMonthlyModeForParticulayDayOfMonth(self, curDateTime, dayOfMonth):
+    # Setup time to test in timezone specified by RI
+    nd = self.timezone.localize(datetime.datetime(
+      curDateTime.year,
+      curDateTime.month,
+      dayOfMonth,
+      self.hour,
+      self.minute,
+      0,
+      0
+    ))
+    #convert to UTC for comparison
+    nd = nd.astimezone(pytz.timezone('UTC'))
+    if (nd <= curDateTime):
+      year = curDateTime.year
+      month = curDateTime.month + 1
+      if (month > 12):
+        year = year + 1
+        month = 1
+      nd = self.timezone.localize(datetime.datetime(
+        year,
+        month,
+        dayOfMonth,
+        self.hour,
+        self.minute,
+        0,
+        0
+      ))
+      nd = nd.astimezone(pytz.timezone('UTC'))
+    return nd
+
+  def _getNextOccuranceDatetimeForMonthlyMode(self, curDateTime):
+    minRetVal = pytz.timezone('UTC').localize(datetime.datetime(4016,1,14,13,0,1,0))
+    cc = True
+    for curDOM in self.dayOfMonth:
+      rv = self._getNextOccuranceDatetimeForMonthlyModeForParticulayDayOfMonth(curDateTime, curDOM)
+      if rv < minRetVal:
+        minRetVal = rv
+        print(rv)
+        cc = False
+    if cc:
+      raise Exception("Algroythm Error")
+    return minRetVal
+
   #Returns the next time that the repetition interval defines according to the current datetime passed in
   def getNextOccuranceDatetime(self, curDateTime):
     if (curDateTime.tzinfo == None):
@@ -210,36 +253,7 @@ class RepetitionIntervalClass():
       return nd
 
     if (self.mode == ModeType.MONTHLY):
-      # Setup time to test in timezone specified by RI
-      nd = self.timezone.localize(datetime.datetime(
-        curDateTime.year,
-        curDateTime.month,
-        self.dayOfMonth,
-        self.hour,
-        self.minute,
-        0,
-        0
-      ))
-      #convert to UTC for comparison
-      nd = nd.astimezone(pytz.timezone('UTC'))
-      if (nd <= curDateTime):
-        year = curDateTime.year
-        month = curDateTime.month + 1
-        if (month > 12):
-          year = year + 1
-          month = 1
-        nd = self.timezone.localize(datetime.datetime(
-          year,
-          month,
-          self.dayOfMonth,
-          self.hour,
-          self.minute,
-          0,
-          0
-        ))
-        nd = nd.astimezone(pytz.timezone('UTC'))
-      return nd
-
+      return self._getNextOccuranceDatetimeForMonthlyMode(curDateTime)
 
     raise Exception('Mode Not Implemented')
 
@@ -268,7 +282,13 @@ class RepetitionIntervalClass():
     if (self.mode == ModeType.MONTHLY):
       #example 'MONTHLY:03:15:11:Europe/London'
       sf = 'MONTHLY:' + str(self.minute).zfill(2) + ":" + str(self.hour).zfill(2) + ":"
-      sf += str(self.dayOfMonth).zfill(2)
+      fir = True
+      for curDOM in self.dayOfMonth:
+        if fir:
+          fir = False
+        else:
+          sf += ","
+        sf += str(curDOM).zfill(2)
       sf += ":" + self.timezone.__str__()
       return sf
     raise Exception('Invalid mode encountered in RepetitionIntervalClass.__str__')
