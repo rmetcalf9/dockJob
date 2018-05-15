@@ -147,7 +147,7 @@ class test_RepetitionInterval(testHelperSuperClass):
     )
     self.assertEqual(ri.__str__(),'HOURLY:00,15,30,45')
 
-  def test_hourlyFourTimesPerHourWrongORder(self):
+  def test_hourlyFourTimesPerHourWrongOrder(self):
     ri = RepetitionIntervalClass("HOURLY:0,30,15,45")
     self.checkNextRun(ri,
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,0,1,0)),
@@ -171,6 +171,20 @@ class test_RepetitionInterval(testHelperSuperClass):
     with self.assertRaises(Exception) as context:
       ri = RepetitionIntervalClass("HOURLY:0,30,61,45")
     self.checkGotRightException(context,badParamater)
+
+  def test_HourlyWithMutipleCommasWIllError(self):
+    with self.assertRaises(Exception) as context:
+      ri = RepetitionIntervalClass("HOURLY:0,15,,30,45")
+    self.checkGotRightException(context,badParamater)
+    with self.assertRaises(Exception) as context2:
+      ri = RepetitionIntervalClass("HOURLY:,,")
+    self.checkGotRightException(context2,badParamater)
+    with self.assertRaises(Exception) as context3:
+      ri = RepetitionIntervalClass("HOURLY:,0,15,30,45")
+    self.checkGotRightException(context3,badParamater)
+    with self.assertRaises(Exception) as context4:
+      ri = RepetitionIntervalClass("HOURLY:0,15,30,45,")
+    self.checkGotRightException(context4,badParamater)
 
 # Daily Tests
 ## Every day of week
