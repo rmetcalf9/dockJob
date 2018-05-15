@@ -5,7 +5,7 @@ from datetime import timedelta
 import pytz
 
 class test_RepetitionInterval(testHelperSuperClass):
-  def checkNextRun(self, riOBj, curTime, expTime):
+  def checkNextRun(self, riOBj, curTime, expTime, msg=''):
     nextRun = riOBj.getNextOccuranceDatetime(curTime)
     if str(nextRun.tzinfo) != 'UTC':
       self.assertTrue(False, msg='Repetition Interval did not return next run in UTC (' + str(nextRun.tzinfo) + ')')
@@ -13,6 +13,7 @@ class test_RepetitionInterval(testHelperSuperClass):
     if (nextRun != expTimeUTC):
       print("Next Run:" + str(nextRun) + ' (Always UTC)')
       print("Expected:" + str(expTime) + ' (Expected UTC=' + str(expTimeUTC) + ')')
+      print(msg)
     self.assertEqual(nextRun, expTime)
 
 #-----------------------------------------------
@@ -39,6 +40,7 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,5,14,2,59,0)),
       pytz.timezone('Europe/London').localize(datetime.datetime(2016,1,5,14,3,0,0))
     )
+    self.assertEqual(ri.__str__(),'HOURLY:03')
 
   def test_nextdateHourlyModeExactlyInMinute(self):
     ri = RepetitionIntervalClass("HOURLY:03")
@@ -81,6 +83,8 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,23,3,1,0)),
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,00,3,0,0))
     )
+    self.assertEqual(ri.__str__(),'HOURLY:03')
+
 
   def test_hourlyZeroMinute(self):
     ri = RepetitionIntervalClass("HOURLY:0")
@@ -88,6 +92,7 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,23,3,1,0)),
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,00,0,0,0))
     )
+    self.assertEqual(ri.__str__(),'HOURLY:00')
 
   def test_hourlyDoubleZeroMinute(self):
     ri = RepetitionIntervalClass("HOURLY:00")
@@ -95,6 +100,7 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,23,3,1,0)),
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,15,00,0,0,0))
     )
+    self.assertEqual(ri.__str__(),'HOURLY:00')
 
   def test_hourlyInvalidMinute(self):
     with self.assertRaises(Exception) as context:
@@ -119,6 +125,7 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,46,1,0)),
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,14,0,0,0))
     )
+    self.assertEqual(ri.__str__(),'HOURLY:00,15,30,45')
 
   def test_hourlyFourTimesPerHourMutipleSameValues(self):
     ri = RepetitionIntervalClass("HOURLY:0,15,30,45,45")
@@ -138,6 +145,7 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,46,1,0)),
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,14,0,0,0))
     )
+    self.assertEqual(ri.__str__(),'HOURLY:00,15,30,45')
 
   def test_hourlyFourTimesPerHourWrongORder(self):
     ri = RepetitionIntervalClass("HOURLY:0,30,15,45")
@@ -157,6 +165,7 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,13,46,1,0)),
       pytz.timezone('UTC').localize(datetime.datetime(2016,1,14,14,0,0,0))
     )
+    self.assertEqual(ri.__str__(),'HOURLY:00,15,30,45')
 
   def test_hourlyFourTimesPerHourInvalid(self):
     with self.assertRaises(Exception) as context:
@@ -171,6 +180,23 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,0,30,0,0)),
       pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,29,15,3,0,0))
     )
+
+    #6 may 2018 is a sunday. Check at 4 o'clock for next 3 weeks we have correct next runs (always the next day)
+    #  3 weeks won't go over month boundary
+    days_of_week = ['Mon','Tue','Wed','Thur','Fri','Sat','Sun']
+    cur_day_of_week = 6
+    for DayOfMonthBeforeRunIsDue in range(6,6+(3*7)):
+      #cur_day_of_week = cur_day_of_week+1
+      if cur_day_of_week > 6:
+        cur_day_of_week = 0
+      print(DayOfMonthBeforeRunIsDue)
+      self.checkNextRun(ri,
+        pytz.timezone('UTC').localize(datetime.datetime(2018,5,DayOfMonthBeforeRunIsDue,16,30,0,0)),
+        pytz.timezone('Europe/London').localize(datetime.datetime(2018,5,(DayOfMonthBeforeRunIsDue+1),15,3,0,0)),
+        'Test was for ' + days_of_week[cur_day_of_week]
+      )
+    self.assertEqual(ri.__str__(),'DAILY:03:15:+++++++:Europe/London')
+
 
   def test_DailyEveryDayOnPrevDay(self):
     ri = RepetitionIntervalClass("DAILY:03:15:+++++++:Europe/London")
@@ -195,6 +221,14 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('Europe/London').localize(datetime.datetime(2018,11,2,15,3,0,0))
     )
 
+## Only on Sundays
+  def test_DailyEveryDayOnSun(self):
+    ri = RepetitionIntervalClass("DAILY:03:15:------+:Europe/London")
+    self.checkNextRun(ri,
+      pytz.timezone('UTC').localize(datetime.datetime(2018,10,29,16,30,0,0)),
+      pytz.timezone('UTC').localize(datetime.datetime(2018,11,4,15,3,0,0))
+    )
+
 # MONTHLY Tests
   def test_MonthlyDayBefore(self):
     ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")
@@ -202,6 +236,12 @@ class test_RepetitionInterval(testHelperSuperClass):
       pytz.timezone('UTC').localize(datetime.datetime(2018,10,10,16,30,0,0)),
       pytz.timezone('Europe/London').localize(datetime.datetime(2018,10,11,15,3,0,0))
     )
+    self.assertEqual(ri.__str__(),'MONTHLY:03:15:11:Europe/London')
+
+  def test_MonthlySingleDigitConversion(self):
+    ri = RepetitionIntervalClass("MONTHLY:0:5:1:Europe/London")
+    self.assertEqual(ri.__str__(),'MONTHLY:00:05:01:Europe/London')
+
 
   def test_MonthlyDayBeforeBST(self):
     ri = RepetitionIntervalClass("MONTHLY:03:15:11:Europe/London")

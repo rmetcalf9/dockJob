@@ -109,7 +109,7 @@ class RepetitionIntervalClass():
         if (len(daysOfWeek) != 7):
           raise badParamater
         numDays = 0
-        for x in range(0, 6):
+        for x in range(0, 7):
           if (daysOfWeek[x]=="+"):
             self.daysForDaily[x] = True
             numDays = numDays + 1
@@ -173,7 +173,6 @@ class RepetitionIntervalClass():
     minRetVal = pytz.timezone('UTC').localize(datetime.datetime(4016,1,14,13,0,1,0))
     cc = True
     for curMinute in self.hourlyModeMinutes:
-      print("Calling with minute " + str(curMinute))
       rv = self._getNextOccuranceDatetimeForHourlyModeForParticularMinute(curDateTime, curMinute)
       if rv < minRetVal:
         minRetVal = rv
@@ -243,5 +242,36 @@ class RepetitionIntervalClass():
 
 
     raise Exception('Mode Not Implemented')
+
+  def __str__(self):
+    if (self.mode == ModeType.HOURLY):
+      #example 'HOURLY:03'
+      sf = 'HOURLY:'
+      fir = True
+      for curHour in self.hourlyModeMinutes:
+        if fir:
+          fir = False
+        else:
+          sf += ","
+        sf += str(curHour).zfill(2)
+      return sf
+    if (self.mode == ModeType.DAILY):
+      #example 'DAILY:03:15:+++++++:Europe/London'
+      sf = 'DAILY:' + str(self.minute).zfill(2) + ":" + str(self.hour).zfill(2) + ":"
+      for curDay in self.daysForDaily:
+        if curDay:
+          sf += "+"
+        else:
+          sf += "-"
+      sf += ":" + self.timezone.__str__()
+      return sf
+    if (self.mode == ModeType.MONTHLY):
+      #example 'MONTHLY:03:15:11:Europe/London'
+      sf = 'MONTHLY:' + str(self.minute).zfill(2) + ":" + str(self.hour).zfill(2) + ":"
+      sf += str(self.dayOfMonth).zfill(2)
+      sf += ":" + self.timezone.__str__()
+      return sf
+    raise Exception('Invalid mode encountered in RepetitionIntervalClass.__str__')
+
 
 

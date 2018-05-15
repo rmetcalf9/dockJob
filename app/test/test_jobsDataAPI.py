@@ -732,4 +732,28 @@ class test_jobsData(testHelperAPIClient):
     result6JSON = dict(json.loads(result6.get_data(as_text=True)))
     self.assertJSONJobStringsEqual(result6JSON, data_simpleJobCreateExpRes);
 
+  def test_getJobHasProperlyFormattedRepititionInterval_singledigit(self):
+    single_digit_hourly = dict(data_simpleJobCreateParams)
+    single_digit_hourly['repetitionInterval'] = 'HOURLY:3'
+    result = self.testClient.post('/api/jobs/', data=json.dumps(single_digit_hourly), content_type='application/json')
+    self.assertEqual(result.status_code, 200, msg='Failed to create job with single digit hourly repitition interval')
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    self.assertEqual(resultJSON['repetitionInterval'], 'HOURLY:03')
+
+  def test_getJobHasProperlyFormattedRepititionInterval_wrongorder(self):
+    hourly_list_wrong_order = dict(data_simpleJobCreateParams)
+    hourly_list_wrong_order['repetitionInterval'] = 'HOURLY:1,3,2'
+    result = self.testClient.post('/api/jobs/', data=json.dumps(hourly_list_wrong_order), content_type='application/json')
+    self.assertEqual(result.status_code, 200, msg='Failed to create job with hourly repitition interval list in wrong order')
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    self.assertEqual(resultJSON['repetitionInterval'], 'HOURLY:01,02,03')
+
+  def test_getJobHasProperlyFormattedRepititionInterval_repeat(self):
+    hourly_list_repeat = dict(data_simpleJobCreateParams)
+    hourly_list_repeat['repetitionInterval'] = 'HOURLY:1,3,2,3,3,3,2,2,1'
+    result = self.testClient.post('/api/jobs/', data=json.dumps(hourly_list_repeat), content_type='application/json')
+    self.assertEqual(result.status_code, 200, msg='Failed to create job with hourly repitition interval with values repeating')
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    self.assertEqual(resultJSON['repetitionInterval'], 'HOURLY:01,02,03')
+
 

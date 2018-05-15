@@ -84,6 +84,13 @@ class jobClass():
     except:
       raise BadRequest('Invalid Repetition Interval')
 
+  def setNewRepetitionInterval(self, newRepetitionInterval):
+    self.repetitionInterval = newRepetitionInterval
+    if (self.repetitionInterval != None):
+      if (self.repetitionInterval != ''):
+        ri = RepetitionIntervalClass(self.repetitionInterval)
+        self.repetitionInterval = ri.__str__()
+
   def __init__(self, name, command, enabled, repetitionInterval):
     jobClass.assertValidName(name)
     jobClass.assertValidRepetitionInterval(repetitionInterval, enabled)
@@ -92,7 +99,7 @@ class jobClass():
     self.name = name
     self.command = command
     self.enabled = enabled
-    self.repetitionInterval = repetitionInterval
+    self.setNewRepetitionInterval(repetitionInterval)
     self.creationDate = curTime.isoformat()
     self.lastUpdateDate = curTime.isoformat()
     self.lastRunDate = None
@@ -105,7 +112,7 @@ class jobClass():
     self.name = name
     self.command = command
     self.enabled = enabled
-    self.repetitionInterval = repetitionInterval
+    self.setNewRepetitionInterval(repetitionInterval)
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
 
   def setNextScheduledRun(self, curTime):
@@ -125,7 +132,7 @@ class jobClass():
     return jobClass.uniqueJobNameStatic(self.name)
 
 class jobsDataClass():
-  # map of guid to Job
+  # map of Jobs keyed by GUID
   jobs = None
   # map of Job name to guid
   jobs_name_lookup = None
