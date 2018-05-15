@@ -63,9 +63,10 @@
             float-label="Day(s) of week"
             error-label="Minute must be a number between 0 and 59"
           />
-          <q-input v-model="showCreateJobDialogData.repetitionInterval.dayofmonth" type="number" float-label="Day of Month"
-            :disable="!((showCreateJobDialogData.enabled) && (showCreateJobDialogData.repetitionInterval.mode === 'MONTHLY'))"
-            v-if="((showCreateJobDialogData.enabled) && (showCreateJobDialogData.repetitionInterval.mode === 'MONTHLY'))"
+          <q-input v-model="showCreateJobDialogData.repetitionInterval.dayofmonth" type="text" float-label="Comma seperates list of day of months to run" error-label="Comma seperated list of days of monyh to run job (1-31)"
+            :error="createJobInValidDayOfMonth"
+            :disable="createJobDOMDisabled"
+            v-if="!createJobDOMDisabled"
           />
           <q-input
             v-model="showCreateJobDialogData.repetitionInterval.timezone"
@@ -152,9 +153,32 @@ function initShowCreateJobDialogData () {
         }
       ],
       timezone: globalStore.getters.serverInfo.Server.DefaultUserTimezone,
-      dayofmonth: 1
+      dayofmonth: '1,15'
     }
   }
+}
+
+function commaSeperatedIntListIsInvalid (listStr, minVal, maxVal) {
+  if (listStr.match('[^().0-9,]')) {
+    return true
+  }
+  if (listStr.substr(0, 1) === ',') {
+    return true
+  }
+  if (listStr.substr(-1) === ',') {
+    return true
+  }
+  var invalidVals = listStr.split(',').filter(function (val) {
+    var i = parseInt(val)
+    if (isNaN(i)) return true
+    if (i < minVal) return true
+    if (i > maxVal) return true
+    return false
+  })
+  if (invalidVals.length !== 0) {
+    return true
+  }
+  return false
 }
 
 function pad (num, size) {
@@ -354,6 +378,10 @@ export default {
     createJobTimezoneDisabled () {
       return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))
     },
+    createJobDOMDisabled () {
+      return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode === 'MONTHLY'))
+    },
+    // ---------------- END DISABLE -------------------
     createJobInValidJobName () {
       return this.showCreateJobDialogData.jobname.length <= 2
     },
@@ -367,26 +395,13 @@ export default {
       if (this.createJobHourlyMinuteStringDisabled) {
         return false
       }
-      if (this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString.trim().match('[^().0-9,]')) {
-        return true
-      }
-      if (this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString.trim().substr(0, 1) === ',') {
-        return true
-      }
-      if (this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString.trim().substr(-1) === ',') {
-        return true
-      }
-      var invalidVals = this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString.trim().split(',').filter(function (val) {
-        var i = parseInt(val)
-        if (isNaN(i)) return true
-        if (i < 0) return true
-        if (i > 59) return true
+      return commaSeperatedIntListIsInvalid(this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString.trim(), 0, 59)
+    },
+    createJobInValidDayOfMonth () {
+      if (this.createJobDOMDisabled) {
         return false
-      })
-      if (invalidVals.length !== 0) {
-        return true
       }
-      return false
+      return commaSeperatedIntListIsInvalid(this.showCreateJobDialogData.repetitionInterval.dayofmonth.trim(), 1, 31)
     },
     createJobInValidRepHour () {
       return (!this.createJobHourDisabled) && ((this.showCreateJobDialogData.repetitionInterval.hour < 0) || (this.showCreateJobDialogData.repetitionInterval.hour > 23))
@@ -405,6 +420,7 @@ export default {
       if (this.createJobInValidDays) return false
       if (this.createJobInValidTimezone) return false
       if (this.createJobInValidRepHourlyMinuteString) return false
+      if (this.createJobInValidDayOfMonth) return false
       return true
     }
   }
