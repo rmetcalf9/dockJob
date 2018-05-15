@@ -47,6 +47,11 @@
             :disable="createJobMinuteDisabled"
             v-if="!createJobMinuteDisabled"
           />
+          <q-input v-model="showCreateJobDialogData.repetitionInterval.hourlyMinuteString" type="text" float-label="Comma seperates list of Minutes past hour to run" error-label="Comma seperated list of minutes past hour to run job (0-59)"
+            :error="createJobInValidRepHourlyMinuteString"
+            :disable="createJobHourlyMinuteStringDisabled"
+            v-if="!createJobHourlyMinuteStringDisabled"
+          />
           <q-select
             toggle
             multiple
@@ -113,6 +118,7 @@ function initShowCreateJobDialogData () {
         }
       ],
       minute: 1,
+      hourlyMinuteString: '15,45',
       hour: 1,
       days: [],
       dayOptions: [
@@ -162,7 +168,7 @@ function getRepIntervalString (dialogData) {
   // if (!dialogData.enabled) return ''
 
   if (dialogData.repetitionInterval.mode === 'HOURLY') {
-    return 'HOURLY:' + pad(dialogData.repetitionInterval.minute, 2)
+    return 'HOURLY:' + dialogData.repetitionInterval.hourlyMinuteString.trim()
   }
   if (dialogData.repetitionInterval.mode === 'MONTHLY') {
     // MONTHLY hour minute day
@@ -261,7 +267,7 @@ export default {
           } else if (this.origJobObject.repetitionInterval.startsWith('HOURLY')) {
             arr = this.origJobObject.repetitionInterval.split(':')
             this.showCreateJobDialogData.repetitionInterval.mode = 'HOURLY'
-            this.showCreateJobDialogData.repetitionInterval.minute = arr[1]
+            this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString = arr[1]
 
             // Not overriding defaults
             // this.showCreateJobDialogData.repetitionInterval.hour = 1
@@ -337,7 +343,10 @@ export default {
       return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))
     },
     createJobMinuteDisabled () {
-      return !this.showCreateJobDialogData.enabled
+      return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))
+    },
+    createJobHourlyMinuteStringDisabled () {
+      return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode === 'HOURLY'))
     },
     createJobDaysDisabled () {
       return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode === 'DAILY'))
@@ -353,6 +362,31 @@ export default {
     },
     createJobInValidRepMinute () {
       return (!this.createJobMinuteDisabled) && ((this.showCreateJobDialogData.repetitionInterval.minute < 0) || (this.showCreateJobDialogData.repetitionInterval.minute > 59))
+    },
+    createJobInValidRepHourlyMinuteString () {
+      if (this.createJobHourlyMinuteStringDisabled) {
+        return false
+      }
+      if (this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString.trim().match('[^().0-9,]')) {
+        return true
+      }
+      if (this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString.trim().substr(0, 1) === ',') {
+        return true
+      }
+      if (this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString.trim().substr(-1) === ',') {
+        return true
+      }
+      var invalidVals = this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString.trim().split(',').filter(function (val) {
+        var i = parseInt(val)
+        if (isNaN(i)) return true
+        if (i < 0) return true
+        if (i > 59) return true
+        return false
+      })
+      if (invalidVals.length !== 0) {
+        return true
+      }
+      return false
     },
     createJobInValidRepHour () {
       return (!this.createJobHourDisabled) && ((this.showCreateJobDialogData.repetitionInterval.hour < 0) || (this.showCreateJobDialogData.repetitionInterval.hour > 23))
@@ -370,6 +404,7 @@ export default {
       if (this.createJobInValidRepHour) return false
       if (this.createJobInValidDays) return false
       if (this.createJobInValidTimezone) return false
+      if (this.createJobInValidRepHourlyMinuteString) return false
       return true
     }
   }
