@@ -25,7 +25,7 @@ I put images for this project into the [Docker hub](https://hub.docker.com/r/met
 
 On a machine with docker installed run the following command:
 ````
-docker run -d -p 80:80 -e APIAPP_APIURL='http://localhost:80/api' -e'APIAPP_APIDOCSURL=http://localhost:80/apidocs/' metcarob/dockjob
+docker run -d -p 80:80 -e APIAPP_APIURL='http://localhost:80/api' -e'APIAPP_APIDOCSURL=http://localhost:80/apidocs' metcarob/dockjob
 ````
 
 Visit http://localhost/frontend
@@ -57,9 +57,9 @@ At the moment I have a multi stage build so it wasn't possible to use TravisCI t
 To release dockjob I:
  - Run the [build process](./dockerImageBuildProcess/README.md) to create an image on my local machine
  - Make sure I remember to stop the dev server instances before testing the container
- - Launch the image with a docker run command and make sure it starts and the logs display correct version number
+ - Launch the image with a docker run command (Above) and make sure it starts and the logs display correct version number
  - Go into compose examples and run https basic auth example and make sure I can log in to the application (A temp version of the compose file must be produced with hard coded version number as the latest tag will not point to the right version even though docker images shows that it does.)
- - When testing usg incognito mode as the webapp is cached by browsers.
+ - When testing use incognito mode as the webapp is cached by browsers.
  - Rename milestone
  - Update RELEASE.md (pointing at the milestone)
  - Run docker login and log in to my docker hub account
