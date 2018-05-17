@@ -1,5 +1,10 @@
 # Release Log
 
+## 0.3.1
+
+Fixed bug that stopped daily activities running on sundays, added Execution views and enabled hourly and monthly jobs to run mutiple times per hour/month.
+https://github.com/rmetcalf9/dockJob/milestone/4?closed=5
+
 ## 0.2.3
 
 Adding feature to allow me to integrate more easily with other projects.
