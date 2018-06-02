@@ -113,3 +113,8 @@ class test_appObjClass(testHelperAPIClient):
       appObj.init(env, self.standardStartupTime)
     self.checkGotRightException(context,getInvalidEnvVarParamaterException('APIAPP_SKIPUSERCHECK'))
 
+  def test_FrontendRedirect(self):
+    result = self.testClient.get('/frontend')
+    self.assertEqual(result.status_code, 301)
+    self.assertEqual(result.headers['location'], 'http://frontenddummytestxxx/')
+

@@ -6,6 +6,7 @@ export APIAPP_MODE=DEVELOPER
 export APIAPP_FRONTEND=_
 export APIAPP_APIURL=http://localhost/api
 export APIAPP_APIDOCSURL=http://localhost/apidocs
+export APIAPP_FRONTENDURL=http://localhost/frontend
 export APIAPP_APIACCESSSECURITY=[]
 export APIAPP_USERFORJOBS=dockjobuser
 export APIAPP_GROUPFORJOBS=dockjobgroup

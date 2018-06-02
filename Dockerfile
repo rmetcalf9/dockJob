@@ -13,6 +13,7 @@ ENV APP_DIR /app
 ENV APIAPP_FRONTEND /webfrontend
 ENV APIAPP_APIURL http://localhost:80/dockjobapi
 ENV APIAPP_APIDOCSURL http://localhost:80/apidocs
+ENV APIAPP_FRONTENDURL http://localhost:80/frontend
 ENV APIAPP_APIACCESSSECURITY '[]'
 ENV APIAPP_USERFORJOBS=dockjobuser
 ENV APIAPP_GROUPFORJOBS=dockjobgroup

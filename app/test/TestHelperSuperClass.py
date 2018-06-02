@@ -15,6 +15,7 @@ env = {
   'APIAPP_VERSION': 'TEST-3.3.3',
   'APIAPP_FRONTEND': '../app',
   'APIAPP_APIURL': 'http://apiurlxxx',
+  'APIAPP_FRONTENDURL': 'http://frontenddummytestxxx',
   'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]',
   'APIAPP_USERFORJOBS': 'root',
   'APIAPP_GROUPFORJOBS': 'root',

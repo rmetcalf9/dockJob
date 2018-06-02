@@ -5,6 +5,7 @@ APP_DIR=.
 export APIAPP_MODE=DEVELOPER
 export APIAPP_FRONTEND=_
 export APIAPP_APIURL="http://localhost:80/api"
+export APIAPP_FRONTENDURL="http://localhost.com:80/frontend"
 export APIAPP_APIACCESSSECURITY="[{\"type\": \"basic-auth\" }]"
 export APIAPP_USERFORJOBS=dockjobuser
 export APIAPP_GROUPFORJOBS=dockjobgroup
