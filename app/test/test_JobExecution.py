@@ -101,3 +101,16 @@ class test_JobExecution(testHelperAPIClient):
     tim = from_iso8601(a.dateCompleted)
     self.assertTimeCloseToCurrent(tim)
     self.assertJSONStringsEqual(resDict, expCompleted)
+
+  # Test added in issue https://github.com/rmetcalf9/dockJob/issues/52 when I discovered
+  def test_butEncounteredWithWgetFromGoogle(self):
+    jobObj = jobClass('TestJob123', 'cat test/wget_google_example.dat | iconv -f ISO-8859-1 -t UTF-8', False, '')
+    a = JobExecutionClass(jobObj, 'TestExecutionName', False)
+    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails)
+    self.assertEqual(a.stage, 'Completed')
+    self.assertEqual(a.resultReturnCode, 0)
+    self.assertTimeCloseToCurrent(a.dateCreated)
+    self.assertTimeCloseToCurrent(a.dateStarted)
+    self.assertTimeCloseToCurrent(a.dateCompleted)
+
+
