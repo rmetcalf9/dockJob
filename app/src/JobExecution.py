@@ -93,7 +93,10 @@ class JobExecutionClass():
       return
     lockAcquireFn()
     self.resultReturnCode = executionResult.returncode
-    self.resultSTDOUT = executionResult.stdout.decode().strip()
+    try:
+      self.resultSTDOUT = executionResult.stdout.decode().strip()
+    except Exception:
+      self.resultSTDOUT = "ERROR - failed to decode output probally because it wasn't in utf-8 format"
     #valid exit codes are between 0-255. I have hijacked -1 for timeout
     if executionResult.returncode == -1:
       self.stage = 'Timeout'
