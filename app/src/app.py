@@ -14,6 +14,11 @@ import pytz
 curDatetime = datetime.datetime.now(pytz.utc)
 appObj.init(os.environ, curDatetime)
 
+try:
+  uwsgi.atexit = appObj.exit_gracefully
+except:
+  print('uwsgi not availiable')
+
 globalFlaskAppObj = appObj.flaskAppObject
 
 if __name__ == "__main__":
