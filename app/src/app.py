@@ -16,7 +16,7 @@ appObj.init(os.environ, curDatetime)
 
 try:
   import uwsgi
-  uwsgi.atexit = appObj.exit_gracefully
+  uwsgi.atexit = appObj.exit_gracefully(None, None)
 except:
   print('uwsgi not availiable')
 
