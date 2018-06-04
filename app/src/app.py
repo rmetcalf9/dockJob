@@ -14,9 +14,12 @@ import pytz
 curDatetime = datetime.datetime.now(pytz.utc)
 appObj.init(os.environ, curDatetime)
 
+def call_exit_gracefully():
+  appObj.exit_gracefully(None, None)
+
 try:
   import uwsgi
-  uwsgi.atexit = appObj.exit_gracefully(None, None)
+  uwsgi.atexit = call_exit_gracefully
 except:
   print('uwsgi not availiable')
 
