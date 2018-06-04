@@ -44,8 +44,8 @@ child_uwsgi=$!
 nginx -g 'daemon off;' &
 child_nginx=$! 
 
-wait "$child_nginx"
 wait "$child_uwsgi"
+wait "$child_nginx"
 
 
 exit 0
