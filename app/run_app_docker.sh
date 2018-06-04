@@ -39,13 +39,13 @@ if [ E${DOCKERRUN_USERHOSTFILE} != 'E' ]; then
   echo "  ${C} variables evaluated"
 fi
 
-uwsgi --ini /uwsgi.ini &
-child_uwsgi=$! 
 nginx -g 'daemon off;' &
 child_nginx=$! 
+uwsgi --ini /uwsgi.ini &
+child_uwsgi=$! 
 
 wait "$child_uwsgi"
-wait "$child_nginx"
+##wait "$child_nginx"
 
 
 exit 0
