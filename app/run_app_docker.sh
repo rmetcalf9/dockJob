@@ -17,7 +17,8 @@ fi
 
 _term() { 
   echo "run_app_docker.sh - Caught SIGTERM signal!" 
-  kill -TERM "$child" 2>/dev/null
+  kill -TERM "$child_nginx" 2>/dev/null
+  kill -TERM "$child_uwsgi" 2>/dev/null
 }
 
 trap _term SIGTERM
@@ -38,10 +39,13 @@ if [ E${DOCKERRUN_USERHOSTFILE} != 'E' ]; then
   echo "  ${C} variables evaluated"
 fi
 
-python3 -u "${APP_DIR}/app.py" &
+uwsgi --ini /uwsgi.ini &
+child_uwsgi=$! 
+nginx -g 'daemon off;' &
+child_nginx=$! 
 
-child=$! 
-wait "$child"
+wait "$child_nginx"
+wait "$child_uwsgi"
 
 
 exit 0

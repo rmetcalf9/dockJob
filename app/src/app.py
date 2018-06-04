@@ -14,25 +14,28 @@ import pytz
 curDatetime = datetime.datetime.now(pytz.utc)
 appObj.init(os.environ, curDatetime)
 
-#Custom handler to allow me to use my own logger
-from werkzeug.serving import WSGIRequestHandler, _log
+globalFlaskAppObj = appObj.flaskAppObject
 
-class CustomRequestHandler(WSGIRequestHandler):
-  # Stop logging sucessful health checks
-  def log_request(self, code='-', size='-'):
-    ignore = False
-    if code > 199:
-      if code < 300:
-        if "healthcheck=true" in self.requestline:
-          ignore = True
+if __name__ == "__main__":
+  #Custom handler to allow me to use my own logger
+  from werkzeug.serving import WSGIRequestHandler, _log
 
-    if ignore:
-      return
-    return super(CustomRequestHandler, self).log_request(code,size)
+  class CustomRequestHandler(WSGIRequestHandler):
+    # Stop logging sucessful health checks
+    def log_request(self, code='-', size='-'):
+      ignore = False
+      if code > 199:
+        if code < 300:
+          if "healthcheck=true" in self.requestline:
+            ignore = True
 
-expectedNumberOfParams = 0
-if ((len(sys.argv)-1) != expectedNumberOfParams):
-  raise Exception('Wrong number of paramaters passed (Got ' + str((len(sys.argv)-1)) + " expected " + str(expectedNumberOfParams) + ")")
+      if ignore:
+        return
+      return super(CustomRequestHandler, self).log_request(code,size)
 
-appObj.run(CustomRequestHandler)
+  expectedNumberOfParams = 0
+  if ((len(sys.argv)-1) != expectedNumberOfParams):
+    raise Exception('Wrong number of paramaters passed (Got ' + str((len(sys.argv)-1)) + " expected " + str(expectedNumberOfParams) + ")")
+
+  appObj.run(CustomRequestHandler)
 
