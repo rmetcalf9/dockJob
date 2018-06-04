@@ -15,6 +15,7 @@ curDatetime = datetime.datetime.now(pytz.utc)
 appObj.init(os.environ, curDatetime)
 
 try:
+  import uwsgi
   uwsgi.atexit = appObj.exit_gracefully
 except:
   print('uwsgi not availiable')
