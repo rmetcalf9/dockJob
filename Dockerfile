@@ -5,7 +5,10 @@ MAINTAINER Robert Metcalf
 ##https://vladikk.com/2013/09/12/serving-flask-with-nginx-on-ubuntu/
 
 ENV APP_DIR /app
+##APIAPP_FRONTEND is also configured in nginx conf
 ENV APIAPP_FRONTEND /webfrontend
+
+
 ENV APIAPP_APIURL http://localhost:80/dockjobapi
 ENV APIAPP_APIDOCSURL http://localhost:80/apidocs
 ENV APIAPP_FRONTENDURL http://localhost:80/frontend

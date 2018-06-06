@@ -92,8 +92,10 @@ services:
     environment:
       #- APIAPP_APIURL=https://cat-sdts.metcarob-home.com/dockjobapi
       #- APIAPP_APIDOCSURL=https://cat-sdts.metcarob-home.com/dockjobapidocs
+      #- APIAPP_FRONTENDURL=https://cat-sdts.metcarob-home.com:5443/dockjob
       - APIAPP_APIURL=https://somefunnyhostname.com:5443/dockjobapi
       - APIAPP_APIDOCSURL=https://somefunnyhostname.com:5443/dockjobapidocs
+      - APIAPP_FRONTENDURL=https://somefunnyhostname.com:5443/dockjob
       - "APIAPP_APIACCESSSECURITY=[{ \"type\": \"basic-auth\" }]"
     deploy:
       restart_policy:

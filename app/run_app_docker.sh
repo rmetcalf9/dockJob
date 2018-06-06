@@ -45,7 +45,12 @@ nginx -g 'daemon off;' &
 child_nginx=$! 
 
 wait "$child_uwsgi"
-wait "$child_nginx"
 
+##wait "$child_nginx"
+##Not waiting for nginx. Otherwise when python app terminates but nginx doesn't
+## the container dosen't stop
+## instead we kill nginx if the python app has stopped
+kill -TERM "$child_nginx" 2>/dev/null
+wait "$child_nginx"
 
 exit 0
