@@ -418,10 +418,10 @@ def registerAPI(appObj):
       '''Get Job Executions'''
       jobObj = None
       try:
-        jobObj = appObj.appData['jobsData'].getJob(guid).__dict__
+        jobObj = appObj.appData['jobsData'].getJob(guid)
       except:
         try:
-          jobObj = appObj.appData['jobsData'].getJobByName(guid).__dict__
+          jobObj = appObj.appData['jobsData'].getJobByName(guid)
         except:
           raise BadRequest('Invalid Job Identifier')
 
@@ -430,7 +430,7 @@ def registerAPI(appObj):
       def filterJobExecution(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
         return True
       return appObj.getPaginatedResult(
-        appObj.jobExecutor.getAllJobExecutions(jobObj['guid']),
+        appObj.jobExecutor.getAllJobExecutions(jobObj.guid),
         outputJobExecution,
         request,
         filterJobExecution
