@@ -397,12 +397,21 @@ def registerAPI(appObj):
     @appObj.addStandardSortParams(nsJobs)
     def get(self, guid):
       '''Get Job Executions'''
+      jobObj = None
+      try:
+        jobObj = appObj.appData['jobsData'].getJob(guid).__dict__
+      except:
+        try:
+          jobObj = appObj.appData['jobsData'].getJobByName(guid).__dict__
+        except:
+          raise BadRequest('Invalid Job Identifier')
+
       def outputJobExecution(item):
         return item.__dict__
       def filterJobExecution(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
         return True
       return appObj.getPaginatedResult(
-        appObj.jobExecutor.getAllJobExecutions(guid),
+        appObj.jobExecutor.getAllJobExecutions(jobObj['guid']),
         outputJobExecution,
         request,
         filterJobExecution
