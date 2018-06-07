@@ -5,6 +5,11 @@
 Changed container to use production http server.
 https://github.com/rmetcalf9/dockJob/milestone/7
 
+## 0.3.2
+
+Bash output with non utf8 output caused the job runner to freeze.
+https://github.com/rmetcalf9/dockJob/milestone/6?closed=1
+
 ## 0.3.1
 
 Fixed bug that stopped daily activities running on sundays, added Execution views and enabled hourly and monthly jobs to run mutiple times per hour/month.
