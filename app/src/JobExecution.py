@@ -76,8 +76,8 @@ class JobExecutionClass():
   def execute(self, executor, lockAcquireFn, lockReleaseFn, registerRunDetailsFn):
     lockAcquireFn()
     self.stage = 'Running'
-    curDateTime = datetime.datetime.now(pytz.timezone("UTC")).isoformat()
-    self.dateStarted = curDateTime
+    curDateTime = datetime.datetime.now(pytz.timezone("UTC"))
+    self.dateStarted = curDateTime.isoformat()
     registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=curDateTime, newLastRunReturnCode=None, newLastRunExecutionGUID=self.guid)
     lockReleaseFn()
     try:

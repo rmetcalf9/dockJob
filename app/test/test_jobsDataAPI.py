@@ -6,7 +6,7 @@ from appObj import appObj
 import datetime
 import pytz
 import time
-
+from dateutil.relativedelta import relativedelta
 
 data_simpleJobCreateParams = {
   "name": "TestJob",
@@ -32,6 +32,7 @@ data_simpleJobCreateExpRes = {
   "lastRunDate": None,
   "lastRunReturnCode": None,
   "lastRunExecutionGUID": "",
+  "mostRecentCompletionStatus": "Unknown"
 }
 data_simpleJobExecutionCreateExpRes = {
   "guid": 'IGNORE',
@@ -759,4 +760,156 @@ class test_jobsData(testHelperAPIClient):
   def test_getJobExecutionsInvalidJob(self):
     result = self.testClient.get('/api/jobs/SomeInvlaidJobKey/execution')
     self.assertEqual(result.status_code, 400, msg='Invalid job key did not return bad request')
+
+  def test_getAndUpdateSuccesfulJobGivesCorrectReturn(self):
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    jobGUID = resultJSON['guid']
+
+    #Execute the job
+    result2 = self.addExecution(jobGUID, '001_001')
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,1,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
+
+    #print(appObj.appData['jobsData'].getJob(jobGUID)._caculatedDict(appObj))
+
+    #Get the job and ensure it's status is Success
+    result3 = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(result3.status_code, 200, msg='Read back Job record after it was executed')
+    result3JSON = json.loads(result3.get_data(as_text=True))
+    result3JSON['lastRunDate'] = None
+    result3JSON['lastRunExecutionGUID'] = ""
+    expRes = dict(data_simpleJobCreateExpRes)
+    expRes['mostRecentCompletionStatus'] = "Success"
+    expRes['lastRunReturnCode'] = 0
+    self.assertJSONJobStringsEqual(result3JSON, expRes);
+
+    #Update the job and ensure returned data is still Success
+    updateNameInput = dict(data_simpleJobCreateParams)
+    updateNameInput['name'] = "newJobNamedsffds"
+    updateJobNameResult = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(updateNameInput), content_type='application/json')
+    self.assertEqual(updateJobNameResult.status_code, 200, msg='Put call did not give correct status')
+    updateJobNameResultJSON = dict(json.loads(updateJobNameResult.get_data(as_text=True)))
+    updateJobNameResultJSON['lastRunDate'] = None
+    updateJobNameResultJSON['lastRunExecutionGUID'] = ""
+    expRes2 = dict(expRes)
+    expRes2['name'] = updateNameInput['name']
+    self.assertJSONJobStringsEqual(updateJobNameResultJSON, expRes2);
+
+    #Test get list of jobs returns caculated fields
+    result3 = self.testClient.get('/api/jobs/')
+    self.assertEqual(result3.status_code, 200, msg='Fetch all jobs failed')
+    result3JSON = json.loads(result3.get_data(as_text=True))
+    expPaginationResult = {'offset': 0, 'pagesize': 100, 'total': 1}
+    self.assertJSONStringsEqual(result3JSON["pagination"], expPaginationResult);
+    self.assertEqual(len(result3JSON["result"]),1,msg="Wrong number of returned results")
+    result3JSON["result"][0]['lastRunDate'] = None
+    result3JSON["result"][0]['lastRunExecutionGUID'] = ""
+    self.assertJSONJobStringsEqual(result3JSON["result"][0], expRes2);
+
+    #Go 1 year into the future
+    curDateTime = appObj.getCurDateTime()
+    appObj.setTestingDateTime(curDateTime + relativedelta(years=1))
+    
+    #print(appObj.appData['jobsData'].getJob(jobGUID)._caculatedDict(appObj))
+    
+    #Get the job and ensure it's status is now Unknown
+    resultFutureGet = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(resultFutureGet.status_code, 200, msg='Read back record 1 year in future')
+    resultFutureGetJSON = json.loads(resultFutureGet.get_data(as_text=True))
+    resultFutureGetJSON['lastRunDate'] = None
+    resultFutureGetJSON['lastRunExecutionGUID'] = ""
+    expRes3 = dict(expRes2)
+    expRes3['mostRecentCompletionStatus'] = "Unknown"
+    self.assertJSONJobStringsEqual(resultFutureGetJSON, expRes3);
+
+    #Go back to today
+    appObj.setTestingDateTime(None)
+
+    #Test job delete returns mostREcentCompletionStatus Success
+    result4 = self.testClient.delete('/api/jobs/' + jobGUID)
+    self.assertEqual(result4.status_code, 200, msg='Didn''t delete Job')
+    result4JSON = json.loads(result4.get_data(as_text=True))
+    result4JSON['lastRunDate'] = None
+    result4JSON['lastRunExecutionGUID'] = ""
+    self.assertJSONJobStringsEqual(result4JSON, expRes2);
+
+  def test_getAndUpdateFailedJobGivesCorrectReturn(self):
+    data_simpleJobCreateParamsFailed = dict(data_simpleJobCreateParams)
+    data_simpleJobCreateParamsFailed['command'] = 'badCommand'
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParamsFailed), content_type='application/json')
+    self.assertEqual(result.status_code, 200)
+    resultJSON = json.loads(result.get_data(as_text=True))
+    jobGUID = resultJSON['guid']
+
+    #Execute the job
+    result2 = self.addExecution(jobGUID, '001_001')
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,1,59,0,pytz.timezone('UTC')))
+    appObj.jobExecutor.loopIteration(datetime.datetime(2016,1,5,14,2,59,0,pytz.timezone('UTC')))
+
+    #print(appObj.appData['jobsData'].getJob(jobGUID)._caculatedDict(appObj))
+
+    #Get the job and ensure it's status is Fail
+    result3 = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(result3.status_code, 200, msg='Read back Job record after it was executed')
+    result3JSON = json.loads(result3.get_data(as_text=True))
+    result3JSON['lastRunDate'] = None
+    result3JSON['lastRunExecutionGUID'] = ""
+    expRes = dict(data_simpleJobCreateExpRes)
+    expRes['mostRecentCompletionStatus'] = "Fail"
+    expRes['command'] = data_simpleJobCreateParamsFailed['command']
+    expRes['lastRunReturnCode'] = 127
+    self.assertJSONJobStringsEqual(result3JSON, expRes);
+
+    #Update the job and ensure returned data is still Fail
+    updateNameInput = dict(data_simpleJobCreateParamsFailed)
+    updateNameInput['name'] = "newJobNamedsffds"
+    updateJobNameResult = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(updateNameInput), content_type='application/json')
+    self.assertEqual(updateJobNameResult.status_code, 200, msg='Put call did not give correct status')
+    updateJobNameResultJSON = dict(json.loads(updateJobNameResult.get_data(as_text=True)))
+    updateJobNameResultJSON['lastRunDate'] = None
+    updateJobNameResultJSON['lastRunExecutionGUID'] = ""
+    expRes2 = dict(expRes)
+    expRes2['name'] = updateNameInput['name']
+    self.assertJSONJobStringsEqual(updateJobNameResultJSON, expRes2);
+
+    #Test get list of jobs returns caculated fields
+    result3 = self.testClient.get('/api/jobs/')
+    self.assertEqual(result3.status_code, 200, msg='Fetch all jobs failed')
+    result3JSON = json.loads(result3.get_data(as_text=True))
+    expPaginationResult = {'offset': 0, 'pagesize': 100, 'total': 1}
+    self.assertJSONStringsEqual(result3JSON["pagination"], expPaginationResult);
+    self.assertEqual(len(result3JSON["result"]),1,msg="Wrong number of returned results")
+    result3JSON["result"][0]['lastRunDate'] = None
+    result3JSON["result"][0]['lastRunExecutionGUID'] = ""
+    self.assertJSONJobStringsEqual(result3JSON["result"][0], expRes2);
+
+    #Go 1 year into the future
+    curDateTime = appObj.getCurDateTime()
+    appObj.setTestingDateTime(curDateTime + relativedelta(years=1))
+    
+    #print(appObj.appData['jobsData'].getJob(jobGUID)._caculatedDict(appObj))
+    
+    #Get the job and ensure it's status is now Unknown
+    resultFutureGet = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(resultFutureGet.status_code, 200, msg='Read back record 1 year in future')
+    resultFutureGetJSON = json.loads(resultFutureGet.get_data(as_text=True))
+    resultFutureGetJSON['lastRunDate'] = None
+    resultFutureGetJSON['lastRunExecutionGUID'] = ""
+    expRes3 = dict(expRes2)
+    expRes3['mostRecentCompletionStatus'] = "Unknown"
+    self.assertJSONJobStringsEqual(resultFutureGetJSON, expRes3);
+
+    #Go back to today
+    appObj.setTestingDateTime(None)
+
+    #Test job delete returns mostRecentCompletionStatus Fail
+    result4 = self.testClient.delete('/api/jobs/' + jobGUID)
+    self.assertEqual(result4.status_code, 200, msg='Didn''t delete Job')
+    result4JSON = json.loads(result4.get_data(as_text=True))
+    result4JSON['lastRunDate'] = None
+    result4JSON['lastRunExecutionGUID'] = ""
+    self.assertJSONJobStringsEqual(result4JSON, expRes2);
+
 

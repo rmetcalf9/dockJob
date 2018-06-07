@@ -13,14 +13,17 @@ from jobExecutionsDataAPI import registerAPI as registerJobExecutionsApi
 from flask_restplus import fields
 from JobExecutor import JobExecutorClass
 import time
+import datetime
 
 class appObjClass(parAppObj):
   jobExecutor = None
   userforjobs = None
   groupforjobs = None
   serverStartTime = None
+  curDateTimeOverrideForTesting = None
 
   def init(self, env, serverStartTime, testingMode = False):
+    self.curDateTimeOverrideForTesting = None
     self.serverStartTime = serverStartTime
     if self.jobExecutor is not None:
       #for testing we init multiple times. We need to stop the thread running in this case
@@ -46,6 +49,12 @@ class appObjClass(parAppObj):
     registerJobsApi(self)
     registerJobExecutionsApi(self)
 
+  def setTestingDateTime(self, val):
+    self.curDateTimeOverrideForTesting = val
+  def getCurDateTime(self):
+    if self.curDateTimeOverrideForTesting is None:
+      return datetime.datetime.now(pytz.timezone("UTC"))
+    return self.curDateTimeOverrideForTesting
 
   def getServerInfoModel(self):
     serverInfoServerModel = appObj.flastRestPlusAPIObject.model('ServerInfoServer', {

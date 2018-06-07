@@ -4,6 +4,7 @@ from werkzeug.exceptions import BadRequest
 import uuid
 import json
 import datetime
+from dateutil.relativedelta import relativedelta
 # from pytz import timezone
 import pytz
 from RepetitionInterval import RepetitionIntervalClass
@@ -28,7 +29,8 @@ def getJobModel(appObj):
       'lastUpdateDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was changed (excluding runs)'),
       'lastRunDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was run'),
       'lastRunReturnCode': fields.Integer(default=None,description='Return code for the last execution of this job or -1 for timed out'),
-      'lastRunExecutionGUID': fields.String(default='',description='Unique identifier for the last job execution for this job')
+      'lastRunExecutionGUID': fields.String(default='',description='Unique identifier for the last job execution for this job'),
+      'mostRecentCompletionStatus': fields.String(default='Unknown',description='READONLY - Success, Fail or Unknown. Success or Fail if the job has run in last 25 hours, Unknown otherwise')
     })
   return jobModel
 
@@ -107,6 +109,23 @@ class jobClass():
     self.lastRunReturnCode = None
     self.nextScheduledRun = None
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
+
+  # Needed when we use extra caculated values in the dict
+  def _caculatedDict(self, appObj):
+    ret = dict(self.__dict__)
+    if self.lastRunDate is None:
+      ret['mostRecentCompletionStatus'] = "Unknown"
+    else:
+      ret['lastRunDate'] = self.lastRunDate.isoformat()
+      earlyTime = appObj.getCurDateTime() - relativedelta(hours=25)
+      if self.lastRunDate < earlyTime:
+        ret['mostRecentCompletionStatus'] = "Unknown"
+      else:
+        if self.lastRunReturnCode==0:
+          ret['mostRecentCompletionStatus'] = "Success"
+        else:
+          ret['mostRecentCompletionStatus'] = "Fail"
+    return ret
 
   def setNewValues(self, name, command, enabled, repetitionInterval):
     self.name = name
@@ -297,7 +316,7 @@ def registerAPI(appObj):
     def get(self):
       '''Get Jobs'''
       def outputJob(item):
-        return appObj.appData['jobsData'].jobs[item].__dict__
+        return appObj.appData['jobsData'].jobs[item]._caculatedDict(appObj)
       def filterJob(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
         if appObj.appData['jobsData'].jobs[item].name.upper().find(whereClauseText) != -1:
           return True
@@ -335,10 +354,10 @@ def registerAPI(appObj):
     def get(self, guid):
       '''Fetch a given resource'''
       try:
-        return appObj.appData['jobsData'].getJob(guid).__dict__
+        return appObj.appData['jobsData'].getJob(guid)._caculatedDict(appObj)
       except:
         try:
-          return appObj.appData['jobsData'].getJobByName(guid).__dict__
+          return appObj.appData['jobsData'].getJobByName(guid)._caculatedDict(appObj)
         except:
           raise BadRequest('Invalid Job Identifier')
       return None
@@ -357,7 +376,7 @@ def registerAPI(appObj):
         except:
           raise BadRequest('Invalid Job Identifier')
       appObj.appData['jobsData'].deleteJob(deletedJob)
-      return deletedJob.__dict__
+      return deletedJob._caculatedDict(appObj)
 
     @nsJobs.doc('update_job')
     @nsJobs.expect(jobCreationModel, validate=True)
@@ -375,7 +394,7 @@ def registerAPI(appObj):
         except:
           raise BadRequest('Invalid Job Identifier')
       appObj.appData['jobsData'].updateJob(Job, request.get_json())
-      return Job.__dict__
+      return Job._caculatedDict(appObj)
 
   @nsJobs.route('/<string:guid>/execution')
   @nsJobs.response(400, 'Job not found')
