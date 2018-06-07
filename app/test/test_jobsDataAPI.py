@@ -343,7 +343,7 @@ class test_jobsData(testHelperAPIClient):
     exp['jobGUID'] = jobGUID
 
     self.assertJSONStringsEqual(resultJSON2, exp);
-
+    
   def test_getJobExecutions(self):
     execution_guids = self.setupJobsAndExecutions(data_simpleJobCreateParams)
 
@@ -756,4 +756,7 @@ class test_jobsData(testHelperAPIClient):
     resultJSON = dict(json.loads(result.get_data(as_text=True)))
     self.assertEqual(resultJSON['repetitionInterval'], 'HOURLY:01,02,03')
 
+  def test_getJobExecutionsInvalidJob(self):
+    result = self.testClient.get('/api/jobs/SomeInvlaidJobKey/execution')
+    self.assertEqual(result.status_code, 400, msg='Invalid job key did not return bad request')
 
