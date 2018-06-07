@@ -21,8 +21,10 @@ class appObjClass(parAppObj):
   groupforjobs = None
   serverStartTime = None
   curDateTimeOverrideForTesting = None
+  hoursBeforeMostRecentCompletionStatusBecomesUnknown = None
 
   def init(self, env, serverStartTime, testingMode = False):
+    self.hoursBeforeMostRecentCompletionStatusBecomesUnknown = 49
     self.curDateTimeOverrideForTesting = None
     self.serverStartTime = serverStartTime
     if self.jobExecutor is not None:
@@ -61,7 +63,8 @@ class appObjClass(parAppObj):
       'DefaultUserTimezone': fields.String(default='Europe/London', description='Timezone used by client to display times. (All API''s use UTC so client must convert)'),
       'ServerDatetime': fields.DateTime(dt_format=u'iso8601', description='Current server date time'),
       'ServerStartupTime': fields.DateTime(dt_format=u'iso8601', description='Time the dockJob server started'),
-      'TotalJobExecutions': fields.Integer(default='0',description='Number to jobs executed since server started')
+      'TotalJobExecutions': fields.Integer(default='0',description='Number to jobs executed since server started'),
+      'HoursBeforeMostRecentCompletionStatusBecomesUnknown': fields.Integer(default='0',description='Number of hours a job has not been run before a job is considered to have Unknown status.')
     })
 
     return appObj.flastRestPlusAPIObject.model('ServerInfo', {
@@ -69,13 +72,14 @@ class appObjClass(parAppObj):
       'Jobs': fields.Nested(getJobServerInfoModel(appObj))
     })  
 
-    #curDateTime must be in UTC
+  #curDateTime must be in UTC
   def getServerInfoJSON(self, curDateTime):
     if (curDateTime.tzinfo != pytz.utc):
       raise self.NotUTCException
     self.serverObj['ServerDatetime'] = curDateTime.isoformat()
     self.serverObj['ServerStartupTime'] = self.serverStartTime.isoformat()
     self.serverObj['TotalJobExecutions'] = self.jobExecutor.totalExecutions
+    self.serverObj['HoursBeforeMostRecentCompletionStatusBecomesUnknown'] = self.hoursBeforeMostRecentCompletionStatusBecomesUnknown
     return {'Server': self.serverObj, 'Jobs': self.appData['jobsData'].getJobServerInfo()}
     #return json.dumps({'Server': self.serverObj, 'Jobs': jobsObj})
 

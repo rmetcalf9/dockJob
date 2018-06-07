@@ -24,7 +24,8 @@ class test_api(testHelperAPIClient):
         'DefaultUserTimezone': 'Europe/London', 
         'ServerDatetime': 'IGNORE',
         'ServerStartupTime': '2018-01-01T13:46:00+00:00',
-        'TotalJobExecutions': 0
+        'TotalJobExecutions': 0,
+        'HoursBeforeMostRecentCompletionStatusBecomesUnknown': 49
       },
     }
     result = self.testClient.get('/api/serverinfo/')
@@ -67,7 +68,8 @@ class test_api(testHelperAPIClient):
         'DefaultUserTimezone': 'Europe/London', 
         'ServerDatetime': 'IGNORE',
         'ServerStartupTime': '2018-01-01T13:46:00+00:00',
-        'TotalJobExecutions': 0
+        'TotalJobExecutions': 0,
+        'HoursBeforeMostRecentCompletionStatusBecomesUnknown': 49
       },
     }
     self.createJobs(1,data_simpleJobCreateParams)

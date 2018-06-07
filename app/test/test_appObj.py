@@ -29,7 +29,8 @@ class test_appObjClass(testHelperAPIClient):
         'DefaultUserTimezone': 'Europe/London', 
         'ServerDatetime': curDatetime.isoformat(),
         'ServerStartupTime': '2018-01-01T13:46:00+00:00',
-        'TotalJobExecutions': 0
+        'TotalJobExecutions': 0,
+        'HoursBeforeMostRecentCompletionStatusBecomesUnknown': 49
       },
     }
 
