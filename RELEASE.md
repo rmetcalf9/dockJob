@@ -1,5 +1,10 @@
 # Release Log
 
+## 0.3.13
+
+Adding Job Status.
+https://github.com/rmetcalf9/dockJob/milestone/8
+
 ## 0.3.12
 
 Changed container to use production http server.
