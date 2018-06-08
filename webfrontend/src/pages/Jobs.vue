@@ -35,6 +35,11 @@
       <q-search clearable hide-underline v-model="jobsDataTableSettings.filter" />
       </template>
 
+      <q-td  slot="body-cell-name" slot-scope="props" :props="props">
+        <q-btn v-if="props.row.mostRecentCompletionStatus === 'Success'" flat color="positive" :label="props.value" @click="$router.push('/jobs/' + props.row.guid)" width="100%"/>
+        <q-btn v-if="props.row.mostRecentCompletionStatus === 'Fail'" flat color="negative" :label="props.value" @click="$router.push('/jobs/' + props.row.guid)" width="100%"/>
+        <q-btn v-if="props.row.mostRecentCompletionStatus === 'Unknown'" flat color="primary" :label="props.value" @click="$router.push('/jobs/' + props.row.guid)" width="100%"/>
+      </q-td>
       <q-td slot="body-cell-..." slot-scope="props" :props="props">
         <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/jobs/' + props.row.guid)" />
       </q-td>
@@ -90,6 +95,7 @@ export default {
         { name: 'nextScheduledRun', required: false, label: 'Next Run', align: 'left', field: 'nextScheduledRunString', sortable: true, filter: true },
         { name: 'command', required: false, label: 'Command', align: 'left', field: 'command', sortable: true, filter: true },
         { name: 'lastUpdateDate', required: false, label: 'Last Update', align: 'left', field: 'lastUpdateDateString', sortable: true, filter: true },
+        { name: 'mostRecentCompletionStatus', required: false, label: 'Completion Status', align: 'left', field: 'mostRecentCompletionStatus', sortable: true, filter: true },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobData: [],

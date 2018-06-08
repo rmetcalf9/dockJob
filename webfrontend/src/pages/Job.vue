@@ -31,19 +31,31 @@
           <q-item-tile label>Last Update Date</q-item-tile>
           <q-item-tile sublabel>{{ jobData.lastUpdateDateString }}</q-item-tile>
       </q-item-main></q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Last Run Date</q-item-tile>
+      <q-item v-if="jobData.mostRecentCompletionStatus === 'Success'"><q-item-main >
+          <q-item-tile label class="bg-positive text-white">Last Run Date</q-item-tile>
           <q-item-tile sublabel v-if="everRun(jobData)">{{ jobData.lastRunDateString }}</q-item-tile>
           <q-item-tile sublabel v-if="!everRun(jobData)">Never run</q-item-tile>
       </q-item-main></q-item>
-      <q-item v-if="everRun(jobData)"><q-item-main >
-          <q-item-tile label>Last Run Return Code</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.lastRunReturnCode }}</q-item-tile>
+      <q-item v-if="jobData.mostRecentCompletionStatus === 'Fail'"><q-item-main >
+          <q-item-tile label class="bg-negative text-white">Last Run Date</q-item-tile>
+          <q-item-tile sublabel v-if="everRun(jobData)">{{ jobData.lastRunDateString }}</q-item-tile>
+          <q-item-tile sublabel v-if="!everRun(jobData)">Never run</q-item-tile>
       </q-item-main></q-item>
-      <q-item v-if="everRun(jobData)"><q-item-main >
-          <q-item-tile label>Last Execution GUID</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.lastRunExecutionGUID }}</q-item-tile>
+      <q-item v-if="jobData.mostRecentCompletionStatus === 'Unknown'"><q-item-main >
+          <q-item-tile label class="bg-primary text-white">Last Run Date</q-item-tile>
+          <q-item-tile sublabel v-if="everRun(jobData)">{{ jobData.lastRunDateString }}</q-item-tile>
+          <q-item-tile sublabel v-if="!everRun(jobData)">Never run</q-item-tile>
       </q-item-main></q-item>
+      <div v-if="everRun(jobData)">
+        <q-item><q-item-main >
+            <q-item-tile label>Last Run Return Code</q-item-tile>
+            <q-item-tile sublabel>{{ jobData.lastRunReturnCode }}</q-item-tile>
+        </q-item-main></q-item>
+        <q-item><q-item-main >
+            <q-item-tile label>Last Execution GUID</q-item-tile>
+            <q-item-tile sublabel>{{ jobData.lastRunExecutionGUID }}</q-item-tile>
+        </q-item-main></q-item>
+      </div>
     </q-list>
     <ExecutionTable
       ref="ExecutionTable"
