@@ -120,7 +120,7 @@ class jobClass():
       ret['mostRecentCompletionStatus'] = "Unknown"
     else:
       ret['lastRunDate'] = self.lastRunDate.isoformat()
-      earlyTime = appObj.getCurDateTime() - relativedelta(hours=appObj.hoursBeforeMostRecentCompletionStatusBecomesUnknown)
+      earlyTime = appObj.getCurDateTime() - relativedelta(hours=appObj.minutesBeforeMostRecentCompletionStatusBecomesUnknown)
       if self.lastRunDate < earlyTime:
         ret['mostRecentCompletionStatus'] = "Unknown"
       else:

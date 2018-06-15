@@ -1,13 +1,7 @@
 from TestHelperSuperClass import testHelperAPIClient
 import unittest
 import json
-
-data_simpleJobCreateParams = {
-  "name": "TestJob",
-  "repetitionInterval": "HOURLY:03",
-  "command": "ls",
-  "enabled": True
-}
+from commonJSONStrings import data_simpleJobCreateParams
 
 class test_api(testHelperAPIClient):
 
@@ -25,7 +19,7 @@ class test_api(testHelperAPIClient):
         'ServerDatetime': 'IGNORE',
         'ServerStartupTime': '2018-01-01T13:46:00+00:00',
         'TotalJobExecutions': 0,
-        'HoursBeforeMostRecentCompletionStatusBecomesUnknown': 49
+        'MinutesBeforeMostRecentCompletionStatusBecomesUnknown': 49 * 60
       },
     }
     result = self.testClient.get('/api/serverinfo/')
@@ -70,7 +64,7 @@ class test_api(testHelperAPIClient):
         'ServerDatetime': 'IGNORE',
         'ServerStartupTime': '2018-01-01T13:46:00+00:00',
         'TotalJobExecutions': 0,
-        'HoursBeforeMostRecentCompletionStatusBecomesUnknown': 49
+        'MinutesBeforeMostRecentCompletionStatusBecomesUnknown': 49 * 60
       },
     }
     self.createJobs(1,data_simpleJobCreateParams)
