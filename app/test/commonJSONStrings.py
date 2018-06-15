@@ -25,8 +25,10 @@ data_simpleJobCreateExpRes = {
   "lastRunReturnCode": None,
   "lastRunExecutionGUID": "",
   "mostRecentCompletionStatus": "Unknown",
-  "pinned": False
+  "pinned": False,
+  "overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown": None
 }
+
 data_simpleJobExecutionCreateExpRes = {
   "guid": 'IGNORE',
   "stage": 'Pending', 

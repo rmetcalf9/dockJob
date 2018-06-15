@@ -31,7 +31,8 @@ def getJobModel(appObj):
       'lastRunReturnCode': fields.Integer(default=None,description='Return code for the last execution of this job or -1 for timed out'),
       'lastRunExecutionGUID': fields.String(default='',description='Unique identifier for the last job execution for this job'),
       'mostRecentCompletionStatus': fields.String(default='Unknown',description='READONLY - Success, Fail or Unknown. Success or Fail if the job has run in last 25 hours, Unknown otherwise'),
-      'pinned': fields.Boolean(default=False,description='Pin job to dashboard')
+      'pinned': fields.Boolean(default=False,description='Pin job to dashboard'),
+      'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': fields.Integer(default=None,description='Override global number of minutes a job has not been run before a job is considered to have Unknown status for this job.')
     })
   return jobModel
 
@@ -59,6 +60,7 @@ class jobClass():
   lastRunReturnCode = None
   lastRunExecutionGUID = None
   pinned = False
+  overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = None
 
   def __repr__(self):
     ret = 'jobClass('
@@ -95,7 +97,7 @@ class jobClass():
         ri = RepetitionIntervalClass(self.repetitionInterval)
         self.repetitionInterval = ri.__str__()
 
-  def __init__(self, name, command, enabled, repetitionInterval, pinned):
+  def __init__(self, name, command, enabled, repetitionInterval, pinned, overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown):
     jobClass.assertValidName(name)
     jobClass.assertValidRepetitionInterval(repetitionInterval, enabled)
     curTime = datetime.datetime.now(pytz.timezone("UTC"))
@@ -112,6 +114,12 @@ class jobClass():
     self.nextScheduledRun = None
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
     self.pinned = pinned
+    self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
+
+  def _getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(self, appObj):
+    if self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown == None:
+      return appObj.minutesBeforeMostRecentCompletionStatusBecomesUnknown
+    return self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
 
   # Needed when we use extra caculated values in the dict
   def _caculatedDict(self, appObj):
@@ -120,7 +128,7 @@ class jobClass():
       ret['mostRecentCompletionStatus'] = "Unknown"
     else:
       ret['lastRunDate'] = self.lastRunDate.isoformat()
-      earlyTime = appObj.getCurDateTime() - relativedelta(hours=appObj.minutesBeforeMostRecentCompletionStatusBecomesUnknown)
+      earlyTime = appObj.getCurDateTime() - relativedelta(minutes=self._getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(appObj))
       if self.lastRunDate < earlyTime:
         ret['mostRecentCompletionStatus'] = "Unknown"
       else:
@@ -130,13 +138,14 @@ class jobClass():
           ret['mostRecentCompletionStatus'] = "Fail"
     return ret
 
-  def setNewValues(self, name, command, enabled, repetitionInterval, pinned):
+  def setNewValues(self, name, command, enabled, repetitionInterval, pinned, overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown):
     self.name = name
     self.command = command
     self.enabled = enabled
     self.setNewRepetitionInterval(repetitionInterval)
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
     self.pinned = pinned
+    self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
 
   def setNextScheduledRun(self, curTime):
     ri = None
@@ -242,7 +251,7 @@ class jobsDataClass():
       self.nextJobToExecuteCalcRequired = True
 
     # change values in object to new values
-    jobObj.setNewValues(newValues['name'], newValues['command'], newValues['enabled'], newValues['repetitionInterval'], newValues.get('pinned',False))
+    jobObj.setNewValues(newValues['name'], newValues['command'], newValues['enabled'], newValues['repetitionInterval'], newValues.get('pinned',False), newValues.get('overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown',None))
 
   def deleteJob(self, jobObj):
     uniqueJobName = jobObj.uniqueName()
@@ -343,7 +352,7 @@ def registerAPI(appObj):
     def post(self):
       '''Create Job'''
       content = request.get_json()
-      jobObj = jobClass(content['name'], content['command'], content['enabled'], content['repetitionInterval'], content.get('pinned',False))
+      jobObj = jobClass(content['name'], content['command'], content['enabled'], content['repetitionInterval'], content.get('pinned',False), content.get('overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown',None))
       res = appObj.appData['jobsData'].addJob(jobObj)
       if res['msg']!='OK':
         raise BadRequest(res['msg'])
