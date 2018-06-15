@@ -121,11 +121,13 @@ class jobClass():
         ri = RepetitionIntervalClass(self.repetitionInterval)
         self.repetitionInterval = ri.__str__()
 
-  def verifyJobGUID(self, appObj, jobGUID):
+  def verifyJobGUID(self, appObj, jobGUID, callingJobGUID):
     if jobGUID is None:
       return None
     if jobGUID == '':
       return None
+    if callingJobGUID == jobGUID:
+      raise BadRequest('A follow on action can not be set to the same job')
     unused = appObj.appData['jobsData'].getJob(jobGUID) #Will throw bad request exception if job dosen't exist
     return jobGUID
 
@@ -165,9 +167,9 @@ class jobClass():
     self.CompletionstatusLock = Lock()
     self.CompletionstatusLock = Lock()
     self.CompletionstatusLock = Lock()
-    self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID)
-    self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID)
-    self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID)
+    self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID, self.guid)
+    self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID, self.guid)
+    self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID, self.guid)
 
     #fields excluded from JSON output
     self.resetCompletionStatusToUnknownTime = None
@@ -220,9 +222,9 @@ class jobClass():
     if overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown==0:
       overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = None
     self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
-    self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID)
-    self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID)
-    self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID)
+    self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID, self.guid)
+    self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID, self.guid)
+    self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID, self.guid)
 
   def setNextScheduledRun(self, curTime):
     ri = None

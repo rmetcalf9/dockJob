@@ -1187,4 +1187,19 @@ class test_jobsData(testHelperAPIClient):
     self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeFailJobGUID"])),0,msg='Fail job ran an unexpected number of times')
     self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeUnknownJobGUID"])),1,msg='No executions found for the state change to unknown job')
 
+  def test_canNotSetSelfAsFollowOnJob(self):
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    self.assertResponseCodeEqual(result, 200)
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    jobGUID = resultJSON['guid']
+
+    updateInput = dict(data_simpleJobCreateParams)
+    updateInput["StateChangeSuccessJobGUID"] = jobGUID
+    updateInput["StateChangeFailJobGUID"] = jobGUID
+    updateInput["StateChangeUnknownJobGUID"] = jobGUID
+    updateJobNameResult = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(updateInput), content_type='application/json')
+    self.assertResponseCodeEqual(updateJobNameResult, 400)
+
+
+
 
