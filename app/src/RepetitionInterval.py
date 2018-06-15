@@ -175,7 +175,6 @@ class RepetitionIntervalClass():
       rv = self._getNextOccuranceDatetimeForHourlyModeForParticularMinute(curDateTime, curMinute)
       if rv < minRetVal:
         minRetVal = rv
-        print(rv)
         cc = False
     if cc:
       raise Exception("Algroythm Error")
@@ -219,7 +218,6 @@ class RepetitionIntervalClass():
       rv = self._getNextOccuranceDatetimeForMonthlyModeForParticulayDayOfMonth(curDateTime, curDOM)
       if rv < minRetVal:
         minRetVal = rv
-        print(rv)
         cc = False
     if cc:
       raise Exception("Algroythm Error")

@@ -54,6 +54,12 @@ class testHelperSuperClass(unittest.TestCase):
     curTime = datetime.datetime.now(pytz.timezone("UTC"))
     time_diff = (curTime - time).total_seconds()
     self.assertTrue(time_diff < 3, msg=msg)
+
+  def assertResponseCodeEqual(self, result, expectedResponse, msg=''):
+    if result.status_code==expectedResponse:
+      return
+    print(result.get_data(as_text=True))
+    self.assertEqual(result.status_code, expectedResponse, msg)
     
 #helper class with setup for an APIClient
 class testHelperAPIClient(testHelperSuperClass):
@@ -94,6 +100,7 @@ class testHelperAPIClient(testHelperSuperClass):
       param[cur]['name'] = basis['name'] + str(cur+1).zfill(3)
       result = self.testClient.post('/api/jobs/', data=json.dumps(param[cur]), content_type='application/json')
       self.assertEqual(result.status_code, 200, msg='job creation failed')
+      param[cur]['createResult'] = dict(json.loads(result.get_data(as_text=True)))
     self.assertCorrectTotalJobs(num + jobsAtStart)
     return param
 

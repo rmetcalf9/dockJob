@@ -60,12 +60,12 @@ class JobExecutionClass():
     return ret
 
 
-  def __init__(self, job, executionName, manual):
+  def __init__(self, job, executionName, manual, curDatetime):
     self.guid = str(uuid.uuid4())
     self.stage = 'Pending'
     self.jobGUID = job.guid
     self.jobCommand = job.command
-    self.dateCreated = datetime.datetime.now(pytz.timezone("UTC")).isoformat()
+    self.dateCreated = curDatetime.isoformat()
     self.dateStarted = None
     self.dateCompleted = None
     self.resultReturnCode = None
@@ -73,12 +73,12 @@ class JobExecutionClass():
     self.executionName = executionName
     self.manual = manual
 
-  def execute(self, executor, lockAcquireFn, lockReleaseFn, registerRunDetailsFn):
+  def execute(self, executor, lockAcquireFn, lockReleaseFn, registerRunDetailsFn, appObj):
     lockAcquireFn()
     self.stage = 'Running'
-    curDateTime = datetime.datetime.now(pytz.timezone("UTC"))
-    self.dateStarted = curDateTime.isoformat()
-    registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=curDateTime, newLastRunReturnCode=None, newLastRunExecutionGUID=self.guid)
+    self.dateStarted = appObj.getCurDateTime().isoformat()
+    ##I only want to register the run when it completes because then I can record it's result and fire any events
+    ##registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=appObj.getCurDateTime(), newLastRunReturnCode=None, newLastRunExecutionGUID=self.guid)
     lockReleaseFn()
     try:
       executionResult = executor.executeCommand(self.jobCommand)
@@ -87,8 +87,8 @@ class JobExecutionClass():
       self.resultReturnCode = -1
       self.resultSTDOUT = None
       self.stage = 'Timeout'
-      self.dateCompleted = datetime.datetime.now(pytz.timezone("UTC")).isoformat()
-      registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=curDateTime, newLastRunReturnCode=self.resultReturnCode, newLastRunExecutionGUID=self.guid)
+      self.dateCompleted = appObj.getCurDateTime().isoformat()
+      registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=appObj.getCurDateTime(), newLastRunReturnCode=self.resultReturnCode, newLastRunExecutionGUID=self.guid)
       lockReleaseFn()
       return
     lockAcquireFn()
@@ -102,8 +102,8 @@ class JobExecutionClass():
       self.stage = 'Timeout'
     else:
       self.stage = 'Completed'
-    self.dateCompleted = datetime.datetime.now(pytz.timezone("UTC")).isoformat()
-    registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=curDateTime, newLastRunReturnCode=self.resultReturnCode, newLastRunExecutionGUID=self.guid)
+    self.dateCompleted = appObj.getCurDateTime().isoformat()
+    registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=appObj.getCurDateTime(), newLastRunReturnCode=self.resultReturnCode, newLastRunExecutionGUID=self.guid)
     lockReleaseFn()
 
 

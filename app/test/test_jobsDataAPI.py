@@ -7,7 +7,7 @@ import datetime
 import pytz
 import time
 from dateutil.relativedelta import relativedelta
-from commonJSONStrings import data_simpleJobCreateParams, data_simpleManualJobCreateParams, data_simpleJobCreateExpRes, data_simpleJobExecutionCreateExpRes
+from commonJSONStrings import data_simpleJobCreateParams, data_simpleManualJobCreateParams, data_simpleJobCreateExpRes, data_simpleJobExecutionCreateExpRes, data_simpleManualJobCreateParamsWithAllOptionalFields, data_simpleManualJobCreateParamsWithAllOptionalFieldsExpRes
 
 class test_jobsData(testHelperAPIClient):
   def assertJSONJobStringsEqual(self, result,expectedResult):
@@ -20,13 +20,24 @@ class test_jobsData(testHelperAPIClient):
 
   def test_JobCreate(self):
     result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
-    self.assertEqual(result.status_code, 200)
+    self.assertResponseCodeEqual(result, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertEqual(len(resultJSON['guid']), 36, msg='Invalid GUID - must be 36 chars')
     self.assertEqual(resultJSON['creationDate'], resultJSON['lastUpdateDate'], msg='Creation date dosen''t match last update')
     tim = from_iso8601(resultJSON['creationDate'])
     self.assertTimeCloseToCurrent(tim)
     self.assertJSONJobStringsEqual(resultJSON, data_simpleJobCreateExpRes)
+    self.assertCorrectTotalJobs(1)
+
+  def test_JobCreateWithAllOptionalFields(self):
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleManualJobCreateParamsWithAllOptionalFields), content_type='application/json')
+    self.assertResponseCodeEqual(result, 200, msg='Job Create Failed')
+    resultJSON = json.loads(result.get_data(as_text=True))
+    self.assertEqual(len(resultJSON['guid']), 36, msg='Invalid GUID - must be 36 chars')
+    self.assertEqual(resultJSON['creationDate'], resultJSON['lastUpdateDate'], msg='Creation date dosen''t match last update')
+    tim = from_iso8601(resultJSON['creationDate'])
+    self.assertTimeCloseToCurrent(tim)
+    self.assertJSONJobStringsEqual(resultJSON, data_simpleManualJobCreateParamsWithAllOptionalFieldsExpRes)
     self.assertCorrectTotalJobs(1)
 
   def test_JobCreateDuplicateErrors(self):
@@ -984,7 +995,7 @@ class test_jobsData(testHelperAPIClient):
 
     #unset it
     updateInput = dict(data_simpleJobCreateParams)
-    updateInput['overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown'] = None
+    updateInput['overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown'] = 0 #I can't use none so I supply 0 which my input code turns to None
     updateJobNameResult = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(updateInput), content_type='application/json')
     self.assertEqual(updateJobNameResult.status_code, 200, msg='Put call did not give correct status')
     updateJobResultJSON = dict(json.loads(updateJobNameResult.get_data(as_text=True)))
@@ -1004,6 +1015,7 @@ class test_jobsData(testHelperAPIClient):
     self.assertEqual(result.status_code, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     jobGUID = resultJSON['guid']
+    self.assertEqual(resultJSON['overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown'],2)
 
     #Execute the job
     result2 = self.addExecution(jobGUID, '001_001')
@@ -1061,4 +1073,118 @@ class test_jobsData(testHelperAPIClient):
     expRes3 = dict(expRes)
     expRes3['mostRecentCompletionStatus'] = "Unknown"
     self.assertJSONJobStringsEqual(resultFutureGetJSON, expRes3);
+
+  def test_createWithAndAssignInvalidEventJobFails(self):
+    jc = dict(data_simpleJobCreateParams)
+    jc["StateChangeSuccessJobGUID"] = "Invalid"
+    jc["StateChangeFailJobGUID"] = "Invalid"
+    jc["StateChangeUnknownJobGUID"] = "Invalid"
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jc), content_type='application/json')
+    self.assertResponseCodeEqual(result, 400)
+
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    self.assertResponseCodeEqual(result, 200)
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    jobGUID = resultJSON['guid']
+
+    updateInput = dict(data_simpleJobCreateParams)
+    updateInput["StateChangeSuccessJobGUID"] = "Invalid"
+    updateInput["StateChangeFailJobGUID"] = "Invalid"
+    updateInput["StateChangeUnknownJobGUID"] = "Invalid"
+    updateJobNameResult = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(updateInput), content_type='application/json')
+    self.assertResponseCodeEqual(updateJobNameResult, 400)
+
+  def _getExecutionsForJob(self, jobGUID):
+    result = self.testClient.get('/api/jobs/' + jobGUID + '/execution')
+    self.assertResponseCodeEqual(result, 200)
+    return json.loads(result.get_data(as_text=True))['result']
+
+
+  def test_createJobWithThreeEvents(self):
+    numTestRecords = 3
+    param = self.createJobs(numTestRecords, data_simpleManualJobCreateParams)
+
+    jc = dict(data_simpleManualJobCreateParams)
+    jc["StateChangeSuccessJobGUID"] = param[0]['createResult']['guid']
+    jc["StateChangeFailJobGUID"] = param[1]['createResult']['guid']
+    jc["StateChangeUnknownJobGUID"] = param[2]['createResult']['guid']
+    jc["command"] = "ls"
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jc), content_type='application/json')
+    self.assertResponseCodeEqual(result, 200)
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    jobGUID = resultJSON['guid']
+    self.assertEqual(resultJSON['StateChangeSuccessJobGUID'],jc["StateChangeSuccessJobGUID"])
+    self.assertEqual(resultJSON['StateChangeFailJobGUID'],jc["StateChangeFailJobGUID"])
+    self.assertEqual(resultJSON['StateChangeUnknownJobGUID'],jc["StateChangeUnknownJobGUID"])
+
+    #Preform a get and ensure it is still valid
+    resultGet = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertResponseCodeEqual(result, 200)
+    resultGetJSON = json.loads(resultGet.get_data(as_text=True))
+    self.assertEqual(resultGetJSON['StateChangeSuccessJobGUID'],jc["StateChangeSuccessJobGUID"])
+    self.assertEqual(resultGetJSON['StateChangeFailJobGUID'],jc["StateChangeFailJobGUID"])
+    self.assertEqual(resultGetJSON['StateChangeUnknownJobGUID'],jc["StateChangeUnknownJobGUID"])
+
+    #Find out how many times the success change job has been run
+    self.assertEqual(len(self._getExecutionsForJob(jobGUID)),0)
+
+    #Run the main job and ensure it goes to success status
+    res = self.addExecution(jobGUID,'TestJobExecutionName')
+    curDateTime = appObj.getCurDateTime()
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+    resultGet = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertResponseCodeEqual(result, 200)
+    resultGetJSON = json.loads(resultGet.get_data(as_text=True))
+    self.assertEqual(resultGetJSON['mostRecentCompletionStatus'],'Success',msg='Main Job run was not sucessful')
+
+    #Check the main job and success jobs were run
+    self.assertEqual(len(self._getExecutionsForJob(jobGUID)),1,msg='No execution for main job')
+    self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeSuccessJobGUID"])),1,msg='No execution for success job')
+    self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeFailJobGUID"])),0,msg='Execution found for fail job but should not have')
+    self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeUnknownJobGUID"])),0,msg='Execution found for unknown job but should not have')
+
+    #Make the job a failing job
+    jc["command"] = "badcommasdnsjdfn"
+    updateJobResult = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(jc), content_type='application/json')
+    self.assertEqual(updateJobResult.status_code, 200, msg='could not update job command to one that would fail')
+
+    #Run the main job and ensure it goes to fail status
+    res = self.addExecution(jobGUID,'TestJobExecutionName')
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+
+    resultGet = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertResponseCodeEqual(result, 200)
+    resultGetJSON = json.loads(resultGet.get_data(as_text=True))
+    self.assertEqual(resultGetJSON['mostRecentCompletionStatus'],'Fail',msg='Main Job run did not fail')
+
+    #Check the main job and fail jobs were run
+    self.assertEqual(len(self._getExecutionsForJob(jobGUID)),2,msg='No execution for main job')
+    self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeSuccessJobGUID"])),1,msg='Success job ran unexpected number of times')
+    self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeFailJobGUID"])),1,msg='Could not find execution for failed job')
+    self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeUnknownJobGUID"])),0,msg='Execution found for unknown job but should not have')
+
+    #Go 1 year into the future
+    print('Test going forward 1 year')
+    appObj.setTestingDateTime(curDateTime + relativedelta(years=1))
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+
+    #Make sure main job status is unknown
+    resultGet = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertResponseCodeEqual(result, 200)
+    resultGetJSON = json.loads(resultGet.get_data(as_text=True))
+    self.assertEqual(resultGetJSON['mostRecentCompletionStatus'],'Unknown',msg='Main Job dose not have unknown status')
+
+    print('Checking executions 1 year in future (should find unknown job has been executed)')
+    print(self._getExecutionsForJob(jc["StateChangeUnknownJobGUID"]))
+    #Check the unknown job was run
+    #When we go forward one year executions will be deleted as they are deleted after a week. So we will no longer see the main job executions
+    self.assertEqual(len(self._getExecutionsForJob(jobGUID)),0,msg='No execution for main job')
+
+    self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeSuccessJobGUID"])),0,msg='Success job ran unexpected number of times')
+    self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeFailJobGUID"])),0,msg='Fail job ran an unexpected number of times')
+    self.assertEqual(len(self._getExecutionsForJob(jc["StateChangeUnknownJobGUID"])),1,msg='No executions found for the state change to unknown job')
+
 

@@ -26,8 +26,22 @@ data_simpleJobCreateExpRes = {
   "lastRunExecutionGUID": "",
   "mostRecentCompletionStatus": "Unknown",
   "pinned": False,
-  "overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown": None
+  "overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown": None,
+  "StateChangeSuccessJobGUID": None,
+  "StateChangeFailJobGUID": None,
+  "StateChangeUnknownJobGUID": None,
 }
+
+data_simpleManualJobCreateParamsWithAllOptionalFields = dict(data_simpleJobCreateParams)
+data_simpleManualJobCreateParamsWithAllOptionalFields['pinned'] = True
+data_simpleManualJobCreateParamsWithAllOptionalFields['overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown'] = 357
+data_simpleManualJobCreateParamsWithAllOptionalFields['StateChangeSuccessJobGUID'] = '' #Can't provide valid non default value as other jobs don't exist
+data_simpleManualJobCreateParamsWithAllOptionalFields['StateChangeFailJobGUID'] = '' #
+data_simpleManualJobCreateParamsWithAllOptionalFields['StateChangeUnknownJobGUID'] = '' #
+
+data_simpleManualJobCreateParamsWithAllOptionalFieldsExpRes = dict(data_simpleJobCreateExpRes)
+data_simpleManualJobCreateParamsWithAllOptionalFieldsExpRes['pinned'] = True
+data_simpleManualJobCreateParamsWithAllOptionalFieldsExpRes['overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown'] = 357
 
 data_simpleJobExecutionCreateExpRes = {
   "guid": 'IGNORE',

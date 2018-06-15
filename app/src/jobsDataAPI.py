@@ -33,10 +33,26 @@ def getJobModel(appObj):
       'lastRunExecutionGUID': fields.String(default='',description='Unique identifier for the last job execution for this job'),
       'mostRecentCompletionStatus': fields.String(default='Unknown',description='READONLY - Success, Fail or Unknown. Success or Fail if the job has run in last 25 hours, Unknown otherwise'),
       'pinned': fields.Boolean(default=False,description='Pin job to dashboard'),
-      'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': fields.Integer(default=None,description='Override global number of minutes a job has not been run before a job is considered to have Unknown status for this job.')
+      'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': fields.Integer(default=None,description='Override global number of minutes a job has not been run before a job is considered to have Unknown status for this job.'),
+      'StateChangeSuccessJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Success'),
+      'StateChangeFailJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Fail'),
+      'StateChangeUnknownJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Unknown'),
     })
   return jobModel
 
+#Fields required when creating a job (A subset of the JobModel)
+def getJobCreationModel(appObj):
+  return appObj.flastRestPlusAPIObject.model('JobCreation', {
+    'name': fields.String(default=''),
+    'command': fields.String(default=''),
+    'enabled': fields.Boolean(default=False,description='Is the job currently enabled'),
+    'repetitionInterval': fields.String(default='',description='How the job is scheduled to run'),
+    'pinned': fields.Boolean(default=False,description='Pin job to dashboard'),
+    'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': fields.Integer(default=None,description='Override global number of minutes a job has not been run before a job is considered to have Unknown status for this job. (0 for no override)'),
+    'StateChangeSuccessJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Success'),
+    'StateChangeFailJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Fail'),
+    'StateChangeUnknownJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Unknown'),
+  })
 
 def getJobServerInfoModel(appObj):
   return appObj.flastRestPlusAPIObject.model('ServerInfoJobs', {
@@ -64,6 +80,9 @@ class jobClass():
   overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = None
   mostRecentCompletionStatus = 'Unknown'
   resetCompletionStatusToUnknownTime = None
+  StateChangeSuccessJobGUID = None
+  StateChangeFailJobGUID = None
+  StateChangeUnknownJobGUID = None
 
   CompletionstatusLock = None
 
@@ -102,7 +121,27 @@ class jobClass():
         ri = RepetitionIntervalClass(self.repetitionInterval)
         self.repetitionInterval = ri.__str__()
 
-  def __init__(self, name, command, enabled, repetitionInterval, pinned, overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown):
+  def verifyJobGUID(self, appObj, jobGUID):
+    if jobGUID is None:
+      return None
+    if jobGUID == '':
+      return None
+    unused = appObj.appData['jobsData'].getJob(jobGUID) #Will throw bad request exception if job dosen't exist
+    return jobGUID
+
+  def __init__(
+      self,
+      appObj,
+      name,
+      command,
+      enabled,
+      repetitionInterval,
+      pinned,
+      overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown,
+      StateChangeSuccessJobGUID,
+      StateChangeFailJobGUID,
+      StateChangeUnknownJobGUID
+  ):
     jobClass.assertValidName(name)
     jobClass.assertValidRepetitionInterval(repetitionInterval, enabled)
     curTime = datetime.datetime.now(pytz.timezone("UTC"))
@@ -119,8 +158,18 @@ class jobClass():
     self.nextScheduledRun = None
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
     self.pinned = pinned
+    if overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown == 0:
+      overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = None
     self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
     self.mostRecentCompletionStatus = 'Unknown'
+    self.CompletionstatusLock = Lock()
+    self.CompletionstatusLock = Lock()
+    self.CompletionstatusLock = Lock()
+    self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID)
+    self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID)
+    self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID)
+
+    #fields excluded from JSON output
     self.resetCompletionStatusToUnknownTime = None
     self.CompletionstatusLock = Lock()
 
@@ -149,14 +198,31 @@ class jobClass():
       ret['lastRunDate'] = self.lastRunDate.isoformat()
     return ret
 
-  def setNewValues(self, name, command, enabled, repetitionInterval, pinned, overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown):
+  def setNewValues(
+    self,
+    appObj,
+    name,
+    command,
+    enabled,
+    repetitionInterval,
+    pinned,
+    overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown,
+    StateChangeSuccessJobGUID,
+    StateChangeFailJobGUID,
+    StateChangeUnknownJobGUID
+  ):
     self.name = name
     self.command = command
     self.enabled = enabled
     self.setNewRepetitionInterval(repetitionInterval)
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
     self.pinned = pinned
+    if overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown==0:
+      overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = None
     self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
+    self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID)
+    self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID)
+    self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID)
 
   def setNextScheduledRun(self, curTime):
     ri = None
@@ -175,22 +241,52 @@ class jobClass():
     return jobClass.uniqueJobNameStatic(self.name)
 
   #Called from job execution thread and request processing threads
-  def _setNewCompletionStatus(self, newStatus):
+  def _setNewCompletionStatus(self, appObj, newStatus):
     if self.mostRecentCompletionStatus == newStatus:
       return
     self.CompletionstatusLock.acquire()
-    print('TODO maybe Emmit event for state change (' + self.mostRecentCompletionStatus + '->' + newStatus + ')')
     self.mostRecentCompletionStatus = newStatus
     self.CompletionstatusLock.release()
+    if newStatus=='Success':
+      if self.StateChangeSuccessJobGUID is not None:
+        appObj.jobExecutor.submitJobForExecution(
+          self.StateChangeSuccessJobGUID,
+          executionName='Event - StateChangeToSuccess',
+          manual=False,
+          triggerJobObj=self,
+          triggerEvent = 'StateChangeToSuccess',
+          callerHasJobExecutionLock=True
+        )
+    elif newStatus=='Fail':
+      if self.StateChangeFailJobGUID is not None:
+        appObj.jobExecutor.submitJobForExecution(
+          self.StateChangeFailJobGUID,
+          executionName='Event - StateChangeToFail',
+          manual=False,
+          triggerJobObj=self,
+          triggerEvent = 'StateChangeToFail',
+          callerHasJobExecutionLock=True
+        )
+    else:
+      if self.StateChangeUnknownJobGUID is not None:
+        appObj.jobExecutor.submitJobForExecution(
+          self.StateChangeUnknownJobGUID,
+          executionName='Event - StateChangeToUnknown',
+          manual=False,
+          triggerJobObj=self,
+          triggerEvent = 'StateChangeToUnknown',
+          callerHasJobExecutionLock=True
+        )
 
   def registerRunDetails(self, appObj, newLastRunDate, newLastRunReturnCode, newLastRunExecutionGUID):
+    print('registerRunDetails for job ' + self.name + ' - lastrundate=' + newLastRunDate.isoformat())
     self.lastRunDate = newLastRunDate
     self.lastRunReturnCode = newLastRunReturnCode
     self.lastRunExecutionGUID = newLastRunExecutionGUID
     self.resetCompletionStatusToUnknownTime = newLastRunDate + relativedelta(minutes=self._getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(appObj))
 
     newCompletionStatus = self._getCaculatedValueForModeRecentCompletionStatus(appObj, lastRunDate=newLastRunDate, lastRunReturnCode=newLastRunReturnCode)
-    self._setNewCompletionStatus(newCompletionStatus)
+    self._setNewCompletionStatus(appObj, newCompletionStatus)
 
   #In the loop each job needs to check if its status needs to become unknown
   # this is required because the job may need to emit an event as a result
@@ -199,7 +295,7 @@ class jobClass():
     if self.mostRecentCompletionStatus == 'Unknown':
       return
     if curTime > self.resetCompletionStatusToUnknownTime:
-      self._setNewCompletionStatus('Unknown')
+      self._setNewCompletionStatus(appObj, 'Unknown')
 
 class jobsDataClass():
   # map of Jobs keyed by GUID
@@ -294,7 +390,18 @@ class jobsDataClass():
       self.nextJobToExecuteCalcRequired = True
 
     # change values in object to new values
-    jobObj.setNewValues(newValues['name'], newValues['command'], newValues['enabled'], newValues['repetitionInterval'], newValues.get('pinned',False), newValues.get('overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown',None))
+    jobObj.setNewValues(
+      self.appObj,
+      newValues['name'],
+      newValues['command'],
+      newValues['enabled'],
+      newValues['repetitionInterval'],
+      newValues.get('pinned',False), 
+      newValues.get('overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown',None),
+      newValues.get('StateChangeSuccessJobGUID',None),
+      newValues.get('StateChangeFailJobGUID',None),
+      newValues.get('StateChangeUnknownJobGUID',None)
+    )
 
   def deleteJob(self, jobObj):
     uniqueJobName = jobObj.uniqueName()
@@ -351,13 +458,7 @@ def resetData(appObj):
 
 def registerAPI(appObj):
   # Fields required to create a Job
-  jobCreationModel = appObj.flastRestPlusAPIObject.model('JobCreation', {
-    'name': fields.String(default=''),
-    'command': fields.String(default=''),
-    'enabled': fields.Boolean(default=False,description='Is the job currently enabled'),
-    'repetitionInterval': fields.String(default='',description='How the job is scheduled to run'),
-    'pinned': fields.Boolean(default=False,description='Pin job to dashboard'),
-  })
+  jobCreationModel = getJobCreationModel(appObj)
 
   nsJobs = appObj.flastRestPlusAPIObject.namespace('jobs', description='Job Operations')
   @nsJobs.route('/')
@@ -393,7 +494,18 @@ def registerAPI(appObj):
     def post(self):
       '''Create Job'''
       content = request.get_json()
-      jobObj = jobClass(content['name'], content['command'], content['enabled'], content['repetitionInterval'], content.get('pinned',False), content.get('overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown',None))
+      jobObj = jobClass(
+        appObj,
+        content['name'], 
+        content['command'], 
+        content['enabled'], 
+        content['repetitionInterval'], 
+        content.get('pinned',False), 
+        content.get('overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown',None),
+        content.get('StateChangeSuccessJobGUID',None),
+        content.get('StateChangeFailJobGUID',None),
+        content.get('StateChangeUnknownJobGUID',None)
+      )
       res = appObj.appData['jobsData'].addJob(jobObj)
       if res['msg']!='OK':
         raise BadRequest(res['msg'])

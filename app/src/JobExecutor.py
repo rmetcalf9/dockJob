@@ -118,20 +118,25 @@ class JobExecutorClass(threading.Thread):
   def releaseJobExecutionLock(self):
     self.JobExecutionLock.release()
 
-  #called when new service needs submission
-  def submitJobForExecution(self, jobGUID, executionName, manual):
+  #called when new job needs executing
+  def submitJobForExecution(self, jobGUID, executionName, manual, triggerJobObj = None, triggerEvent = None, callerHasJobExecutionLock = False):
+    #print('Subbmitting new job execution name = ' + executionName)
     #manual = True when called by jobsDataAPI and False when called from scheduler
     jobObj = self.appObj.appData['jobsData'].getJob(jobGUID)
     if jobObj is None:
       raise BadRequest('Invalid job')
-    execution = JobExecutionClass(jobObj, executionName, manual)
+    execution = JobExecutionClass(jobObj, executionName, manual, curDatetime=self.appObj.getCurDateTime())
     #lock shouldn't be needed but it is a cheap operation
+    lockAquired = False
     try:
-      self.aquireJobExecutionLock()
+      if not callerHasJobExecutionLock:
+        self.aquireJobExecutionLock()
+        lockAquired = True
       self.JobExecutions[execution.guid] = execution
       self.totalExecutions += 1
     finally:
-      self.JobExecutionLock.release()
+      if lockAquired:
+        self.JobExecutionLock.release()
     self.pendingExecutions.put(execution.guid)
     return execution
 
@@ -189,12 +194,13 @@ class JobExecutorClass(threading.Thread):
       except KeyError:
         jobExecutionObj = None # if we get a key error it just means this job was deleted while it had a pending execution
       if jobExecutionObj is not None:
-        print('Executing (Execution name = ' + jobExecutionObj.executionName + ')')
+        print(curDatetime.isoformat() + ' Executing (Execution name = ' + jobExecutionObj.executionName + ')')
         jobExecutionObj.execute(
           self.appObj.jobExecutor, 
           self.aquireJobExecutionLock, 
           self.releaseJobExecutionLock,
-          self.appObj.appData['jobsData'].registerRunDetails
+          self.appObj.appData['jobsData'].registerRunDetails,
+          self.appObj #Passing in so execution time stamps are simulated in testing
         )
 
     #schedule any new jobs that are due to be automatically run
@@ -221,6 +227,9 @@ class JobExecutorClass(threading.Thread):
             print('Job execution: ' + self.JobExecutions[curJobExecution].guid)
             raise
           if tim < timeToPurgeBefore:
+            print('Purging Execution ' + self.JobExecutions[curJobExecution].executionName)
+            print(' - date completed ' + self.JobExecutions[curJobExecution].dateCompleted)
+            print(' - time to purge before (7 days before current) ' + str(timeToPurgeBefore))
             toPurge.put(curJobExecution)
       while not toPurge.empty():
         toDel = toPurge.get()

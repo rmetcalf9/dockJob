@@ -10,8 +10,11 @@ import threading
 class test_JobExecution(testHelperAPIClient):
   JobExecutionLock = threading.Lock()
 
+  def _getJobExecutionObj(self, jobObj):
+    return JobExecutionClass(jobObj, 'TestExecutionName', False, curDatetime=appObj.getCurDateTime())
+
   def createJobObj(self, command='echo "This is a test"'):
-    return jobClass('TestJob123', command, False, '', False, None)
+    return jobClass(appObj, 'TestJob123', command, False, '', False, None, None, None, None)
 
   def aquireJobExecutionLock(self):
     if not self.JobExecutionLock.acquire(blocking=True, timeout=0.5): #timeout value is in seconds
@@ -26,7 +29,7 @@ class test_JobExecution(testHelperAPIClient):
 
   def test_Create(self):
     jobObj = self.createJobObj()
-    a = JobExecutionClass(jobObj, 'TestExecutionName', False)
+    a = self._getJobExecutionObj(jobObj)
     tim = from_iso8601(a.dateCreated)
     self.assertTimeCloseToCurrent(tim)
     self.assertEqual(a.stage, 'Pending')
@@ -35,8 +38,8 @@ class test_JobExecution(testHelperAPIClient):
 
   def test_run(self):
     jobObj = self.createJobObj()
-    a = JobExecutionClass(jobObj, 'TestExecutionName', False)
-    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails)
+    a = self._getJobExecutionObj(jobObj)
+    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails, appObj)
     self.assertEqual(a.stage, 'Completed')
     self.assertEqual(a.resultReturnCode, 0)
     self.assertEqual(a.resultSTDOUT, 'This is a test')
@@ -50,7 +53,7 @@ class test_JobExecution(testHelperAPIClient):
   #  a = JobExecutionClass(jobObj)
   #  appObj.jobExecutor.timeout = 1
   #  start_time = time.time()
-  #  a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails)
+  #  a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails, appObj)
   #  elapsed_time = time.time() - start_time
   #  self.assertLess(elapsed_time, 2)
   #  self.assertEqual(a.stage, 'Timeout')
@@ -61,7 +64,7 @@ class test_JobExecution(testHelperAPIClient):
   #  jobObj = jobClass('TestJob123', 'find /', True, '')
   #  a = JobExecutionClass(jobObj)
   #  appObj.jobExecutor.timeout = 1 #Increase
-  #  a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails)
+  #  a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails, appObj)
   #  self.assertEqual(a.stage, 'Completed')
   #  self.assertEqual(a.resultReturnCode, 0)
 
@@ -86,13 +89,13 @@ class test_JobExecution(testHelperAPIClient):
     expCompleted['dateStarted'] = 'OVERRIDE'
     expCompleted['dateCompleted'] = 'OVERRIDE'
     expCompleted['resultReturnCode'] = 0
-    a = JobExecutionClass(jobObj, 'TestExecutionName', False)
+    a = self._getJobExecutionObj(jobObj)
     resDict = dict(a.__dict__)
     tim = from_iso8601(a.dateCreated)
     resDict['dateCreated'] = 'OVERRIDE'
     resDict['guid'] = 'OVERRIDE'
     self.assertJSONStringsEqual(resDict, expPending)
-    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails)
+    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails, appObj)
     self.assertEqual(a.stage, 'Completed')
     resDict = dict(a.__dict__)
     resDict['dateCreated'] = 'OVERRIDE'
@@ -108,8 +111,8 @@ class test_JobExecution(testHelperAPIClient):
   # Test added in issue https://github.com/rmetcalf9/dockJob/issues/52 when I discovered
   def test_butEncounteredWithWgetFromGoogleFixed(self):
     jobObj = self.createJobObj(command='cat test/wget_google_example.dat | iconv -f ISO-8859-1 -t UTF-8')
-    a = JobExecutionClass(jobObj, 'TestExecutionName', False)
-    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails)
+    a = self._getJobExecutionObj(jobObj)
+    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails, appObj)
     self.assertEqual(a.stage, 'Completed')
     self.assertEqual(a.resultReturnCode, 0)
     self.assertTimeCloseToCurrent(a.dateCreated)
@@ -118,8 +121,8 @@ class test_JobExecution(testHelperAPIClient):
 
   def test_butEncounteredWithWgetFromGoogle(self):
     jobObj = self.createJobObj(command='cat test/wget_google_example.dat')
-    a = JobExecutionClass(jobObj, 'TestExecutionName', False)
-    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails)
+    a = self._getJobExecutionObj(jobObj)
+    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails, appObj)
     self.assertEqual(a.stage, 'Completed')
     self.assertEqual(a.resultReturnCode, 0)
     self.assertTimeCloseToCurrent(a.dateCreated)
