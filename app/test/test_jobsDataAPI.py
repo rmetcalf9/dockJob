@@ -781,7 +781,8 @@ class test_jobsData(testHelperAPIClient):
     #Go 1 year into the future
     curDateTime = appObj.getCurDateTime()
     appObj.setTestingDateTime(curDateTime + relativedelta(years=1))
-    
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+
     #print(appObj.appData['jobsData'].getJob(jobGUID)._caculatedDict(appObj))
     
     #Get the job and ensure it's status is now Unknown
@@ -842,7 +843,8 @@ class test_jobsData(testHelperAPIClient):
     #Go 1 year into the future
     curDateTime = appObj.getCurDateTime()
     appObj.setTestingDateTime(curDateTime + relativedelta(years=1))
-    
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+
     #print(appObj.appData['jobsData'].getJob(jobGUID)._caculatedDict(appObj))
     
     #Get the job and ensure it's status is now Unknown
@@ -1034,7 +1036,10 @@ class test_jobsData(testHelperAPIClient):
     self.assertJSONJobStringsEqual(resultFutureGetJSON, expRes3);
 
     #Go 5 minutes into the future
+    print('Test going forward in time 5 minutes')
     appObj.setTestingDateTime(curDateTime + relativedelta(minutes=5))
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+
     #Get the job and ensure it's status is still success
     resultFutureGet = self.testClient.get('/api/jobs/' + jobGUID)
     self.assertEqual(resultFutureGet.status_code, 200)

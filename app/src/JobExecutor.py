@@ -225,8 +225,13 @@ class JobExecutorClass(threading.Thread):
       while not toPurge.empty():
         toDel = toPurge.get()
         self.JobExecutions.pop(toDel)
+
     finally:
       self.JobExecutionLock.release()
+
+    self.appObj.appData['jobsData'].loopIteration(self.appObj, curDatetime)
+
+
 
   #main loop of thread
   running = True

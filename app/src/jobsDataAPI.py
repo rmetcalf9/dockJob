@@ -10,6 +10,7 @@ import pytz
 from RepetitionInterval import RepetitionIntervalClass
 from JobExecution import getJobExecutionCreationModel, getJobExecutionModel
 import enum
+from threading import Lock
 
 #I need jobs to be stored in order so pagination works
 from sortedcontainers import SortedDict
@@ -61,6 +62,10 @@ class jobClass():
   lastRunExecutionGUID = None
   pinned = False
   overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = None
+  mostRecentCompletionStatus = 'Unknown'
+  resetCompletionStatusToUnknownTime = None
+
+  CompletionstatusLock = None
 
   def __repr__(self):
     ret = 'jobClass('
@@ -115,27 +120,33 @@ class jobClass():
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
     self.pinned = pinned
     self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
+    self.mostRecentCompletionStatus = 'Unknown'
+    self.resetCompletionStatusToUnknownTime = None
+    self.CompletionstatusLock = Lock()
 
   def _getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(self, appObj):
     if self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown == None:
       return appObj.minutesBeforeMostRecentCompletionStatusBecomesUnknown
     return self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
 
+  def _getCaculatedValueForModeRecentCompletionStatus(self, appObj, lastRunDate, lastRunReturnCode):
+    if lastRunDate is None:
+      return "Unknown"
+    earlyTime = appObj.getCurDateTime() - relativedelta(minutes=self._getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(appObj))
+    if lastRunDate < earlyTime:
+      return "Unknown"
+    if lastRunReturnCode==0:
+      return "Success"
+    else:
+      return "Fail"
+
   # Needed when we use extra caculated values in the dict
   def _caculatedDict(self, appObj):
     ret = dict(self.__dict__)
-    if self.lastRunDate is None:
-      ret['mostRecentCompletionStatus'] = "Unknown"
-    else:
+    del ret['CompletionstatusLock']
+    del ret['resetCompletionStatusToUnknownTime']
+    if self.lastRunDate is not None:
       ret['lastRunDate'] = self.lastRunDate.isoformat()
-      earlyTime = appObj.getCurDateTime() - relativedelta(minutes=self._getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(appObj))
-      if self.lastRunDate < earlyTime:
-        ret['mostRecentCompletionStatus'] = "Unknown"
-      else:
-        if self.lastRunReturnCode==0:
-          ret['mostRecentCompletionStatus'] = "Success"
-        else:
-          ret['mostRecentCompletionStatus'] = "Fail"
     return ret
 
   def setNewValues(self, name, command, enabled, repetitionInterval, pinned, overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown):
@@ -163,6 +174,33 @@ class jobClass():
   def uniqueName(self):
     return jobClass.uniqueJobNameStatic(self.name)
 
+  #Called from job execution thread and request processing threads
+  def _setNewCompletionStatus(self, newStatus):
+    if self.mostRecentCompletionStatus == newStatus:
+      return
+    self.CompletionstatusLock.acquire()
+    print('TODO maybe Emmit event for state change (' + self.mostRecentCompletionStatus + '->' + newStatus + ')')
+    self.mostRecentCompletionStatus = newStatus
+    self.CompletionstatusLock.release()
+
+  def registerRunDetails(self, appObj, newLastRunDate, newLastRunReturnCode, newLastRunExecutionGUID):
+    self.lastRunDate = newLastRunDate
+    self.lastRunReturnCode = newLastRunReturnCode
+    self.lastRunExecutionGUID = newLastRunExecutionGUID
+    self.resetCompletionStatusToUnknownTime = newLastRunDate + relativedelta(minutes=self._getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(appObj))
+
+    newCompletionStatus = self._getCaculatedValueForModeRecentCompletionStatus(appObj, lastRunDate=newLastRunDate, lastRunReturnCode=newLastRunReturnCode)
+    self._setNewCompletionStatus(newCompletionStatus)
+
+  #In the loop each job needs to check if its status needs to become unknown
+  # this is required because the job may need to emit an event as a result
+  # This is called from the job execution thread
+  def loopIteration(self, appObj, curTime):
+    if self.mostRecentCompletionStatus == 'Unknown':
+      return
+    if curTime > self.resetCompletionStatusToUnknownTime:
+      self._setNewCompletionStatus('Unknown')
+
 class jobsDataClass():
   # map of Jobs keyed by GUID
   jobs = None
@@ -174,6 +212,11 @@ class jobsDataClass():
     self.jobs = SortedDict()
     self.jobs_name_lookup = SortedDict()
     self.appObj = appObj
+
+  #Run Job loop iteration
+  def loopIteration(self, appObj, curTime):
+    for jobIdx in self.jobs:
+      self.jobs[jobIdx].loopIteration(appObj, curTime)
 
   def getJobServerInfo(self):
     nextJobToExecute = self.getNextJobToExecute()
@@ -294,9 +337,7 @@ class jobsDataClass():
     return self.nextJobToExecute
 
   def registerRunDetails(self, jobGUID, newLastRunDate, newLastRunReturnCode, newLastRunExecutionGUID):
-    self.jobs[str(jobGUID)].lastRunDate = newLastRunDate
-    self.jobs[str(jobGUID)].lastRunReturnCode = newLastRunReturnCode
-    self.jobs[str(jobGUID)].lastRunExecutionGUID = newLastRunExecutionGUID
+    self.jobs[str(jobGUID)].registerRunDetails(self.appObj, newLastRunDate, newLastRunReturnCode, newLastRunExecutionGUID)
 
   #funciton for testing allowing us to pretend it is currently a different time
   def recaculateExecutionTimesBasedonNewTime(self, curTime):
