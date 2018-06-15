@@ -7,46 +7,7 @@ import datetime
 import pytz
 import time
 from dateutil.relativedelta import relativedelta
-
-data_simpleJobCreateParams = {
-  "name": "TestJob",
-  "repetitionInterval": "HOURLY:03",
-  "command": "ls",
-  "enabled": True
-}
-data_simpleManualJobCreateParams = {
-  "name": "TestJob",
-  "repetitionInterval": "",
-  "command": "ls",
-  "enabled": False
-}
-data_simpleJobCreateExpRes = {
-  "guid": 'IGNORE', 
-  "name": data_simpleJobCreateParams['name'], 
-  "command": data_simpleJobCreateParams['command'], 
-  "enabled": data_simpleJobCreateParams['enabled'], 
-  "repetitionInterval": data_simpleJobCreateParams['repetitionInterval'], 
-  "nextScheduledRun": 'IGNORE', 
-  "creationDate": "IGNORE", 
-  "lastUpdateDate": "IGNORE",
-  "lastRunDate": None,
-  "lastRunReturnCode": None,
-  "lastRunExecutionGUID": "",
-  "mostRecentCompletionStatus": "Unknown"
-}
-data_simpleJobExecutionCreateExpRes = {
-  "guid": 'IGNORE',
-  "stage": 'Pending', 
-  "executionName": 'TestExecutionName', 
-  "resultReturnCode": 0, 
-  "jobGUID": 'OVERRIDE',
-  "jobCommand": 'OVERRIDE',
-  "resultSTDOUT": '', 
-  "manual": True, 
-  "dateCreated": 'IGNORE', 
-  "dateStarted": 'IGNORE', 
-  "dateCompleted": 'IGNORE' 
-}
+from commonJSONStrings import data_simpleJobCreateParams, data_simpleManualJobCreateParams, data_simpleJobCreateExpRes, data_simpleJobExecutionCreateExpRes
 
 class test_jobsData(testHelperAPIClient):
   def assertJSONJobStringsEqual(self, result,expectedResult):
@@ -911,5 +872,56 @@ class test_jobsData(testHelperAPIClient):
     result4JSON['lastRunDate'] = None
     result4JSON['lastRunExecutionGUID'] = ""
     self.assertJSONJobStringsEqual(result4JSON, expRes2);
+
+  def test_pinAndUnpinJob(self):
+    result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    self.assertEqual(result.status_code, 200, msg='First job creation should have worked')
+    jobGUID = resultJSON['guid']
+    origName = resultJSON['name']
+    self.assertEqual(resultJSON['pinned'],False)
+
+    #Read back job to make sure it starts unpinned
+    result2 = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(result2.status_code, 200, msg='Read back record')
+    result2JSON = dict(json.loads(result2.get_data(as_text=True)))
+    self.assertEqual(resultJSON['pinned'],False)
+
+    #Update pinned to true
+    updateInput = dict(data_simpleJobCreateParams)
+    updateInput['pinned'] = True
+    updateJobNameResult = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(updateInput), content_type='application/json')
+    self.assertEqual(updateJobNameResult.status_code, 200, msg='Put call did not give correct status')
+    updateJobResultJSON = dict(json.loads(updateJobNameResult.get_data(as_text=True)))
+    self.assertEqual(updateJobResultJSON['pinned'],True)
+
+    #Test get returns correct value
+    result2 = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(result2.status_code, 200, msg='Read back record')
+    result2JSON = dict(json.loads(result2.get_data(as_text=True)))
+    self.assertEqual(result2JSON['pinned'],True)
+
+    #Update pinned to false
+    update2Input = dict(data_simpleJobCreateParams)
+    update2Input['pinned'] = False
+    updateJob2Result = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(update2Input), content_type='application/json')
+    self.assertEqual(updateJob2Result.status_code, 200, msg='Put call did not give correct status')
+    updateJob2ResultJSON = dict(json.loads(updateJob2Result.get_data(as_text=True)))
+    self.assertEqual(updateJob2ResultJSON['pinned'],False)
+
+    result3 = self.testClient.get('/api/jobs/' + jobGUID)
+    self.assertEqual(result3.status_code, 200, msg='Read back record')
+    result3JSON = dict(json.loads(result3.get_data(as_text=True)))
+    self.assertEqual(result3JSON['pinned'],False)
+
+  def test_createPinnedJob(self):
+    jc = dict(data_simpleJobCreateParams)
+    jc['pinned'] = True
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jc), content_type='application/json')
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    self.assertEqual(result.status_code, 200, msg='First job creation should have worked')
+    jobGUID = resultJSON['guid']
+    origName = resultJSON['name']
+    self.assertEqual(resultJSON['pinned'],True)
 
 

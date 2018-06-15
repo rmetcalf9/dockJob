@@ -30,7 +30,8 @@ def getJobModel(appObj):
       'lastRunDate': fields.DateTime(dt_format=u'iso8601', description='Last time job record was run'),
       'lastRunReturnCode': fields.Integer(default=None,description='Return code for the last execution of this job or -1 for timed out'),
       'lastRunExecutionGUID': fields.String(default='',description='Unique identifier for the last job execution for this job'),
-      'mostRecentCompletionStatus': fields.String(default='Unknown',description='READONLY - Success, Fail or Unknown. Success or Fail if the job has run in last 25 hours, Unknown otherwise')
+      'mostRecentCompletionStatus': fields.String(default='Unknown',description='READONLY - Success, Fail or Unknown. Success or Fail if the job has run in last 25 hours, Unknown otherwise'),
+      'pinned': fields.Boolean(default=False,description='Pin job to dashboard')
     })
   return jobModel
 
@@ -57,6 +58,7 @@ class jobClass():
   nextScheduledRun = None
   lastRunReturnCode = None
   lastRunExecutionGUID = None
+  pinned = False
 
   def __repr__(self):
     ret = 'jobClass('
@@ -93,7 +95,7 @@ class jobClass():
         ri = RepetitionIntervalClass(self.repetitionInterval)
         self.repetitionInterval = ri.__str__()
 
-  def __init__(self, name, command, enabled, repetitionInterval):
+  def __init__(self, name, command, enabled, repetitionInterval, pinned):
     jobClass.assertValidName(name)
     jobClass.assertValidRepetitionInterval(repetitionInterval, enabled)
     curTime = datetime.datetime.now(pytz.timezone("UTC"))
@@ -109,6 +111,7 @@ class jobClass():
     self.lastRunReturnCode = None
     self.nextScheduledRun = None
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
+    self.pinned = pinned
 
   # Needed when we use extra caculated values in the dict
   def _caculatedDict(self, appObj):
@@ -127,12 +130,13 @@ class jobClass():
           ret['mostRecentCompletionStatus'] = "Fail"
     return ret
 
-  def setNewValues(self, name, command, enabled, repetitionInterval):
+  def setNewValues(self, name, command, enabled, repetitionInterval, pinned):
     self.name = name
     self.command = command
     self.enabled = enabled
     self.setNewRepetitionInterval(repetitionInterval)
     self.setNextScheduledRun(datetime.datetime.now(pytz.timezone("UTC")))
+    self.pinned = pinned
 
   def setNextScheduledRun(self, curTime):
     ri = None
@@ -238,7 +242,7 @@ class jobsDataClass():
       self.nextJobToExecuteCalcRequired = True
 
     # change values in object to new values
-    jobObj.setNewValues(newValues['name'], newValues['command'], newValues['enabled'], newValues['repetitionInterval'])
+    jobObj.setNewValues(newValues['name'], newValues['command'], newValues['enabled'], newValues['repetitionInterval'], newValues.get('pinned',False))
 
   def deleteJob(self, jobObj):
     uniqueJobName = jobObj.uniqueName()
@@ -302,6 +306,7 @@ def registerAPI(appObj):
     'command': fields.String(default=''),
     'enabled': fields.Boolean(default=False,description='Is the job currently enabled'),
     'repetitionInterval': fields.String(default='',description='How the job is scheduled to run'),
+    'pinned': fields.Boolean(default=False,description='Pin job to dashboard'),
   })
 
   nsJobs = appObj.flastRestPlusAPIObject.namespace('jobs', description='Job Operations')
@@ -338,11 +343,11 @@ def registerAPI(appObj):
     def post(self):
       '''Create Job'''
       content = request.get_json()
-      jobObj = jobClass(content['name'], content['command'], content['enabled'], content['repetitionInterval'])
+      jobObj = jobClass(content['name'], content['command'], content['enabled'], content['repetitionInterval'], content.get('pinned',False))
       res = appObj.appData['jobsData'].addJob(jobObj)
       if res['msg']!='OK':
         raise BadRequest(res['msg'])
-      return appObj.appData['jobsData'].getJob(res['guid'])
+      return appObj.appData['jobsData'].getJob(res['guid'])._caculatedDict(appObj)
 
   @nsJobs.route('/<string:guid>')
   @nsJobs.response(400, 'Job not found')
