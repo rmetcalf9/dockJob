@@ -281,7 +281,7 @@ class jobClass():
         )
 
   def registerRunDetails(self, appObj, newLastRunDate, newLastRunReturnCode, newLastRunExecutionGUID):
-    print('registerRunDetails for job ' + self.name + ' - lastrundate=' + newLastRunDate.isoformat())
+    #print('registerRunDetails for job ' + self.name + ' - lastrundate=' + newLastRunDate.isoformat())
     self.lastRunDate = newLastRunDate
     self.lastRunReturnCode = newLastRunReturnCode
     self.lastRunExecutionGUID = newLastRunExecutionGUID
