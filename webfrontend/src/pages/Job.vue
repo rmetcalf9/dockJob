@@ -63,7 +63,7 @@
       <q-item v-if="typeof(jobData.StateChangeSuccessJobGUID) !== 'undefined' && jobData.StateChangeSuccessJobGUID !== null"><q-item-main >
           <q-item-tile label>State Change Success Job</q-item-tile>
           <q-item-tile sublabel>
-            <router-link :to="'/jobs/' + executionData.jobGUID" tag="a" class="text-grey-8">
+            <router-link :to="'/jobs/' + jobData.StateChangeSuccessJobGUID" tag="a" class="text-grey-8">
               {{ jobData.StateChangeSuccessJobGUID }}
             </router-link>
           </q-item-tile>
@@ -71,7 +71,7 @@
       <q-item v-if="typeof(jobData.StateChangeFailJobGUID) !== 'undefined' && jobData.StateChangeFailJobGUID !== null"><q-item-main >
           <q-item-tile label>State Change Fail Job</q-item-tile>
           <q-item-tile sublabel>
-            <router-link :to="'/jobs/' + executionData.jobGUID" tag="a" class="text-grey-8">
+            <router-link :to="'/jobs/' + jobData.StateChangeFailJobGUID" tag="a" class="text-grey-8">
               {{ jobData.StateChangeFailJobGUID }}
             </router-link>
           </q-item-tile>
@@ -79,7 +79,7 @@
       <q-item v-if="typeof(jobData.StateChangeUnknownJobGUID) !== 'undefined' && jobData.StateChangeUnknownJobGUID !== null"><q-item-main >
           <q-item-tile label>State Change Unknown Job</q-item-tile>
           <q-item-tile sublabel>
-            <router-link :to="'/jobs/' + executionData.jobGUID" tag="a" class="text-grey-8">
+            <router-link :to="'/jobs/' + jobData.StateChangeUnknownJobGUID" tag="a" class="text-grey-8">
               {{ jobData.StateChangeUnknownJobGUID }}
             </router-link>
           </q-item-tile>
@@ -150,7 +150,8 @@ export default {
       },
       createJobModalDialog: {},
       jobData: {},
-      promptTextValue: ''
+      promptTextValue: '',
+      loadedJobGUID: ''
     }
   },
   methods: {
@@ -191,6 +192,7 @@ export default {
       })
     },
     refreshJobData () {
+      this.loadedJobGUID = this.$route.params.jobGUID
       var TTT = this
       var callback = {
         ok: function (response) {
@@ -214,6 +216,17 @@ export default {
   mounted () {
     // once mounted, we need to trigger the initial server data fetch
     globalStore.commit('SET_PAGE_TITLE', 'Job ' + this.$route.params.jobGUID)
+    this.refreshJobData()
+  },
+  updated () {
+    // Required as when the page is updated to the same page vue will reuse the compoennt and not reload the data
+    // This event is also called very often and when we jump away from the page so it needs to be limited
+    if (typeof (this.$route.params.jobGUID) === 'undefined') {
+      return
+    }
+    if (this.loadedJobGUID === this.$route.params.jobGUID) {
+      return
+    }
     this.refreshJobData()
   }
 }

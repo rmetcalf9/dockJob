@@ -294,11 +294,20 @@ export default {
           this.showCreateJobDialogData.enabled = origJobObject.enabled
         }
         this.showCreateJobDialogData.pinned = origJobObject.pinned
-        this.showCreateJobDialogData.StateChangeSuccessJobGUID = origJobObject.StateChangeSuccessJobGUID
-        this.showCreateJobDialogData.StateChangeFailJobGUID = origJobObject.StateChangeFailJobGUID
-        this.showCreateJobDialogData.StateChangeUnknownJobGUID = origJobObject.StateChangeUnknownJobGUID
+        if (typeof (origJobObject.StateChangeSuccessJobGUID) !== 'undefined' && origJobObject.StateChangeSuccessJobGUID !== null) {
+          this.showCreateJobDialogData.StateChangeSuccessJobGUID = origJobObject.StateChangeSuccessJobGUID
+        }
+        if (typeof (origJobObject.StateChangeFailJobGUID) !== 'undefined' && origJobObject.StateChangeFailJobGUID !== null) {
+          this.showCreateJobDialogData.StateChangeFailJobGUID = origJobObject.StateChangeFailJobGUID
+        }
+        if (typeof (origJobObject.StateChangeUnknownJobGUID) !== 'undefined' && origJobObject.StateChangeUnknownJobGUID !== null) {
+          this.showCreateJobDialogData.StateChangeUnknownJobGUID = origJobObject.StateChangeUnknownJobGUID
+        }
 
-        this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = origJobObject.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
+        if (typeof (origJobObject.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) !== 'undefined' && origJobObject.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown !== null) {
+          this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = origJobObject.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
+        }
+
         if ((typeof (origJobObject.repetitionInterval) !== 'undefined') && (origJobObject.repetitionInterval !== '')) {
           var arr = []
           if (this.origJobObject.repetitionInterval.startsWith('DAILY')) {
@@ -377,36 +386,35 @@ export default {
           Notify.create(TTT.displayValues.failMessage + callbackHelper.getErrorFromResponse(error))
         }
       }
+      var payload = {
+        'name': this.showCreateJobDialogData.jobname,
+        'enabled': this.showCreateJobDialogData.enabled,
+        'command': this.showCreateJobDialogData.command,
+        'repetitionInterval': this.repititionIntervalString,
+        'pinned': this.showCreateJobDialogData.pinned,
+        'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
+      }
+      if (this.showCreateJobDialogData.StateChangeSuccessJobGUID !== '') {
+        payload.StateChangeSuccessJobGUID = this.showCreateJobDialogData.StateChangeSuccessJobGUID
+      }
+      if (this.showCreateJobDialogData.StateChangeFailJobGUID !== '') {
+        payload.StateChangeFailJobGUID = this.showCreateJobDialogData.StateChangeFailJobGUID
+      }
+      if (this.showCreateJobDialogData.StateChangeUnknownJobGUID !== '') {
+        payload.StateChangeUnknownJobGUID = this.showCreateJobDialogData.StateChangeUnknownJobGUID
+      }
       if (typeof (this.origJobObject) !== 'undefined') {
-        console.log('writing ri to ')
-        console.log(this.showCreateJobDialogData)
+        // console.log('PUT With')
+        // console.log(payload)
         globalStore.getters.apiFN('PUT', 'jobs/' + this.origJobObject.guid,
-          {
-            'name': this.showCreateJobDialogData.jobname,
-            'enabled': this.showCreateJobDialogData.enabled,
-            'command': this.showCreateJobDialogData.command,
-            'repetitionInterval': this.repititionIntervalString,
-            'pinned': this.showCreateJobDialogData.pinned,
-            'StateChangeSuccessJobGUID': this.showCreateJobDialogData.StateChangeSuccessJobGUID,
-            'StateChangeFailJobGUID': this.showCreateJobDialogData.StateChangeFailJobGUID,
-            'StateChangeUnknownJobGUID': this.showCreateJobDialogData.StateChangeUnknownJobGUID,
-            'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
-          },
+          payload,
           callback
         )
       } else {
+        // console.log('POST With')
+        // console.log(payload)
         globalStore.getters.apiFN('POST', 'jobs/',
-          {
-            'name': this.showCreateJobDialogData.jobname,
-            'enabled': this.showCreateJobDialogData.enabled,
-            'command': this.showCreateJobDialogData.command,
-            'repetitionInterval': this.repititionIntervalString,
-            'pinned': this.showCreateJobDialogData.pinned,
-            'StateChangeSuccessJobGUID': this.showCreateJobDialogData.StateChangeSuccessJobGUID,
-            'StateChangeFailJobGUID': this.showCreateJobDialogData.StateChangeFailJobGUID,
-            'StateChangeUnknownJobGUID': this.showCreateJobDialogData.StateChangeUnknownJobGUID,
-            'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
-          },
+          payload,
           callback
         )
       }
