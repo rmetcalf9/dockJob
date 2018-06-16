@@ -29,6 +29,12 @@
         <q-field helper="" label="Pinned to Dashboard" :label-width="3">
           <q-toggle v-model="showCreateJobDialogData.pinned" />
         </q-field>
+        <q-field helper="" label="Unknown Timeout Override" :label-width="3">
+          <q-input v-model="showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown" type="number" float-label="Minutes to wait before setting status to unknown (if Job hasn't been executed)"
+            error-label="Error"
+            :error="createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown"
+          />
+        </q-field>
         <q-field helper="Automatic Schedule Enabled" label="Automatic Schedule Enabled" :label-width="3">
           <q-toggle v-model="showCreateJobDialogData.enabled" />
         </q-field>
@@ -105,6 +111,7 @@ function initShowCreateJobDialogData () {
     jobname: '',
     command: '',
     pinned: false,
+    overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown: 0,
     enabled: true,
     repetitionInterval: {
       mode: 'DAILY', // Monthly, Daily, Hourly
@@ -265,6 +272,7 @@ export default {
           this.showCreateJobDialogData.enabled = origJobObject.enabled
         }
         this.showCreateJobDialogData.pinned = origJobObject.pinned
+        this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = origJobObject.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
         if ((typeof (origJobObject.repetitionInterval) !== 'undefined') && (origJobObject.repetitionInterval !== '')) {
           var arr = []
           if (this.origJobObject.repetitionInterval.startsWith('DAILY')) {
@@ -344,14 +352,16 @@ export default {
         }
       }
       if (typeof (this.origJobObject) !== 'undefined') {
-        console.log('writing ri to ' + this.repititionIntervalString)
+        console.log('writing ri to ')
+        console.log(this.showCreateJobDialogData)
         globalStore.getters.apiFN('PUT', 'jobs/' + this.origJobObject.guid,
           {
             'name': this.showCreateJobDialogData.jobname,
             'enabled': this.showCreateJobDialogData.enabled,
             'command': this.showCreateJobDialogData.command,
             'repetitionInterval': this.repititionIntervalString,
-            'pinned': this.showCreateJobDialogData.pinned
+            'pinned': this.showCreateJobDialogData.pinned,
+            'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
           },
           callback
         )
@@ -362,7 +372,8 @@ export default {
             'enabled': this.showCreateJobDialogData.enabled,
             'command': this.showCreateJobDialogData.command,
             'repetitionInterval': this.repititionIntervalString,
-            'pinned': this.showCreateJobDialogData.pinned
+            'pinned': this.showCreateJobDialogData.pinned,
+            'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
           },
           callback
         )
@@ -419,6 +430,9 @@ export default {
     createJobInValidTimezone () {
       return (!this.createJobTimezoneDisabled) && (this.showCreateJobDialogData.repetitionInterval.timezone.length === 0)
     },
+    createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown () {
+      return (this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown < 0)
+    },
     createJobValidAll () {
       if (this.createJobInValidJobName) return false
       if (this.createJobInValidJobCommand) return false
@@ -428,6 +442,7 @@ export default {
       if (this.createJobInValidTimezone) return false
       if (this.createJobInValidRepHourlyMinuteString) return false
       if (this.createJobInValidDayOfMonth) return false
+      if (this.createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) return false
       return true
     }
   }

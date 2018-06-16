@@ -84,9 +84,9 @@
             </router-link>
           </q-item-tile>
       </q-item-main></q-item>
-      <q-item v-if="typeof(jobData.resetCompletionStatusToUnknownTime) !== 'undefined' && jobData.resetCompletionStatusToUnknownTime !== null"><q-item-main >
-          <q-item-tile label>Unknown Timeout Override Value</q-item-tile>
-          <q-item-tile sublabel>x{{ jobData.resetCompletionStatusToUnknownTime }}x{{ jobData.resetCompletionStatusToUnknownTime.length }}yyy</q-item-tile>
+      <q-item v-if="typeof(jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) !== 'undefined' && jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown !== null"><q-item-main >
+          <q-item-tile label>Minutes before setting completion status to Unknown</q-item-tile>
+          <q-item-tile sublabel>{{ jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown }}</q-item-tile>
       </q-item-main></q-item>
     </q-list>
     <ExecutionTable
