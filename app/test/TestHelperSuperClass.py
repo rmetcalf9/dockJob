@@ -23,6 +23,14 @@ env = {
 }
 
 class testHelperSuperClass(unittest.TestCase):
+  def assertJSONJobStringsEqual(self, result,expectedResult):
+    #ignores fields that may be different
+    result['guid'] = expectedResult['guid']
+    result['nextScheduledRun'] = expectedResult['nextScheduledRun']
+    result['creationDate'] = expectedResult['creationDate']
+    result['lastUpdateDate'] = expectedResult['lastUpdateDate']
+    self.assertJSONStringsEqual(result, expectedResult);
+
   def checkGotRightException(self, context, ExpectedException):
     if (context.exception != None):
       if (context.exception != ExpectedException):
