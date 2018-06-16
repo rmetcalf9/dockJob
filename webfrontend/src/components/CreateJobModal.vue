@@ -264,6 +264,7 @@ export default {
         if (typeof (origJobObject.enabled) !== 'undefined') {
           this.showCreateJobDialogData.enabled = origJobObject.enabled
         }
+        this.showCreateJobDialogData.pinned = origJobObject.pinned
         if ((typeof (origJobObject.repetitionInterval) !== 'undefined') && (origJobObject.repetitionInterval !== '')) {
           var arr = []
           if (this.origJobObject.repetitionInterval.startsWith('DAILY')) {
