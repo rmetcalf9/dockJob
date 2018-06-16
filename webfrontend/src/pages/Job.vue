@@ -220,7 +220,7 @@ export default {
   },
   updated () {
     // Required as when the page is updated to the same page vue will reuse the compoennt and not reload the data
-    // This event is also called very often and when we jump away from the page so it needs to be limited
+    // This event is also called very often and when we jump away from the page so it needs to limited be
     if (typeof (this.$route.params.jobGUID) === 'undefined') {
       return
     }
