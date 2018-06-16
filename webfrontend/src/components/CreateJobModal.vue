@@ -29,6 +29,24 @@
         <q-field helper="" label="Pinned to Dashboard" :label-width="3">
           <q-toggle v-model="showCreateJobDialogData.pinned" />
         </q-field>
+        <q-field helper="" label="State Change Success Job" :label-width="3">
+          <q-input v-model="showCreateJobDialogData.StateChangeSuccessJobGUID" type="text" float-label="Job to call when State changes to Success"
+            error-label="Error"
+            :error="createJobInValidStateChangeSuccessJobGUID"
+          />
+        </q-field>
+        <q-field helper="" label="State Change Fail Job" :label-width="3">
+          <q-input v-model="showCreateJobDialogData.StateChangeFailJobGUID" type="text" float-label="Job to call when State changes to Fail"
+            error-label="Error"
+            :error="createJobInValidStateChangeFailJobGUID"
+          />
+        </q-field>
+        <q-field helper="" label="State Change Unknown Job" :label-width="3">
+          <q-input v-model="showCreateJobDialogData.StateChangeUnknownJobGUID" type="text" float-label="Job to call when State changes to Unknown"
+            error-label="Error"
+            :error="createJobInValidStateChangeUnknownJobGUID"
+          />
+        </q-field>
         <q-field helper="" label="Unknown Timeout Override" :label-width="3">
           <q-input v-model="showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown" type="number" float-label="Minutes to wait before setting status to unknown (if Job hasn't been executed)"
             error-label="Error"
@@ -111,6 +129,10 @@ function initShowCreateJobDialogData () {
     jobname: '',
     command: '',
     pinned: false,
+    StateChangeSuccessJobGUID: '',
+    StateChangeFailJobGUID: '',
+    StateChangeUnknownJobGUID: '',
+
     overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown: 0,
     enabled: true,
     repetitionInterval: {
@@ -272,6 +294,10 @@ export default {
           this.showCreateJobDialogData.enabled = origJobObject.enabled
         }
         this.showCreateJobDialogData.pinned = origJobObject.pinned
+        this.showCreateJobDialogData.StateChangeSuccessJobGUID = origJobObject.StateChangeSuccessJobGUID
+        this.showCreateJobDialogData.StateChangeFailJobGUID = origJobObject.StateChangeFailJobGUID
+        this.showCreateJobDialogData.StateChangeUnknownJobGUID = origJobObject.StateChangeUnknownJobGUID
+
         this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = origJobObject.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
         if ((typeof (origJobObject.repetitionInterval) !== 'undefined') && (origJobObject.repetitionInterval !== '')) {
           var arr = []
@@ -361,6 +387,9 @@ export default {
             'command': this.showCreateJobDialogData.command,
             'repetitionInterval': this.repititionIntervalString,
             'pinned': this.showCreateJobDialogData.pinned,
+            'StateChangeSuccessJobGUID': this.showCreateJobDialogData.StateChangeSuccessJobGUID,
+            'StateChangeFailJobGUID': this.showCreateJobDialogData.StateChangeFailJobGUID,
+            'StateChangeUnknownJobGUID': this.showCreateJobDialogData.StateChangeUnknownJobGUID,
             'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
           },
           callback
@@ -373,6 +402,9 @@ export default {
             'command': this.showCreateJobDialogData.command,
             'repetitionInterval': this.repititionIntervalString,
             'pinned': this.showCreateJobDialogData.pinned,
+            'StateChangeSuccessJobGUID': this.showCreateJobDialogData.StateChangeSuccessJobGUID,
+            'StateChangeFailJobGUID': this.showCreateJobDialogData.StateChangeFailJobGUID,
+            'StateChangeUnknownJobGUID': this.showCreateJobDialogData.StateChangeUnknownJobGUID,
             'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
           },
           callback
@@ -433,6 +465,15 @@ export default {
     createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown () {
       return (this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown < 0)
     },
+    createJobInValidStateChangeSuccessJobGUID () {
+      return false // TODO
+    },
+    createJobInValidStateChangeFailJobGUID () {
+      return false // TODO
+    },
+    createJobInValidStateChangeUnknownJobGUID () {
+      return false // TODO
+    },
     createJobValidAll () {
       if (this.createJobInValidJobName) return false
       if (this.createJobInValidJobCommand) return false
@@ -443,6 +484,9 @@ export default {
       if (this.createJobInValidRepHourlyMinuteString) return false
       if (this.createJobInValidDayOfMonth) return false
       if (this.createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) return false
+      if (this.createJobInValidStateChangeSuccessJobGUID) return false
+      if (this.createJobInValidStateChangeFailJobGUID) return false
+      if (this.createJobInValidStateChangeUnknownJobGUID) return false
       return true
     }
   }
