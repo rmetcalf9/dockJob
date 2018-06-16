@@ -56,6 +56,38 @@
             <q-item-tile sublabel>{{ jobData.lastRunExecutionGUID }}</q-item-tile>
         </q-item-main></q-item>
       </div>
+      <q-item><q-item-main >
+          <q-item-tile label>Pinned</q-item-tile>
+          <q-item-tile sublabel>{{ jobData.pinned }}</q-item-tile>
+      </q-item-main></q-item>
+      <q-item v-if="typeof(jobData.StateChangeSuccessJobGUID) !== 'undefined' && jobData.StateChangeSuccessJobGUID !== null"><q-item-main >
+          <q-item-tile label>State Change Success Job</q-item-tile>
+          <q-item-tile sublabel>
+            <router-link :to="'/jobs/' + executionData.jobGUID" tag="a" class="text-grey-8">
+              {{ jobData.StateChangeSuccessJobGUID }}
+            </router-link>
+          </q-item-tile>
+      </q-item-main></q-item>
+      <q-item v-if="typeof(jobData.StateChangeFailJobGUID) !== 'undefined' && jobData.StateChangeFailJobGUID !== null"><q-item-main >
+          <q-item-tile label>State Change Fail Job</q-item-tile>
+          <q-item-tile sublabel>
+            <router-link :to="'/jobs/' + executionData.jobGUID" tag="a" class="text-grey-8">
+              {{ jobData.StateChangeFailJobGUID }}
+            </router-link>
+          </q-item-tile>
+      </q-item-main></q-item>
+      <q-item v-if="typeof(jobData.StateChangeUnknownJobGUID) !== 'undefined' && jobData.StateChangeUnknownJobGUID !== null"><q-item-main >
+          <q-item-tile label>State Change Unknown Job</q-item-tile>
+          <q-item-tile sublabel>
+            <router-link :to="'/jobs/' + executionData.jobGUID" tag="a" class="text-grey-8">
+              {{ jobData.StateChangeUnknownJobGUID }}
+            </router-link>
+          </q-item-tile>
+      </q-item-main></q-item>
+      <q-item v-if="typeof(jobData.resetCompletionStatusToUnknownTime) !== 'undefined' && jobData.resetCompletionStatusToUnknownTime !== null"><q-item-main >
+          <q-item-tile label>Unknown Timeout Override Value</q-item-tile>
+          <q-item-tile sublabel>x{{ jobData.resetCompletionStatusToUnknownTime }}x{{ jobData.resetCompletionStatusToUnknownTime.length }}yyy</q-item-tile>
+      </q-item-main></q-item>
     </q-list>
     <ExecutionTable
       ref="ExecutionTable"

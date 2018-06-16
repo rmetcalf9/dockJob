@@ -51,6 +51,21 @@
           {{ props.value }}
         </router-link>
       </q-td>
+      <q-td slot="body-cell-StateChangeSuccessJobGUID" slot-scope="props" :props="props">
+        <router-link :to="'/jobs/' + props.value" tag="a" class="text-grey-8">
+          {{ props.value }}
+        </router-link>
+      </q-td>
+      <q-td slot="body-cell-StateChangeFailJobGUID" slot-scope="props" :props="props">
+        <router-link :to="'/jobs/' + props.value" tag="a" class="text-grey-8">
+          {{ props.value }}
+        </router-link>
+      </q-td>
+      <q-td slot="body-cell-StateChangeUnknownJobGUID" slot-scope="props" :props="props">
+        <router-link :to="'/jobs/' + props.value" tag="a" class="text-grey-8">
+          {{ props.value }}
+        </router-link>
+      </q-td>
 
     </q-table>
     <CreateJobModal
@@ -96,6 +111,11 @@ export default {
         { name: 'command', required: false, label: 'Command', align: 'left', field: 'command', sortable: true, filter: true },
         { name: 'lastUpdateDate', required: false, label: 'Last Update', align: 'left', field: 'lastUpdateDateString', sortable: true, filter: true },
         { name: 'mostRecentCompletionStatus', required: false, label: 'Completion Status', align: 'left', field: 'mostRecentCompletionStatus', sortable: true, filter: true },
+        { name: 'pinned', required: false, label: 'Pinned', align: 'left', field: 'pinned', sortable: true, filter: true },
+        { name: 'resetCompletionStatusToUnknownTime', required: false, label: 'Unknown Timeout', align: 'left', field: 'resetCompletionStatusToUnknownTime', sortable: true, filter: true },
+        { name: 'StateChangeSuccessJobGUID', required: false, label: 'State Change Success Job', align: 'left', field: 'StateChangeSuccessJobGUID', sortable: true, filter: true },
+        { name: 'StateChangeFailJobGUID', required: false, label: 'State Change Fail Job', align: 'left', field: 'StateChangeFailJobGUID', sortable: true, filter: true },
+        { name: 'StateChangeUnknownJobGUID', required: false, label: 'State Change Unknown Job', align: 'left', field: 'StateChangeUnknownJobGUID', sortable: true, filter: true },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobData: [],
