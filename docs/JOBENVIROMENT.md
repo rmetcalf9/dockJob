@@ -9,7 +9,7 @@ DockJob adds enviroment variables to give jobs access to more information. These
  | DOCKJOB_JOB_NAME | Name of the job being executed |
  | DOCKJOB_EXECUTION_GUID | GUID of the execution |
  | DOCKJOB_EXECUTION_NAME | Name of the execution |
- | DOCKJOB_EXECUTION_METHOD | The method used to start this job execution running. [Manual|Scheduled|StateChangeToSuccess|StateChangeToFail|StateChangeToUnknown] |
+ | DOCKJOB_EXECUTION_METHOD | The method used to start this job execution running. [Manual,Scheduled,StateChangeToSuccess,StateChangeToFail,StateChangeToUnknown] |
  | DOCKJOB_TRIGGERJOB_GUID | If the execution method is a State Change this will contain the GUID of triggering job |
  | DOCKJOB_TRIGGERJOB_NAME | If the execution method is a State Change this will contain the Name of triggering job |
  | DOCKJOB_TRIGGEREXECUTION_GUID | If the execution method is a State Change to Success or Fail then this variable will contain the GUID of the execution that triggered it |

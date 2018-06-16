@@ -1200,6 +1200,92 @@ class test_jobsData(testHelperAPIClient):
     updateJobNameResult = self.testClient.put('/api/jobs/' + jobGUID, data=json.dumps(updateInput), content_type='application/json')
     self.assertResponseCodeEqual(updateJobNameResult, 400)
 
+  def test_manualJobEnviroment(self):
+    jc = dict(data_simpleManualJobCreateParams)
+    jc["command"] = "env | grep DOCKJOB_"
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jc), content_type='application/json')
+    self.assertResponseCodeEqual(result, 200)
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    jobGUID = resultJSON['guid']
+
+    res = self.addExecution(jobGUID,'TestJobExecutionName')
+    executionGUID = res['guid']
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+
+    result = self.testClient.get('/api/executions/' + executionGUID)
+    self.assertResponseCodeEqual(result, 200)
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+
+    stdout = resultJSON['resultSTDOUT']
+    self.assertTrue(len(stdout)>0)
+    envVarDict = dict(map(lambda x:x.split("="),stdout.split("\n")))
+    self.assertEqual(envVarDict['DOCKJOB_JOB_GUID'],jobGUID, msg='enviroment var DOCKJOB_JOB_GUID wrong')
+    self.assertEqual(envVarDict['DOCKJOB_JOB_NAME'],jc['name'], msg='enviroment var DOCKJOB_JOB_NAME wrong')
+
+    self.assertEqual(envVarDict['DOCKJOB_EXECUTION_METHOD'],'Manual', msg='enviroment var DOCKJOB_EXECUTION_METHOD wrong')
+    self.assertEqual(envVarDict['DOCKJOB_EXECUTION_GUID'],executionGUID, msg='enviroment var DOCKJOB_EXECUTION_GUID wrong')
+    self.assertEqual(envVarDict['DOCKJOB_EXECUTION_NAME'],'TestJobExecutionName', msg='enviroment var DOCKJOB_EXECUTION_NAME wrong')
+
+    self.assertEqual(envVarDict['DOCKJOB_TRIGGERJOB_GUID'],'', msg='enviroment var DOCKJOB_TRIGGERJOB_GUID wrong')
+    self.assertEqual(envVarDict['DOCKJOB_TRIGGERJOB_NAME'],'', msg='enviroment var DOCKJOB_TRIGGERJOB_NAME wrong')
+
+    self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_NAME'],'', msg='enviroment var DOCKJOB_TRIGGEREXECUTION_NAME wrong')
+    self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_STDOUT'],'', msg='enviroment var DOCKJOB_TRIGGEREXECUTION_STDOUT wrong')
+    self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_GUID'],'', msg='enviroment var DOCKJOB_TRIGGEREXECUTION_GUID wrong')
+
+  def test_triggeredManualJobEnviroment(self):
+    triggeredJC = dict(data_simpleManualJobCreateParams)
+    triggeredJC["command"] = "env | grep DOCKJOB_"
+    triggeredJC["name"] = "triggeredJobName"
+    result = self.testClient.post('/api/jobs/', data=json.dumps(triggeredJC), content_type='application/json')
+    self.assertResponseCodeEqual(result, 200)
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    triggeredJobGUID = resultJSON['guid']
+
+    jc = dict(data_simpleManualJobCreateParams)
+    testJobOutput = 'Output of main Job'
+    jc["name"] = "mainJobName"
+    jc["command"] = "echo '" + testJobOutput + "'"
+    jc["StateChangeSuccessJobGUID"] = triggeredJobGUID
+    result = self.testClient.post('/api/jobs/', data=json.dumps(jc), content_type='application/json')
+    self.assertResponseCodeEqual(result, 200)
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    jobGUID = resultJSON['guid']
+
+    res = self.addExecution(jobGUID,'TestJobExecutionName')
+    executionGUID = res['guid']
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+    appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+
+    #Find the triggeredJobExecutionGUID
+    result = self.testClient.get('/api/jobs/' + triggeredJobGUID + '/execution')
+    self.assertResponseCodeEqual(result, 200)
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+    self.assertEqual(len(resultJSON['result']),1)
+
+    triggeredJobExecutionGUID = resultJSON['result'][0]['guid']
+
+    result = self.testClient.get('/api/executions/' + triggeredJobExecutionGUID)
+    self.assertResponseCodeEqual(result, 200)
+    resultJSON = dict(json.loads(result.get_data(as_text=True)))
+
+    stdout = resultJSON['resultSTDOUT']
+    self.assertTrue(len(stdout)>0)
+    envVarDict = dict(map(lambda x:x.split("="),stdout.split("\n")))
+    self.assertEqual(envVarDict['DOCKJOB_JOB_GUID'],triggeredJobGUID, msg='enviroment var DOCKJOB_JOB_GUID wrong')
+    self.assertEqual(envVarDict['DOCKJOB_JOB_NAME'],triggeredJC["name"], msg='enviroment var DOCKJOB_JOB_NAME wrong')
+
+    self.assertEqual(envVarDict['DOCKJOB_EXECUTION_METHOD'],'StateChangeToSuccess', msg='enviroment var DOCKJOB_EXECUTION_METHOD wrong')
+    self.assertEqual(envVarDict['DOCKJOB_EXECUTION_GUID'],triggeredJobExecutionGUID, msg='enviroment var DOCKJOB_EXECUTION_GUID wrong')
+    self.assertEqual(envVarDict['DOCKJOB_EXECUTION_NAME'],'Event - StateChangeToSuccess', msg='enviroment var DOCKJOB_EXECUTION_NAME wrong')
+
+    self.assertEqual(envVarDict['DOCKJOB_TRIGGERJOB_GUID'],jobGUID, msg='enviroment var DOCKJOB_TRIGGERJOB_GUID wrong')
+    self.assertEqual(envVarDict['DOCKJOB_TRIGGERJOB_NAME'],jc['name'], msg='enviroment var DOCKJOB_TRIGGERJOB_NAME wrong')
+
+    self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_GUID'],executionGUID, msg='enviroment var DOCKJOB_TRIGGEREXECUTION_GUID wrong')
+    self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_NAME'],'TestJobExecutionName', msg='enviroment var DOCKJOB_TRIGGEREXECUTION_NAME wrong')
+    self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_STDOUT'],testJobOutput, msg='enviroment var DOCKJOB_TRIGGEREXECUTION_STDOUT wrong')
 
 
 

@@ -11,7 +11,14 @@ class test_JobExecution(testHelperAPIClient):
   JobExecutionLock = threading.Lock()
 
   def _getJobExecutionObj(self, jobObj):
-    return JobExecutionClass(jobObj, 'TestExecutionName', False, curDatetime=appObj.getCurDateTime())
+    return JobExecutionClass(
+      jobObj=jobObj,
+      executionName='TestExecutionName',
+      manual=False,
+      curDatetime=appObj.getCurDateTime(),
+      triggerJobObj=None,
+      triggerExecutionObj=None
+    )
 
   def createJobObj(self, command='echo "This is a test"'):
     return jobClass(appObj, 'TestJob123', command, False, '', False, None, None, None, None)
@@ -23,7 +30,7 @@ class test_JobExecution(testHelperAPIClient):
   def releaseJobExecutionLock(self):
     self.JobExecutionLock.release()
 
-  def registerRunDetails(self, jobGUID, newLastRunDate, newLastRunReturnCode, newLastRunExecutionGUID):
+  def registerRunDetails(self, jobGUID, newLastRunDate, newLastRunReturnCode, triggerExecutionObj):
     pass
 
 
@@ -90,14 +97,14 @@ class test_JobExecution(testHelperAPIClient):
     expCompleted['dateCompleted'] = 'OVERRIDE'
     expCompleted['resultReturnCode'] = 0
     a = self._getJobExecutionObj(jobObj)
-    resDict = dict(a.__dict__)
+    resDict = dict(a._caculatedDict())
     tim = from_iso8601(a.dateCreated)
     resDict['dateCreated'] = 'OVERRIDE'
     resDict['guid'] = 'OVERRIDE'
     self.assertJSONStringsEqual(resDict, expPending)
     a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails, appObj)
     self.assertEqual(a.stage, 'Completed')
-    resDict = dict(a.__dict__)
+    resDict = dict(a._caculatedDict())
     resDict['dateCreated'] = 'OVERRIDE'
     resDict['dateStarted'] = 'OVERRIDE'
     resDict['dateCompleted'] = 'OVERRIDE'

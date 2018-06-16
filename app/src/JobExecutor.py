@@ -7,7 +7,7 @@ import pwd
 import grp
 import time
 import threading
-from JobExecution import JobExecutionClass
+from JobExecution import JobExecutionClass, SimpleJobExecutionClass
 from sortedcontainers import SortedDict
 import datetime
 import pytz
@@ -59,7 +59,7 @@ class JobExecutorClass(threading.Thread):
     print('Will run jobs as group: ' + appObj.groupforjobs + ' (' + str(self.processGroupID) + ')')
 
     if not skipUserCheck:
-      testProcess = self.executeCommand('whoami')
+      testProcess = self.executeCommand(SimpleJobExecutionClass('whoami'))
       if testProcess.returncode != 0:
         print(testProcess.stdout.decode())
         if testProcess.stderr != None:
@@ -76,12 +76,37 @@ class JobExecutorClass(threading.Thread):
     #super(threading.Thread, self).__init__()
 
   #Function to execute the command. Passed the shell string and outputs the executed result
-  def executeCommand(self, shellCmd):
+  def executeCommand(self, jobExecutionObj):
     # https://docs.python.org/3/library/subprocess.html#subprocess.CompletedProcess
-    #completedProcess = subprocess.run(shellCmd, stdin=None, input=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=None, timeout=self.timeout, check=False, preexec_fn=self.getDemoteFunction())
+    #completedProcess = subprocess.run(jobExecutionObj.jobCommand, stdin=None, input=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=None, timeout=self.timeout, check=False, preexec_fn=self.getDemoteFunction())
     #return completedProcess
+
+    job_env = dict()
+    job_env = os.environ.copy()
+    job_env["DOCKJOB_JOB_GUID"] = jobExecutionObj.jobGUID
+    job_env["DOCKJOB_JOB_NAME"] = jobExecutionObj.jobObj.name
+    job_env["DOCKJOB_EXECUTION_METHOD"] = jobExecutionObj.getJobExecutionMethod()
+    job_env["DOCKJOB_EXECUTION_GUID"] = jobExecutionObj.guid
+    job_env["DOCKJOB_EXECUTION_NAME"] = jobExecutionObj.executionName
+
+    if jobExecutionObj.triggerJobObj is None:
+      job_env["DOCKJOB_TRIGGERJOB_GUID"] = ""
+      job_env["DOCKJOB_TRIGGERJOB_NAME"] = ""
+    else:
+      job_env["DOCKJOB_TRIGGERJOB_GUID"] = jobExecutionObj.triggerJobObj.guid
+      job_env["DOCKJOB_TRIGGERJOB_NAME"] = jobExecutionObj.triggerJobObj.name
+
+    if jobExecutionObj.triggerExecutionObj is None:
+      job_env["DOCKJOB_TRIGGEREXECUTION_GUID"] = ""
+      job_env["DOCKJOB_TRIGGEREXECUTION_NAME"] = ""
+      job_env["DOCKJOB_TRIGGEREXECUTION_STDOUT"] = ""
+    else:
+      job_env["DOCKJOB_TRIGGEREXECUTION_GUID"] = jobExecutionObj.triggerExecutionObj.guid
+      job_env["DOCKJOB_TRIGGEREXECUTION_NAME"] = jobExecutionObj.triggerExecutionObj.executionName
+      job_env["DOCKJOB_TRIGGEREXECUTION_STDOUT"] = jobExecutionObj.triggerExecutionObj.resultSTDOUT
+
     start_time = time.time()
-    proc = subprocess.Popen(shellCmd, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=None, preexec_fn=self.getDemoteFunction())
+    proc = subprocess.Popen(jobExecutionObj.jobCommand, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=None, preexec_fn=self.getDemoteFunction(), env=job_env)
     returncode = None
     while (returncode == None):
       returncode = proc.poll()
@@ -92,7 +117,7 @@ class JobExecutorClass(threading.Thread):
       time.sleep(0.2)
     stdout, stderr = proc.communicate()
     completed = subprocess.CompletedProcess(
-      args=shellCmd,
+      args=jobExecutionObj.jobCommand,
       returncode=returncode,
       stdout=stdout,
       stderr=stderr,
@@ -119,13 +144,29 @@ class JobExecutorClass(threading.Thread):
     self.JobExecutionLock.release()
 
   #called when new job needs executing
-  def submitJobForExecution(self, jobGUID, executionName, manual, triggerJobObj = None, triggerEvent = None, callerHasJobExecutionLock = False):
+  def submitJobForExecution(
+    self,
+    jobGUID,
+    executionName,
+    manual,
+    triggerJobObj = None,
+    triggerEvent = None,
+    callerHasJobExecutionLock = False,
+    triggerExecutionObj = None
+  ):
     #print('Subbmitting new job execution name = ' + executionName)
     #manual = True when called by jobsDataAPI and False when called from scheduler
     jobObj = self.appObj.appData['jobsData'].getJob(jobGUID)
     if jobObj is None:
       raise BadRequest('Invalid job')
-    execution = JobExecutionClass(jobObj, executionName, manual, curDatetime=self.appObj.getCurDateTime())
+    execution = JobExecutionClass(
+      jobObj, 
+      executionName, 
+      manual, 
+      curDatetime=self.appObj.getCurDateTime(),
+      triggerJobObj=triggerJobObj,
+      triggerExecutionObj=triggerExecutionObj
+    )
     #lock shouldn't be needed but it is a cheap operation
     lockAquired = False
     try:

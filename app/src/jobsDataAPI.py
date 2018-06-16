@@ -243,7 +243,7 @@ class jobClass():
     return jobClass.uniqueJobNameStatic(self.name)
 
   #Called from job execution thread and request processing threads
-  def _setNewCompletionStatus(self, appObj, newStatus):
+  def _setNewCompletionStatus(self, appObj, newStatus, triggerExecutionObj):
     if self.mostRecentCompletionStatus == newStatus:
       return
     self.CompletionstatusLock.acquire()
@@ -257,7 +257,8 @@ class jobClass():
           manual=False,
           triggerJobObj=self,
           triggerEvent = 'StateChangeToSuccess',
-          callerHasJobExecutionLock=True
+          callerHasJobExecutionLock=True,
+          triggerExecutionObj=triggerExecutionObj
         )
     elif newStatus=='Fail':
       if self.StateChangeFailJobGUID is not None:
@@ -267,7 +268,8 @@ class jobClass():
           manual=False,
           triggerJobObj=self,
           triggerEvent = 'StateChangeToFail',
-          callerHasJobExecutionLock=True
+          callerHasJobExecutionLock=True,
+          triggerExecutionObj=triggerExecutionObj
         )
     else:
       if self.StateChangeUnknownJobGUID is not None:
@@ -277,18 +279,23 @@ class jobClass():
           manual=False,
           triggerJobObj=self,
           triggerEvent = 'StateChangeToUnknown',
-          callerHasJobExecutionLock=True
+          callerHasJobExecutionLock=True,
+          triggerExecutionObj=triggerExecutionObj #Always None in the unknown case
         )
 
-  def registerRunDetails(self, appObj, newLastRunDate, newLastRunReturnCode, newLastRunExecutionGUID):
+  def registerRunDetails(self, appObj, newLastRunDate, newLastRunReturnCode, triggerExecutionObj):
     #print('registerRunDetails for job ' + self.name + ' - lastrundate=' + newLastRunDate.isoformat())
     self.lastRunDate = newLastRunDate
     self.lastRunReturnCode = newLastRunReturnCode
-    self.lastRunExecutionGUID = newLastRunExecutionGUID
+    self.lastRunExecutionGUID = triggerExecutionObj.guid
     self.resetCompletionStatusToUnknownTime = newLastRunDate + relativedelta(minutes=self._getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(appObj))
 
     newCompletionStatus = self._getCaculatedValueForModeRecentCompletionStatus(appObj, lastRunDate=newLastRunDate, lastRunReturnCode=newLastRunReturnCode)
-    self._setNewCompletionStatus(appObj, newCompletionStatus)
+    self._setNewCompletionStatus(
+      appObj=appObj,
+      newStatus=newCompletionStatus,
+      triggerExecutionObj=triggerExecutionObj
+    )
 
   #In the loop each job needs to check if its status needs to become unknown
   # this is required because the job may need to emit an event as a result
@@ -297,7 +304,11 @@ class jobClass():
     if self.mostRecentCompletionStatus == 'Unknown':
       return
     if curTime > self.resetCompletionStatusToUnknownTime:
-      self._setNewCompletionStatus(appObj, 'Unknown')
+      self._setNewCompletionStatus(
+        appObj=appObj,
+        newStatus='Unknown',
+        triggerExecutionObj=None
+      )
 
 class jobsDataClass():
   # map of Jobs keyed by GUID
@@ -445,8 +456,8 @@ class jobsDataClass():
     self.nextJobToExecuteCalcRequired = False
     return self.nextJobToExecute
 
-  def registerRunDetails(self, jobGUID, newLastRunDate, newLastRunReturnCode, newLastRunExecutionGUID):
-    self.jobs[str(jobGUID)].registerRunDetails(self.appObj, newLastRunDate, newLastRunReturnCode, newLastRunExecutionGUID)
+  def registerRunDetails(self, jobGUID, newLastRunDate, newLastRunReturnCode, triggerExecutionObj):
+    self.jobs[str(jobGUID)].registerRunDetails(self.appObj, newLastRunDate, newLastRunReturnCode, triggerExecutionObj)
 
   #funciton for testing allowing us to pretend it is currently a different time
   def recaculateExecutionTimesBasedonNewTime(self, curTime):

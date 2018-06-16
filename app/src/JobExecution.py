@@ -30,11 +30,21 @@ def getJobExecutionModel(appObj):
   })
 
 
-class JobExecutionClass():
+#Simple execution object with subset of features
+# it allows the jobExecutor.executeCommand fn to be called
+# this is used for the initial startup test and for unit testing
+#this is never setup as an actual job
+class SimpleJobObj():
+  name = 'SimpleJobObjConstantName'
   guid = None
-  executionName = None #executons not accessible by this name which dosen't have to be unique
-  manual = None #manually ran or ran from schedule
-  stage = None  #Pending, Running, Completed, Timeout
+  def __init__(self):
+    self.guid = str(uuid.uuid4())
+
+class SimpleJobExecutionClass():
+  guid = None
+  executionName = None 
+  manual = None 
+  stage = None  
   jobGUID = None
   jobCommand = None
   dateCreated = None
@@ -42,6 +52,51 @@ class JobExecutionClass():
   dateCompleted = None
   resultReturnCode = None
   resultSTDOUT = None
+
+  #Items not in JSON output
+  jobObj = None
+  triggerJobObj = None
+  triggerExecutionObj = None
+
+
+  def __init__(self, command):
+    self.guid = str(uuid.uuid4())
+    self.jobCommand = command
+    self.jobObj = SimpleJobObj()
+    self.jobGUID = self.jobObj.guid
+    self.triggerJobObj = None
+    self.triggerExecutionObj = None
+    self.executionName = 'SimpleJobExecutionConstantName'
+
+  def getJobExecutionMethod(self):
+    return 'Manual'
+
+  def _caculatedDict(self):
+    ret = dict(self.__dict__)
+    del ret['jobObj']
+    del ret['triggerJobObj']
+    del ret['triggerExecutionObj']
+    return ret
+
+
+
+class JobExecutionClass():
+  guid = None
+  executionName = None #executons not accessible by this name which dosen't have to be unique
+  manual = None #manually ran or ran from schedule
+  stage = None  #Pending, Running, Completed, Timeout
+  jobGUID = None #copy taken on init so it is invariant during execution
+  jobCommand = None #copy taken on init so it is invariant during execution
+  dateCreated = None
+  dateStarted = None
+  dateCompleted = None
+  resultReturnCode = None
+  resultSTDOUT = None
+
+  #Items not in JSON output
+  jobObj = None
+  triggerJobObj = None
+  triggerExecutionObj = None
 
   def __repr__(self):
     ret = 'JobExecutionClass('
@@ -60,11 +115,11 @@ class JobExecutionClass():
     return ret
 
 
-  def __init__(self, job, executionName, manual, curDatetime):
+  def __init__(self, jobObj, executionName, manual, curDatetime, triggerJobObj, triggerExecutionObj):
     self.guid = str(uuid.uuid4())
     self.stage = 'Pending'
-    self.jobGUID = job.guid
-    self.jobCommand = job.command
+    self.jobGUID = jobObj.guid
+    self.jobCommand = jobObj.command
     self.dateCreated = curDatetime.isoformat()
     self.dateStarted = None
     self.dateCompleted = None
@@ -72,23 +127,33 @@ class JobExecutionClass():
     self.resultSTDOUT = None
     self.executionName = executionName
     self.manual = manual
+    self.jobObj = jobObj
+    self.triggerJobObj = triggerJobObj
+    self.triggerExecutionObj = triggerExecutionObj
+
+  def _caculatedDict(self):
+    ret = dict(self.__dict__)
+    del ret['jobObj']
+    del ret['triggerJobObj']
+    del ret['triggerExecutionObj']
+    return ret
 
   def execute(self, executor, lockAcquireFn, lockReleaseFn, registerRunDetailsFn, appObj):
     lockAcquireFn()
     self.stage = 'Running'
     self.dateStarted = appObj.getCurDateTime().isoformat()
     ##I only want to register the run when it completes because then I can record it's result and fire any events
-    ##registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=appObj.getCurDateTime(), newLastRunReturnCode=None, newLastRunExecutionGUID=self.guid)
+    ##registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=appObj.getCurDateTime(), newLastRunReturnCode=None, triggerExecutionObj=self)
     lockReleaseFn()
     try:
-      executionResult = executor.executeCommand(self.jobCommand)
+      executionResult = executor.executeCommand(self)
     except TimeoutExpired:
       lockAcquireFn()
       self.resultReturnCode = -1
       self.resultSTDOUT = None
       self.stage = 'Timeout'
       self.dateCompleted = appObj.getCurDateTime().isoformat()
-      registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=appObj.getCurDateTime(), newLastRunReturnCode=self.resultReturnCode, newLastRunExecutionGUID=self.guid)
+      registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=appObj.getCurDateTime(), newLastRunReturnCode=self.resultReturnCode, triggerExecutionObj=self)
       lockReleaseFn()
       return
     lockAcquireFn()
@@ -103,8 +168,14 @@ class JobExecutionClass():
     else:
       self.stage = 'Completed'
     self.dateCompleted = appObj.getCurDateTime().isoformat()
-    registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=appObj.getCurDateTime(), newLastRunReturnCode=self.resultReturnCode, newLastRunExecutionGUID=self.guid)
+    registerRunDetailsFn(jobGUID=self.jobGUID, newLastRunDate=appObj.getCurDateTime(), newLastRunReturnCode=self.resultReturnCode, triggerExecutionObj=self)
     lockReleaseFn()
 
-
+  def getJobExecutionMethod(self):
+    #determine setting from Manual,Scheduled,StateChangeToSuccess,StateChangeToFail,StateChangeToUnknown
+    if self.manual:
+      return 'Manual'
+    if self.triggerJobObj is None:
+      return 'Scheduled'
+    return 'StateChangeTo' + self.triggerJobObj.mostRecentCompletionStatus
 
