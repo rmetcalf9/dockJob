@@ -26,6 +26,9 @@
         <q-field helper="Command to execute" label="Command" :label-width="3" error-label="Command to run must be supplied">
           <q-input v-model="showCreateJobDialogData.command" type="textarea" :error='showCreateJobDialogData.command.length <= 2' />
         </q-field>
+        <q-field helper="" label="Pinned to Dashboard" :label-width="3">
+          <q-toggle v-model="showCreateJobDialogData.pinned" />
+        </q-field>
         <q-field helper="Automatic Schedule Enabled" label="Automatic Schedule Enabled" :label-width="3">
           <q-toggle v-model="showCreateJobDialogData.enabled" />
         </q-field>
@@ -101,6 +104,7 @@ function initShowCreateJobDialogData () {
   return {
     jobname: '',
     command: '',
+    pinned: false,
     enabled: true,
     repetitionInterval: {
       mode: 'DAILY', // Monthly, Daily, Hourly
@@ -345,7 +349,8 @@ export default {
             'name': this.showCreateJobDialogData.jobname,
             'enabled': this.showCreateJobDialogData.enabled,
             'command': this.showCreateJobDialogData.command,
-            'repetitionInterval': this.repititionIntervalString
+            'repetitionInterval': this.repititionIntervalString,
+            'pinned': this.showCreateJobDialogData.pinned
           },
           callback
         )
@@ -355,7 +360,8 @@ export default {
             'name': this.showCreateJobDialogData.jobname,
             'enabled': this.showCreateJobDialogData.enabled,
             'command': this.showCreateJobDialogData.command,
-            'repetitionInterval': this.repititionIntervalString
+            'repetitionInterval': this.repititionIntervalString,
+            'pinned': this.showCreateJobDialogData.pinned
           },
           callback
         )
