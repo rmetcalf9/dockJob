@@ -46,20 +46,70 @@
         </table>
       </q-card-main>
     </q-card>
-
+    <div v-for="curJob in pinnedJobs" :key=curJob.guid>
+      <q-card inline :class="'q-ma-sm ' + getCardClass(curJob)">
+        <q-card-title>
+         {{ curJob.name }}
+          <span slot="subtitle">{{ curJob.mostRecentCompletionStatus }}</span>
+        </q-card-title>
+        <q-card-main>
+          <table>
+            <tr><td align="right">Manual:</td><td>{{ !curJob.enabled }}</td></tr>
+            <tr><td align="right">Last Run:</td><td>{{ curJob.lastRunDate }}</td></tr>
+            <tr><td align="right">Return Code:</td><td>{{ curJob.lastRunReturnCode }}</td></tr>
+          </table>
+        </q-card-main>
+        <q-card-actions>
+          <q-btn flat round dense icon="rowing" @click="$router.push('/jobs/' + curJob.guid)" />
+        </q-card-actions>
+      </q-card>
+    </div>
   </q-page>
 </template>
 
 <script>
 import globalStore from '../store/globalStore'
 import userSettings from '../store/userSettings'
+import { Notify, Loading } from 'quasar'
+import callbackHelper from '../callbackHelper'
+import getDepaginatedQueryResults from '../depaginatedQuery.js'
 
 export default {
   data () {
     return {
+      pinnedJobs: [{guid: 'a'}, {guid: 'b'}, {guid: 'c'}]
     }
   },
   methods: {
+    getCardClass (jobObj) {
+      if (jobObj.mostRecentCompletionStatus === 'Success') {
+        return 'bg-positive'
+      }
+      if (jobObj.mostRecentCompletionStatus === 'Fail') {
+        return 'bg-negative'
+      }
+      return 'bg-primary'
+    },
+    refreshPage () {
+      // refreshes pinned jobs
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          // console.log(response.data.guid)
+          Loading.hide()
+
+          TTT.pinnedJobs = response.data.result
+
+          TTT.loading = false
+        },
+        error: function (error) {
+          Loading.hide()
+          Notify.create('Failed to query pinned jobs - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      Loading.show()
+      getDepaginatedQueryResults.getDepaginatedQueryResults('jobs?query=pinned=true', callback, globalStore.getters.apiFN)
+    }
   },
   computed: {
     jobs () {
@@ -82,6 +132,9 @@ export default {
     datastoreState () {
       return globalStore.getters.datastoreState
     }
+  },
+  mounted () {
+    this.refreshPage()
   }
 }
 </script>
