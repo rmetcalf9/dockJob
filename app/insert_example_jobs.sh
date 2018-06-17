@@ -2,10 +2,22 @@
 
 echo 'Inserting Example Jobs'
 
+JSON="{    \"enabled\": false,    \"name\": \"SC Success\",    \"repetitionInterval\": \"\",    \"command\": \"ls -la\"  }"
+STATECHNAGESUCCESSJOBGUID=$(curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "${JSON}" 'http://127.0.0.1:80/api/jobs/' | \
+    python -c "import sys, json; print json.load(sys.stdin)['guid']")
+JSON="{    \"enabled\": false,    \"name\": \"SC Fail\",    \"repetitionInterval\": \"\",    \"command\": \"ls -la\"  }"
+STATECHNAGEFAILJOBGUID=$(curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "${JSON}" 'http://127.0.0.1:80/api/jobs/' | \
+    python -c "import sys, json; print json.load(sys.stdin)['guid']")
+JSON="{    \"enabled\": false,    \"name\": \"SC Unknown\",    \"repetitionInterval\": \"\",    \"command\": \"ls -la\"  }"
+STATECHNAGEUNKNOWNJOBGUID=$(curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "${JSON}" 'http://127.0.0.1:80/api/jobs/' | \
+    python -c "import sys, json; print json.load(sys.stdin)['guid']")
+
+
+
 for i in `seq 0 59`;
 do
   TN=$(printf "%03d" ${i})
-  JSON="{    \"enabled\": true,    \"name\": \"Test ${TN}\",    \"repetitionInterval\": \"HOURLY:${i}\",    \"command\": \"echo Running Test ${TN}\necho Finished\",  \"pinned\": true  }"
+  JSON="{    \"enabled\": true,    \"name\": \"Test ${TN}\",    \"repetitionInterval\": \"HOURLY:${i}\",    \"command\": \"echo Running Test ${TN}\necho Finished\",  \"pinned\": true ,  \"StateChangeSuccessJobGUID\": \"${STATECHNAGESUCCESSJOBGUID}\", \"StateChangeFailJobGUID\": \"${STATECHNAGEFAILJOBGUID}\",   \"StateChangeUnknownJobGUID\": \"${STATECHNAGEUNKNOWNJOBGUID}\" }"
   curl --fail -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "${JSON}" 'http://127.0.0.1:80/api/jobs/'
   RES=$?
   echo $RES

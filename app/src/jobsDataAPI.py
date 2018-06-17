@@ -37,6 +37,9 @@ def getJobModel(appObj):
       'StateChangeSuccessJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Success'),
       'StateChangeFailJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Fail'),
       'StateChangeUnknownJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Unknown'),
+      'StateChangeSuccessJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this jobs state changes to Success'),
+      'StateChangeFailJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this jobs state changes to Fail'),
+      'StateChangeUnknownJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this jobs state changes to Unknown'),
     })
   return jobModel
 
@@ -198,6 +201,17 @@ class jobClass():
     del ret['resetCompletionStatusToUnknownTime']
     if self.lastRunDate is not None:
       ret['lastRunDate'] = self.lastRunDate.isoformat()
+
+    ret['StateChangeSuccessJobNAME'] = ''
+    ret['StateChangeFailJobNAME'] = ''
+    ret['StateChangeUnknownJobNAME'] = ''
+    if self.StateChangeSuccessJobGUID is not None:
+      ret['StateChangeSuccessJobNAME'] = appObj.appData['jobsData'].getJob(self.StateChangeSuccessJobGUID).name
+    if self.StateChangeFailJobGUID is not None:
+      ret['StateChangeFailJobNAME'] = appObj.appData['jobsData'].getJob(self.StateChangeFailJobGUID).name
+    if self.StateChangeUnknownJobGUID is not None:
+      ret['StateChangeUnknownJobNAME'] = appObj.appData['jobsData'].getJob(self.StateChangeUnknownJobGUID).name
+
     return ret
 
   def setNewValues(

@@ -53,17 +53,17 @@
       </q-td>
       <q-td slot="body-cell-StateChangeSuccessJobGUID" slot-scope="props" :props="props">
         <router-link :to="'/jobs/' + props.value" tag="a" class="text-grey-8">
-          {{ props.value }}
+          {{ props.row.StateChangeSuccessJobNAME }}
         </router-link>
       </q-td>
       <q-td slot="body-cell-StateChangeFailJobGUID" slot-scope="props" :props="props">
         <router-link :to="'/jobs/' + props.value" tag="a" class="text-grey-8">
-          {{ props.value }}
+          {{ props.row.StateChangeFailJobNAME }}
         </router-link>
       </q-td>
       <q-td slot="body-cell-StateChangeUnknownJobGUID" slot-scope="props" :props="props">
         <router-link :to="'/jobs/' + props.value" tag="a" class="text-grey-8">
-          {{ props.value }}
+          {{ props.row.StateChangeUnknownJobNAME }}
         </router-link>
       </q-td>
 

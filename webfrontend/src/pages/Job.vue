@@ -61,7 +61,7 @@
           <q-item-tile sublabel>{{ jobData.pinned }}</q-item-tile>
       </q-item-main></q-item>
       <q-item v-if="typeof(jobData.StateChangeSuccessJobGUID) !== 'undefined' && jobData.StateChangeSuccessJobGUID !== null"><q-item-main >
-          <q-item-tile label>State Change Success Job</q-item-tile>
+          <q-item-tile label>State Change Success Job: {{ jobData.StateChangeSuccessJobNAME }}</q-item-tile>
           <q-item-tile sublabel>
             <router-link :to="'/jobs/' + jobData.StateChangeSuccessJobGUID" tag="a" class="text-grey-8">
               {{ jobData.StateChangeSuccessJobGUID }}
@@ -69,7 +69,7 @@
           </q-item-tile>
       </q-item-main></q-item>
       <q-item v-if="typeof(jobData.StateChangeFailJobGUID) !== 'undefined' && jobData.StateChangeFailJobGUID !== null"><q-item-main >
-          <q-item-tile label>State Change Fail Job</q-item-tile>
+          <q-item-tile label>State Change Fail Job: {{ jobData.StateChangeFailJobNAME }}</q-item-tile>
           <q-item-tile sublabel>
             <router-link :to="'/jobs/' + jobData.StateChangeFailJobGUID" tag="a" class="text-grey-8">
               {{ jobData.StateChangeFailJobGUID }}
@@ -77,7 +77,7 @@
           </q-item-tile>
       </q-item-main></q-item>
       <q-item v-if="typeof(jobData.StateChangeUnknownJobGUID) !== 'undefined' && jobData.StateChangeUnknownJobGUID !== null"><q-item-main >
-          <q-item-tile label>State Change Unknown Job</q-item-tile>
+          <q-item-tile label>State Change Unknown Job: {{ jobData.StateChangeUnknownJobNAME }}</q-item-tile>
           <q-item-tile sublabel>
             <router-link :to="'/jobs/' + jobData.StateChangeUnknownJobGUID" tag="a" class="text-grey-8">
               {{ jobData.StateChangeUnknownJobGUID }}
