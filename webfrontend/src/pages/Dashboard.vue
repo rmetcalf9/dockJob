@@ -101,6 +101,10 @@ export default {
           TTT.pinnedJobs = response.data.result
 
           TTT.loading = false
+
+          if (!response.data.dePaginatorResp.complete) {
+            Notify.create({color: 'info', detail: 'Not all pinned jobs were queried back'})
+          }
         },
         error: function (error) {
           Loading.hide()
@@ -108,7 +112,9 @@ export default {
         }
       }
       Loading.show()
-      getDepaginatedQueryResults.getDepaginatedQueryResults('jobs?query=pinned=true', callback, globalStore.getters.apiFN)
+      var queryParamArray = []
+      queryParamArray['query'] = 'pinned=true'
+      getDepaginatedQueryResults.getDepaginatedQueryResults('jobs/', queryParamArray, callback, globalStore.getters.apiFN)
     }
   },
   computed: {
