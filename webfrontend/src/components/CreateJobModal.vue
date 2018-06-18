@@ -34,6 +34,17 @@
             error-label="Error"
             :error="createJobInValidStateChangeSuccessJobGUID"
           />
+          TEST_START
+          <JobAutocomplete
+            :model="showCreateJobDialogData.StateChangeSuccessJobModel"
+            floatlabel="Job to call when State changes to Success"
+            errorlabel="Error"
+            @modelupdate="showCreateJobDialogData.StateChangeSuccessJobModel = $event"
+          />
+          TEST_END
+          {{ showCreateJobDialogData.StateChangeSuccessJobModel }}
+          <q-input v-model="showCreateJobDialogData.StateChangeSuccessJobModel.name" type="text" />
+          DEBUGEND
         </q-field>
         <q-field helper="" label="State Change Fail Job" :label-width="3">
           <q-input v-model="showCreateJobDialogData.StateChangeFailJobGUID" type="text" float-label="Job to call when State changes to Fail"
@@ -123,6 +134,7 @@
 import globalStore from '../store/globalStore'
 import { Notify } from 'quasar'
 import callbackHelper from '../callbackHelper'
+import JobAutocomplete from '../components/JobAutocomplete'
 
 function initShowCreateJobDialogData () {
   return {
@@ -132,6 +144,10 @@ function initShowCreateJobDialogData () {
     StateChangeSuccessJobGUID: '',
     StateChangeFailJobGUID: '',
     StateChangeUnknownJobGUID: '',
+    StateChangeSuccessJobModel: {
+      guid: 'tggg',
+      name: 'tnnn'
+    },
 
     overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown: 0,
     enabled: true,
@@ -258,6 +274,9 @@ function getRepIntervalString (dialogData) {
 }
 
 export default {
+  components: {
+    JobAutocomplete
+  },
   data () {
     return {
       displayValues: {
