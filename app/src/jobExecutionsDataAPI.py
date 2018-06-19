@@ -20,7 +20,7 @@ def registerAPI(appObj):
     def get(self):
       '''Get Job Executions'''
       def outputJobExecution(item):
-        return item.__dict__
+        return item._caculatedDict()
       def filterJobExecution(item, whereClauseText):
         return True
       return appObj.getPaginatedResult(
@@ -42,5 +42,5 @@ def registerAPI(appObj):
       execution = appObj.jobExecutor.getJobExecutionStatus(guid)
       if execution is None:
         raise BadRequest('Invalid Job Execution Identifier')
-      return execution
+      return execution._caculatedDict()
 

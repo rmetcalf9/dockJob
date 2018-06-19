@@ -202,9 +202,10 @@ class jobClass():
     if self.lastRunDate is not None:
       ret['lastRunDate'] = self.lastRunDate.isoformat()
 
-    ret['StateChangeSuccessJobNAME'] = ''
-    ret['StateChangeFailJobNAME'] = ''
-    ret['StateChangeUnknownJobNAME'] = ''
+    # If there is no state change job set the value returned should be null
+    ret['StateChangeSuccessJobNAME'] = None
+    ret['StateChangeFailJobNAME'] = None
+    ret['StateChangeUnknownJobNAME'] = None
     if self.StateChangeSuccessJobGUID is not None:
       ret['StateChangeSuccessJobNAME'] = appObj.appData['jobsData'].getJob(self.StateChangeSuccessJobGUID).name
     if self.StateChangeFailJobGUID is not None:
@@ -612,7 +613,7 @@ def registerAPI(appObj):
     def post(self, guid):
       '''Create Job Execution'''
       content = request.get_json()
-      return appObj.jobExecutor.submitJobForExecution(guid, content['name'], True)
+      return appObj.jobExecutor.submitJobForExecution(guid, content['name'], True)._caculatedDict()
 
     @nsJobs.doc('getjobexecutions')
     @nsJobs.marshal_with(appObj.getResultModel(getJobExecutionModel(appObj)))
@@ -630,7 +631,7 @@ def registerAPI(appObj):
           raise BadRequest('Invalid Job Identifier')
 
       def outputJobExecution(item):
-        return item.__dict__
+        return item._caculatedDict()
       def filterJobExecution(item, whereClauseText): #if multiple separated by spaces each is passed individually and anded together
         return True
       return appObj.getPaginatedResult(

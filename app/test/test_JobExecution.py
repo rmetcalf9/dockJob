@@ -81,6 +81,7 @@ class test_JobExecution(testHelperAPIClient):
       'guid': 'OVERRIDE',
       'stage': 'Pending',
       'jobGUID': jobObj.guid,
+      'jobName': jobObj.name,
       'jobCommand': jobObj.command,
       'dateCreated': 'OVERRIDE',
       'dateStarted': None,

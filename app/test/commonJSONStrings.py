@@ -28,8 +28,11 @@ data_simpleJobCreateExpRes = {
   "pinned": False,
   "overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown": None,
   "StateChangeSuccessJobGUID": None,
+  "StateChangeSuccessJobNAME": None,
   "StateChangeFailJobGUID": None,
+  "StateChangeFailJobNAME": None,
   "StateChangeUnknownJobGUID": None,
+  "StateChangeUnknownJobNAME": None,
 }
 
 data_simpleManualJobCreateParamsWithAllOptionalFields = dict(data_simpleJobCreateParams)
@@ -49,6 +52,7 @@ data_simpleJobExecutionCreateExpRes = {
   "executionName": 'TestExecutionName', 
   "resultReturnCode": 0, 
   "jobGUID": 'OVERRIDE',
+  "jobName": 'TestJob',
   "jobCommand": 'OVERRIDE',
   "resultSTDOUT": '', 
   "manual": True, 

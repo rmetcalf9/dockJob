@@ -21,6 +21,7 @@ def getJobExecutionModel(appObj):
     'manual': fields.Boolean(default=False,description='Was the Job manually requested'),
     'stage': fields.String(default='',description='Execution Stage'),
     'jobGUID': fields.String(default='',description='Unique identifier for the job this execution is for'),
+    'jobName': fields.String(default='',description='Name of the job being executed'),
     'jobCommand': fields.String(default=''),
     'dateCreated': fields.DateTime(dt_format=u'iso8601', description='Time the execution was requested'),
     'dateStarted': fields.DateTime(dt_format=u'iso8601', description='Time the execution was started'),
@@ -73,6 +74,7 @@ class SimpleJobExecutionClass():
 
   def _caculatedDict(self):
     ret = dict(self.__dict__)
+    ret['jobName'] = self.jobObj.name
     del ret['jobObj']
     del ret['triggerJobObj']
     del ret['triggerExecutionObj']
@@ -133,6 +135,7 @@ class JobExecutionClass():
 
   def _caculatedDict(self):
     ret = dict(self.__dict__)
+    ret['jobName'] = self.jobObj.name
     del ret['jobObj']
     del ret['triggerJobObj']
     del ret['triggerExecutionObj']

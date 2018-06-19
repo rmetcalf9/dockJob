@@ -58,14 +58,15 @@ export default {
       jobTableColumns: [
         { name: 'dateStarted', required: false, label: 'Start Date', align: 'left', field: 'dateStartedString', sortable: true, filter: true },
         { name: 'guid', required: false, label: 'Execution GUID', align: 'left', field: 'guid', sortable: true, filter: true },
-        { name: 'executionName', required: false, label: 'Name', align: 'left', field: 'executionName', sortable: true, filter: true },
+        { name: 'jobGUID', required: false, label: 'Job GUID', align: 'left', field: 'jobGUID', sortable: true, filter: true },
+        { name: 'jobName', required: false, label: 'Job Name', align: 'left', field: 'jobName', sortable: true, filter: true },
+        { name: 'executionName', required: false, label: 'Execution Name', align: 'left', field: 'executionName', sortable: true, filter: true },
         { name: 'stage', required: false, label: 'Stage', align: 'left', field: 'stage', sortable: true, filter: true },
         { name: 'resultReturnCode', required: false, label: 'Return Code', align: 'left', field: 'resultReturnCode', sortable: true, filter: true },
         { name: 'manual', required: false, label: 'Manual Run', align: 'left', field: 'manual', sortable: true, filter: true },
         { name: 'dateCreated', required: false, label: 'Creation Date', align: 'left', field: 'dateCreatedString', sortable: true, filter: true },
         { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompletedString', sortable: true, filter: true },
         { name: 'resultSTDOUT', required: false, label: 'Output', align: 'left', field: 'resultSTDOUT', sortable: true, filter: true },
-        { name: 'jobGUID', required: false, label: 'Job GUID', align: 'left', field: 'jobGUID', sortable: true, filter: true },
         { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: true, filter: true },
         { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],

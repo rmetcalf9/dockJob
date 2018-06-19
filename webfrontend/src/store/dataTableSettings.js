@@ -9,7 +9,7 @@ import Vuex from 'vuex'
 // using a function to return different instances
 function defaultTableSettings () {
   return {
-    visibleColumns: ['dateStarted', 'executionName', 'stage', 'resultReturnCode'],
+    visibleColumns: ['dateStarted', 'jobName', 'executionName', 'stage', 'resultReturnCode'],
     serverPagination: {
       page: 1,
       rowsNumber: 10, // specifying this determines pagination is server-side
