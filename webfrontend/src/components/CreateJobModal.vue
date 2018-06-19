@@ -30,32 +30,30 @@
           <q-toggle v-model="showCreateJobDialogData.pinned" />
         </q-field>
         <q-field helper="" label="State Change Success Job" :label-width="3">
-          <q-input v-model="showCreateJobDialogData.StateChangeSuccessJobGUID" type="text" float-label="Job to call when State changes to Success"
-            error-label="Error"
-            :error="createJobInValidStateChangeSuccessJobGUID"
-          />
-          TEST_START
           <JobAutocomplete
+            ref="success_jobautocomplete"
             :model="showCreateJobDialogData.StateChangeSuccessJobModel"
             floatlabel="Job to call when State changes to Success"
             errorlabel="Error"
             @modelupdate="showCreateJobDialogData.StateChangeSuccessJobModel = $event"
           />
-          TEST_END
-          {{ showCreateJobDialogData.StateChangeSuccessJobModel }}
-          <q-input v-model="showCreateJobDialogData.StateChangeSuccessJobModel.name" type="text" />
-          DEBUGEND
         </q-field>
         <q-field helper="" label="State Change Fail Job" :label-width="3">
-          <q-input v-model="showCreateJobDialogData.StateChangeFailJobGUID" type="text" float-label="Job to call when State changes to Fail"
-            error-label="Error"
-            :error="createJobInValidStateChangeFailJobGUID"
+          <JobAutocomplete
+            ref="fail_jobautocomplete"
+            :model="showCreateJobDialogData.StateChangeFailJobModel"
+            floatlabel="Job to call when State changes to Fail"
+            errorlabel="Error"
+            @modelupdate="showCreateJobDialogData.StateChangeFailJobModel = $event"
           />
         </q-field>
         <q-field helper="" label="State Change Unknown Job" :label-width="3">
-          <q-input v-model="showCreateJobDialogData.StateChangeUnknownJobGUID" type="text" float-label="Job to call when State changes to Unknown"
-            error-label="Error"
-            :error="createJobInValidStateChangeUnknownJobGUID"
+          <JobAutocomplete
+            ref="unknown_jobautocomplete"
+            :model="showCreateJobDialogData.StateChangeUnknownJobModel"
+            floatlabel="Job to call when State changes to Unknown"
+            errorlabel="Error"
+            @modelupdate="showCreateJobDialogData.StateChangeUnknownJobModel = $event"
           />
         </q-field>
         <q-field helper="" label="Unknown Timeout Override" :label-width="3">
@@ -141,12 +139,17 @@ function initShowCreateJobDialogData () {
     jobname: '',
     command: '',
     pinned: false,
-    StateChangeSuccessJobGUID: '',
-    StateChangeFailJobGUID: '',
-    StateChangeUnknownJobGUID: '',
     StateChangeSuccessJobModel: {
-      guid: 'tggg',
-      name: 'tnnn'
+      guid: '',
+      name: ''
+    },
+    StateChangeFailJobModel: {
+      guid: '',
+      name: ''
+    },
+    StateChangeUnknownJobModel: {
+      guid: '',
+      name: ''
     },
 
     overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown: 0,
@@ -314,13 +317,22 @@ export default {
         }
         this.showCreateJobDialogData.pinned = origJobObject.pinned
         if (typeof (origJobObject.StateChangeSuccessJobGUID) !== 'undefined' && origJobObject.StateChangeSuccessJobGUID !== null) {
-          this.showCreateJobDialogData.StateChangeSuccessJobGUID = origJobObject.StateChangeSuccessJobGUID
+          this.showCreateJobDialogData.StateChangeSuccessJobModel = {
+            guid: origJobObject.StateChangeSuccessJobGUID,
+            name: origJobObject.StateChangeSuccessJobNAME
+          }
         }
         if (typeof (origJobObject.StateChangeFailJobGUID) !== 'undefined' && origJobObject.StateChangeFailJobGUID !== null) {
-          this.showCreateJobDialogData.StateChangeFailJobGUID = origJobObject.StateChangeFailJobGUID
+          this.showCreateJobDialogData.StateChangeFailJobModel = {
+            guid: origJobObject.StateChangeFailJobGUID,
+            name: origJobObject.StateChangeFailJobNAME
+          }
         }
         if (typeof (origJobObject.StateChangeUnknownJobGUID) !== 'undefined' && origJobObject.StateChangeUnknownJobGUID !== null) {
-          this.showCreateJobDialogData.StateChangeUnknownJobGUID = origJobObject.StateChangeUnknownJobGUID
+          this.showCreateJobDialogData.StateChangeUnknownJobModel = {
+            guid: origJobObject.StateChangeUnknownJobGUID,
+            name: origJobObject.StateChangeUnknownJobNAME
+          }
         }
 
         if (typeof (origJobObject.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) !== 'undefined' && origJobObject.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown !== null) {
@@ -414,13 +426,13 @@ export default {
         'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
       }
       if (this.showCreateJobDialogData.StateChangeSuccessJobGUID !== '') {
-        payload.StateChangeSuccessJobGUID = this.showCreateJobDialogData.StateChangeSuccessJobGUID
+        payload.StateChangeSuccessJobGUID = this.showCreateJobDialogData.StateChangeSuccessJobModel.guid
       }
       if (this.showCreateJobDialogData.StateChangeFailJobGUID !== '') {
-        payload.StateChangeFailJobGUID = this.showCreateJobDialogData.StateChangeFailJobGUID
+        payload.StateChangeFailJobGUID = this.showCreateJobDialogData.StateChangeFailJobModel.guid
       }
       if (this.showCreateJobDialogData.StateChangeUnknownJobGUID !== '') {
-        payload.StateChangeUnknownJobGUID = this.showCreateJobDialogData.StateChangeUnknownJobGUID
+        payload.StateChangeUnknownJobGUID = this.showCreateJobDialogData.StateChangeUnknownJobModel.guid
       }
       if (typeof (this.origJobObject) !== 'undefined') {
         // console.log('PUT With')
@@ -492,15 +504,6 @@ export default {
     createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown () {
       return (this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown < 0)
     },
-    createJobInValidStateChangeSuccessJobGUID () {
-      return false // TODO
-    },
-    createJobInValidStateChangeFailJobGUID () {
-      return false // TODO
-    },
-    createJobInValidStateChangeUnknownJobGUID () {
-      return false // TODO
-    },
     createJobValidAll () {
       if (this.createJobInValidJobName) return false
       if (this.createJobInValidJobCommand) return false
@@ -511,9 +514,10 @@ export default {
       if (this.createJobInValidRepHourlyMinuteString) return false
       if (this.createJobInValidDayOfMonth) return false
       if (this.createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) return false
-      if (this.createJobInValidStateChangeSuccessJobGUID) return false
-      if (this.createJobInValidStateChangeFailJobGUID) return false
-      if (this.createJobInValidStateChangeUnknownJobGUID) return false
+
+      if (this.$refs.success_jobautocomplete.invalid) return false
+      if (this.$refs.fail_jobautocomplete.invalid) return false
+      if (this.$refs.unknown_jobautocomplete.invalid) return false
       return true
     }
   }
