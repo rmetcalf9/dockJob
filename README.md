@@ -66,6 +66,7 @@ To release dockjob I:
  - Run docker push metcarob/dockjob:VERSION (Replace VERSION with version number that was just built)
  - Run docker push metcarob/dockjob:latest
  - Create new next milestone
+ - Commit changes to git
 
 # Related projects
 
