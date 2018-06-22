@@ -2,13 +2,18 @@
 
 ## 0.3.13
 
+Adding events that can be triggered when a job completes. (Can also be triggered if a job hasn't been run in a while.)
+https://github.com/rmetcalf9/dockJob/milestone/9?closed=1
+
+## 0.3.13
+
 Adding Job Status.
-https://github.com/rmetcalf9/dockJob/milestone/8
+https://github.com/rmetcalf9/dockJob/milestone/8?closed=1
 
 ## 0.3.12
 
 Changed container to use production http server.
-https://github.com/rmetcalf9/dockJob/milestone/7
+https://github.com/rmetcalf9/dockJob/milestone/7?closed=1
 
 ## 0.3.2
 
