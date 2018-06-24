@@ -414,7 +414,9 @@ class jobsDataClass():
       self.jobs_name_lookup[newUniqueJobName] = jobObj.guid
 
     # set recaculation of repetition interval values
-    if jobObj.repetitionInterval == newValues['repetitionInterval']:
+    if jobObj.repetitionInterval != newValues['repetitionInterval']:
+      self.nextJobToExecuteCalcRequired = True
+    if jobObj.enabled != newValues['enabled']:
       self.nextJobToExecuteCalcRequired = True
 
     # change values in object to new values
