@@ -6,7 +6,7 @@
       :float-label="floatlabel"
       :error-label="errorlabel"
       :error="invalid"
-      clearable=true
+      :clearable="true"
     >
       <q-autocomplete
         @search="search"
