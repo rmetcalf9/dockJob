@@ -107,7 +107,7 @@ class testHelperAPIClient(testHelperSuperClass):
       param[cur] = dict(basis)
       param[cur]['name'] = basis['name'] + str(cur+1).zfill(3)
       result = self.testClient.post('/api/jobs/', data=json.dumps(param[cur]), content_type='application/json')
-      self.assertEqual(result.status_code, 200, msg='job creation failed')
+      self.assertResponseCodeEqual(result, 200, msg='job creation failed')
       param[cur]['createResult'] = dict(json.loads(result.get_data(as_text=True)))
     self.assertCorrectTotalJobs(num + jobsAtStart)
     return param
