@@ -179,7 +179,7 @@ export default {
       }
       this.$q.dialog({
         title: 'Submit request to run ' + TTT.jobData.name,
-        message: 'User name for execution',
+        message: 'Name for execution',
         prompt: {
           model: '',
           type: 'text' // optional

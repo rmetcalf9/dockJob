@@ -61,6 +61,7 @@
         </q-card-main>
         <q-card-actions>
           <q-btn flat round dense icon="rowing" @click="$router.push('/jobs/' + curJob.guid)" />
+          <q-btn flat round dense icon="play_arrow" @click="runnow(curJob.guid, curJob.name)" />
         </q-card-actions>
       </q-card>
     </div>
@@ -81,6 +82,30 @@ export default {
     }
   },
   methods: {
+    runnow (jobGUID, jobName) {
+      var callback = {
+        ok: function (response) {
+          Notify.create({color: 'positive', detail: 'Job Execution Request Sent'})
+          // this.refreshJobData() No point doing this immediately
+        },
+        error: function (error) {
+          Notify.create('Request for execution failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      this.$q.dialog({
+        title: 'Submit request to run ' + jobName,
+        message: 'Name for execution',
+        prompt: {
+          model: '',
+          type: 'text' // optional
+        },
+        cancel: true,
+        color: 'secondary'
+      }).then(data => {
+        var params = {name: data}
+        globalStore.getters.apiFN('POST', 'jobs/' + jobGUID + '/execution', params, callback)
+      })
+    },
     getCardClass (jobObj) {
       if (jobObj.mostRecentCompletionStatus === 'Success') {
         return 'bg-positive'
