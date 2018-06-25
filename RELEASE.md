@@ -1,5 +1,10 @@
 # Release Log
 
+## 0.4.4
+
+Updating to new version of base app (updates swagger-ui) and fixed a bug that stoped automatic jobs running in certain situations.
+https://github.com/rmetcalf9/dockJob/milestone/10
+
 ## 0.3.13
 
 Adding events that can be triggered when a job completes. (Can also be triggered if a job hasn't been run in a while.)
