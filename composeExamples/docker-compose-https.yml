@@ -1,7 +1,6 @@
 #Sample docker compose file for the dockjob image.
 # this shows how to run dockjob using kong to make it https
 #  dock job itself isn't exposed, instead kong is exposed and passes requests to dockjob
-# execute it with the command "docker stack deploy --compose-file=docker-compose-https.yml dockjob-https"
 #
 #note: it is recommended you change :latest to a specific version number
 
@@ -15,7 +14,7 @@ secrets:
 
 services:
   kong-database:
-    image: postgres:9.4
+    image: postgres:9.6
     deploy:
       restart_policy:
         condition: any
@@ -29,7 +28,7 @@ services:
       retries: 5
 
   kong-migration:
-    image: kong:0.12.0
+    image: kong:0.13
     deploy:
       restart_policy:
         condition: on-failure
@@ -43,7 +42,7 @@ services:
 
   kong:
     #tried changing to kong:0.12.0-alpine but didn't work as health check needs curl
-    image: kong:0.12.0
+    image: kong:0.13
     deploy:
       restart_policy:
         condition: on-failure
@@ -67,41 +66,25 @@ services:
   dockjob:
     image: metcarob/dockjob:latest
     environment:
-      - APIAPP_APIURL=https://cat-sdts.metcarob-home.com:443/dockjobapi
-      - APIAPP_APIDOCSURL=https://cat-sdts.metcarob-home.com:443/dockjobapidocs
-      #- APIAPP_APIURL=https://somefunnyhostname.com:5443/dockjobapi
-      #- APIAPP_APIDOCSURL=https://somefunnyhostname.com:5443/dockjobapidocs
+      - APIAPP_APIURL=${EXTURL}:${EXTPORT}/dockjobapi
+      - APIAPP_APIDOCSURL=${EXTURL}:${EXTPORT}/dockjobapidocs
+      - APIAPP_FRONTENDURL=${EXTURL}:${EXTPORT}/dockjob
     deploy:
       restart_policy:
         condition: any
 
   #Add API's to kong to forward requests to dockjob
   kong-addapis-dockjob:
-    image: byrnedo/alpine-curl
+    image: metcarob/docker-ws-caller:0.0.9
     deploy:
       restart_policy:
         condition: on-failure
         delay: 6s
     entrypoint: "/bin/sh"
     command:    "-c \" \
-                   (curl -i -X POST \
-                     --url http://kong:8001/apis/ \
-                     --data 'name=dockjobapi' \
-                     --data 'uris=/dockjobapi' \
-                     --data 'upstream_url=http://dockjob:80/api' \
-                     --data 'https_only=true') && \
-                   (curl -i -X POST \
-                     --url http://kong:8001/apis/ \
-                     --data 'name=dockjobapidocs' \
-                     --data 'uris=/dockjobapidocs' \
-                     --data 'upstream_url=http://dockjob:80/apidocs' \
-                     --data 'https_only=true') && \
-                   (curl -i -X POST \
-                     --url http://kong:8001/apis/ \
-                     --data 'name=dockjob' \
-                     --data 'uris=/dockjob' \
-                     --data 'upstream_url=http://dockjob:80/frontend' \
-                     --data 'https_only=true') \
+                   (kong_install_service_and_route http://kong:8001 dockjobapi http dockjob 80 \\\"/api\\\" https /dockjobapi) && \
+                   (kong_install_service_and_route http://kong:8001 dockjobapidocs http dockjob 80 \\\"/apidocs\\\" https /dockjobapidocs) && \
+                   (kong_install_service_and_route http://kong:8001 dockjob http dockjob 80 \\\"/frontend\\\" https /dockjob) \
                \""
 
 ##The next section starts a UI for kong called konga. 
@@ -115,3 +98,5 @@ services:
 #    ports:
 #     - 1337:1337
 
+
+## docker stack deploy --compose-file=docker-compose-https.yml dockjob-https

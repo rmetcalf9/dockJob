@@ -2,7 +2,6 @@
 # This adds a login container and the frontend will call that endpoint with username and password
 #  then recieve a jwt response. JWT is then used to access services.
 #  you will need to add your own ldap config details
-# execute it with the command "docker stack deploy --compose-file=docker-compose-https-ldap-jwt-auth.yml dockjob-https-ldap-jwt-auth"
 #
 version: "3.1"
 
@@ -14,7 +13,7 @@ secrets:
 
 services:
   kong-database:
-    image: postgres:9.4
+    image: postgres:9.6
     deploy:
       restart_policy:
         condition: any
@@ -28,7 +27,7 @@ services:
       retries: 5
 
   kong-migration:
-    image: kong:0.12.0
+    image: kong:0.13
     deploy:
       restart_policy:
         condition: on-failure
@@ -42,7 +41,7 @@ services:
 
   kong:
     #tried changing to kong:0.12.0-alpine but didn't work as health check needs curl
-    image: kong:0.12.0
+    image: kong:0.13
     deploy:
       restart_policy:
         condition: on-failure
@@ -65,7 +64,7 @@ services:
       retries: 10
 
   kong-configure:
-    image: byrnedo/alpine-curl
+    image: metcarob/docker-ws-caller:0.0.9
     deploy:
       restart_policy:
         condition: on-failure
@@ -103,30 +102,24 @@ services:
       - LOGINEP_JWT_TOKEN_TIMEOUT=1800 
 
   kong-addapis-loginservice:
-    image: byrnedo/alpine-curl
+    image: metcarob/docker-ws-caller:0.0.9
     deploy:
       restart_policy:
         condition: on-failure
         delay: 6s
     entrypoint: "/bin/sh"
     command:    "-c \" \
-                   (curl -i -X POST \
-                     --url http://kong:8001/apis/ \
-                     --data 'name=login' \
-                     --data 'uris=/login' \
-                     --data 'upstream_url=http://loginservice:80/login' \
-                     --data 'https_only=true') \
+                   (kong_install_service_and_route http://kong:8001 login http loginservice 80 \\\"/login\\\" https /login)
                 \""
 
   dockjob:
     image: metcarob/dockjob:latest
     #image: dockjobdev
     environment:
-      #- APIAPP_APIURL=https://cat-sdts.metcarob-home.com/dockjobapi
-      #- APIAPP_APIDOCSURL=https://cat-sdts.metcarob-home.com/dockjobapidocs
-      - APIAPP_APIURL=https://somefunnyhostname.com:5443/dockjobapi
-      - APIAPP_APIDOCSURL=https://somefunnyhostname.com:5443/dockjobapidocs
-      - "APIAPP_APIACCESSSECURITY=[{\"type\": \"basic-auth-login-toget-jwttoken\", \"loginurl\": \"https://somefunnyhostname.com:5443/login/\", \"cookiename\": \"jwt-auth-cookie\" }]"
+      - APIAPP_APIURL=${EXTURL}:${EXTPORT}/dockjobapi
+      - APIAPP_APIDOCSURL=${EXTURL}:${EXTPORT}/dockjobapidocs
+      - APIAPP_FRONTENDURL=${EXTURL}:${EXTPORT}/dockjob
+      - "APIAPP_APIACCESSSECURITY=[{\"type\": \"basic-auth-login-toget-jwttoken\", \"loginurl\": \"${EXTURL}:${EXTPORT}/login/\", \"cookiename\": \"jwt-auth-cookie\" }]"
     deploy:
       restart_policy:
         condition: any
@@ -134,40 +127,25 @@ services:
   kong-addapis-dockjob:
     #Add API's to kong to forward requests to dockjob
     # also configure basic-auth so that only users in group samplegroup can access
-    image: byrnedo/alpine-curl
+    image: metcarob/docker-ws-caller:0.0.9
     deploy:
       restart_policy:
         condition: on-failure
         delay: 6s
     entrypoint: "/bin/sh"
     command:    "-c \" \
+                   (kong_install_service_and_route http://kong:8001 dockjobapi http dockjob 80 \\\"/api\\\" https /dockjobapi) && \
+                   (kong_install_service_and_route http://kong:8001 dockjobapidocs http dockjob 80 \\\"/apidocs\\\" https /dockjobapidocs) && \
+                   (kong_install_service_and_route http://kong:8001 dockjob http dockjob 80 \\\"/frontend\\\" https /dockjob) && \
                    (curl -i -X POST \
-                     --url http://kong:8001/apis/ \
-                     --data 'name=dockjobapi' \
-                     --data 'uris=/dockjobapi' \
-                     --data 'upstream_url=http://dockjob:80/api' \
-                     --data 'https_only=true') && \
-                   (curl -i -X POST \
-                     --url http://kong:8001/apis/ \
-                     --data 'name=dockjobapidocs' \
-                     --data 'uris=/dockjobapidocs' \
-                     --data 'upstream_url=http://dockjob:80/apidocs' \
-                     --data 'https_only=true') && \
-                   (curl -i -X POST \
-                     --url http://kong:8001/apis/dockjobapi/plugins \
+                     --url http://kong:8001/services/dockjobapi/plugins \
                      --data 'name=acl' \
                      --data 'config.whitelist=soa_tech_monitoring' \
                     ) && \
                    (curl -i -X POST \
-                     --url http://kong:8001/apis/dockjobapi/plugins/ \
+                     --url http://kong:8001/services/dockjobapi/plugins/ \
                      --data 'name=jwt' \
-                     --data 'config.secret_is_base64=true&config.claims_to_verify=exp&config.cookie_names=jwt-auth-cookie') && \
-                   (curl -i -X POST \
-                     --url http://kong:8001/apis/ \
-                     --data 'name=dockjob' \
-                     --data 'uris=/dockjob' \
-                     --data 'upstream_url=http://dockjob:80/frontend' \
-                     --data 'https_only=true') \
+                     --data 'config.secret_is_base64=true&config.claims_to_verify=exp&config.cookie_names=jwt-auth-cookie') \
                 \""
 
 ##The next section starts a UI for kong called konga. 
@@ -180,3 +158,5 @@ services:
         condition: on-failure
     ports:
      - 1337:1337
+
+#docker stack deploy --compose-file=docker-compose-https-ldap-jwt-auth.yml dockjob-https-ldap-jwt-auth

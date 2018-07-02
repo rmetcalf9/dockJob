@@ -2,7 +2,21 @@
 
 As Dockjob is designed to be run as part of a ‘docker stack’ with Kong in front of it providing https and user accounts I have provided this section with a set of examples showing how it could be run. These examples should be run on a machine with a docker environment which is set up in a swarm. The commands should be run from a directory with the relevant .yml file.
 
-See [Enviroment Variables](../ENVVARIABLES.md) for documentation of possible enviroment variables that can be used as settings.
+To use these you need to arrange to set the following enviroment variables on the machine running docker swarm:
+````
+ | Variable Name | Example Value | Description |
+ |---------------|---------------|-------------|
+ | EXTURL | https://somefunnyhostname.com | URL users use to access web frontend  |
+ | EXTPORT | 443 | Port users use to access web frontend |
+````
+I do this by adding 
+````
+export EXTURL=https://somefunnyhostname.com
+export EXTPORT=443
+````
+to the end of ~/.bashrc
+
+See [Enviroment Variables](../ENVVARIABLES.md) for documentation of possible container enviroment variables that can be used as settings.
 
 # Dockjob Standalone
 This uses docker to run dockjob standalone on a machine. This example shows setting dockjob options via environment variables. You must change the urls in docker-compose-standalone.yml replacing the host name with the hostname clients need to use to access dockjob.
@@ -12,7 +26,8 @@ docker stack deploy --compose-file=docker-compose-standalone.yml dockjob-standal
 ````
 Note: If you see a message that this node is not a swarm manager you may need to run docker swarm init
 
-Now visit http://localhost:80/frontend
+(For this option your EXTURL won't be SSL and your EXTPORT will be 80.
+Now visit ${EXTURL}:${EXTPORT}/frontend
 
 When done use 
 ````
