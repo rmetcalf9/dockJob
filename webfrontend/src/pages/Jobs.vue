@@ -26,13 +26,29 @@
         >Create Job</q-btn>
       </template>
       <template slot="top-right" slot-scope="props">
+      VisibleColums:{{ jobsDataTableSettings.visibleColumns }}
+      <q-select
+        filled
+        v-model="jobsDataTableSettings.visibleColumns"
+        mutiple
+        :options="columnsForEnableDropdown"
+        label="Multiple selection"
+      />
       <q-table-columns
         color="secondary"
         class="q-mr-sm"
         v-model="jobsDataTableSettings.visibleColumns"
         :columns="jobTableColumns"
       />
-      <q-search clearable hide-underline v-model="jobsDataTableSettings.filter" />
+      <q-input
+        v-model="jobsDataTableSettings.filter"
+        debounce="500"
+        placeholder="Search" outlined
+      >
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
       </template>
 
       <q-td  slot="body-cell-name" slot-scope="props" :props="props">
@@ -116,7 +132,7 @@ export default {
         { name: 'StateChangeSuccessJobGUID', required: false, label: 'State Change Success Job', align: 'left', field: 'StateChangeSuccessJobGUID', sortable: true, filter: true },
         { name: 'StateChangeFailJobGUID', required: false, label: 'State Change Fail Job', align: 'left', field: 'StateChangeFailJobGUID', sortable: true, filter: true },
         { name: 'StateChangeUnknownJobGUID', required: false, label: 'State Change Unknown Job', align: 'left', field: 'StateChangeUnknownJobGUID', sortable: true, filter: true },
-        { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
+        { name: '...', required: true, label: '...', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobData: [],
       loading: false,
@@ -225,6 +241,9 @@ export default {
     }
   },
   computed: {
+    columnsForEnableDropdown () {
+      return this.jobTableColumns.filter(function (x) { return !x.required })
+    },
     datastoreState () {
       return globalStore.getters.datastoreState
     },

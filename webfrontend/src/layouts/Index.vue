@@ -26,21 +26,29 @@
       <q-list no-border link inset-separator>
         <q-item-label header>Navigation</q-item-label>
         <q-item to="/dashboard">
-          <q-item-section icon="home" />
-          <q-item-label label="Dashboard" sublabel="" />
+          <q-item-section avatar>
+            <q-icon color="primary" name="home" />
+          </q-item-section>
+          <q-item-section>Dashboard</q-item-section>
         </q-item>
         <q-item to="/jobs">
-          <q-item-section icon="rowing" />
-          <q-item-label label="Jobs" sublabel="" />
+          <q-item-section avatar>
+            <q-icon color="primary" name="rowing" />
+          </q-item-section>
+          <q-item-section>Jobs</q-item-section>
         </q-item>
         <q-item to="/executions">
-          <q-item-section icon="play_arrow" />
-          <q-item-label label="Executions" sublabel="" />
+          <q-item-section avatar>
+            <q-icon color="primary" name="play_arrow" />
+          </q-item-section>
+          <q-item-section>Executions</q-item-section>
         </q-item>
-        <hr v-if="loginRequiredByServer">
-        <q-item to="/logout" v-if="loginRequiredByServer">
-          <q-item-section icon="exit_to_app" />
-          <q-item-label label="Logout" Logout="" />
+        <q-separator  v-if="loginRequiredByServer" />
+        <q-item to="/logout"  v-if="loginRequiredByServer">
+          <q-item-section avatar>
+            <q-icon color="primary" name="exit_to_app" />
+          </q-item-section>
+          <q-item-section>Logout</q-item-section>
         </q-item>
       </q-list>
     </q-drawer>

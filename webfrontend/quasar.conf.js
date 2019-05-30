@@ -74,7 +74,8 @@ module.exports = function (ctx) {
         'QSelect'
       ],
       directives: [
-        'Ripple'
+        'Ripple',
+        'ClosePopup'
       ],
       plugins: [
         'Notify',

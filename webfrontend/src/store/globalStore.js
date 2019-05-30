@@ -14,7 +14,11 @@ export const getInitialState = function () {
     accessCredentials: undefined,
     pageTitle: 'Default Page Title',
     connectionData: { version: 'UNKNOWN' }, // Data retrieved from this server (no security)
-    serverInfo: undefined // Data retrieved from server info service call
+    serverInfo: { // Data retrieved from server info service call
+      Server: {
+        DefaultUserTimezone: 'Europe/London'
+      }
+    }
   }
 }
 
