@@ -33,7 +33,7 @@ class appObjClass(parAppObj):
       if self.jobExecutor.isAlive():
         self.jobExecutor.join()
       self.jobExecutor = None
-    super(appObjClass, self).init(env)
+    super(appObjClass, self).init(env, serverStartTime, testingMode)
     resetJobsData(self)
 
     self.userforjobs = readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, None)
