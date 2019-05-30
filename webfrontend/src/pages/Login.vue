@@ -9,21 +9,23 @@
           <q-tab name="usernamePass" slot="title" label="Basic Auth" v-if="tabs.usernamePass"/>
           <q-tab name="xxx" slot="title" label="XXX" v-if="tabs.xxx"/>
 
-          <q-tab-pane name="usernamePass">
-            <q-input v-model="usernamePass.username" placeholder="Username" />
-            <br>
-            <q-input type="password" v-model="usernamePass.password" placeholder="Password" />
-            <p class="text-center group">
-              <q-btn
-                color="primary"
-                push
-                @click="usernamePassLogin"
-              >
-                Login
-              </q-btn>
-            </p>
-          </q-tab-pane>
-          <q-tab-pane name="xxx">TODO Next Tab</q-tab-pane>
+          <q-tab-panels>
+            <q-tab-panel name="usernamePass">
+              <q-input v-model="usernamePass.username" placeholder="Username" />
+              <br>
+              <q-input type="password" v-model="usernamePass.password" placeholder="Password" />
+              <p class="text-center group">
+                <q-btn
+                  color="primary"
+                  push
+                  @click="usernamePassLogin"
+                >
+                  Login
+                </q-btn>
+              </p>
+            </q-tab-panel>
+            <q-tab-panel name="xxx">TODO Next Tab</q-tab-panel>
+          </q-tab-panels>
         </q-tabs>
       </div>
       Version: {{connectionData.version}}
@@ -37,8 +39,9 @@ import {
   QIcon,
   QTabs,
   QTab,
-  QTabPane,
   QInput,
+  QTabPanels,
+  QTabPanel,
   Loading,
   Notify
 } from 'quasar'
@@ -51,8 +54,9 @@ export default {
     QIcon,
     QTabs,
     QTab,
-    QTabPane,
-    QInput
+    QInput,
+    QTabPanels,
+    QTabPanel
   },
   data () {
     return {

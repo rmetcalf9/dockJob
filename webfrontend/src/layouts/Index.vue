@@ -1,7 +1,7 @@
 <template>
   <q-layout
   >
-    <q-layout-header>
+    <q-header>
       <!-- First row of header is a QToolbar -->
       <q-toolbar>
         <!-- showLeft is a model attached to left side drawer below -->
@@ -19,37 +19,38 @@
           <span slot="subtitle">dockJob - Scheduled Job Runner by RJM</span>
         </q-toolbar-title>
       </q-toolbar>
-    </q-layout-header>
+    </q-header>
 
     <!-- Left Side Drawer -->
-    <q-layout-drawer side="left" v-model="showLeft">
+    <q-drawer side="left" v-model="showLeft">
       <q-list no-border link inset-separator>
-        <q-list-header>Navigation</q-list-header>
+        <q-item-label header>Navigation</q-item-label>
         <q-item to="/dashboard">
-          <q-item-side icon="home" />
-          <q-item-main label="Dashboard" sublabel="" />
+          <q-item-section icon="home" />
+          <q-item-label label="Dashboard" sublabel="" />
         </q-item>
         <q-item to="/jobs">
-          <q-item-side icon="rowing" />
-          <q-item-main label="Jobs" sublabel="" />
+          <q-item-section icon="rowing" />
+          <q-item-label label="Jobs" sublabel="" />
         </q-item>
         <q-item to="/executions">
-          <q-item-side icon="play_arrow" />
-          <q-item-main label="Executions" sublabel="" />
+          <q-item-section icon="play_arrow" />
+          <q-item-label label="Executions" sublabel="" />
         </q-item>
         <hr v-if="loginRequiredByServer">
         <q-item to="/logout" v-if="loginRequiredByServer">
-          <q-item-side icon="exit_to_app" />
-          <q-item-main label="Logout" Logout="" />
+          <q-item-section icon="exit_to_app" />
+          <q-item-label label="Logout" Logout="" />
         </q-item>
       </q-list>
-    </q-layout-drawer>
+    </q-drawer>
 
     <q-page-container>
       <router-view />
     </q-page-container>
 
-    <q-layout-footer><q-toolbar>
+    <q-footer>
+      <q-toolbar>
         <table width="100%"><tr>
         <td>
           <a v-if="! (connectionData.apidocsurl === '_')" v-bind:href="connectionData.apidocsurl" target="_blank">APIdocs</a>
@@ -57,7 +58,8 @@
         </td>
         <td align="right">Version: {{connectionData.version}}</td>
         </tr></table>
-    </q-toolbar></q-layout-footer>
+      </q-toolbar>
+    </q-footer>
   </q-layout>
 </template>
 
@@ -66,14 +68,12 @@ import {
   QLayout,
   QToolbar,
   QToolbarTitle,
-  QSearch,
   QTabs,
   QRouteTab,
   QBtn,
   QIcon,
-  QItemSide,
-  QItemMain,
-  QListHeader,
+  QItemSection,
+  QItemLabel,
   QScrollArea,
   Loading,
   Notify
@@ -85,14 +85,12 @@ export default {
     QLayout,
     QToolbar,
     QToolbarTitle,
-    QSearch,
     QTabs,
     QRouteTab,
     QBtn,
     QIcon,
-    QItemSide,
-    QItemMain,
-    QListHeader,
+    QItemSection,
+    QItemLabel,
     QScrollArea
   },
   data () {

@@ -2,7 +2,7 @@
 
 module.exports = function (ctx) {
   return {
-    plugins: [
+    boot: [
       'axios',
       'callDockjobAPI'
     ],
@@ -10,11 +10,10 @@ module.exports = function (ctx) {
       'app.styl'
     ],
     extras: [
-      ctx.theme.mat ? 'roboto-font' : null,
       'material-icons'
-      // 'ionicons',
-      // 'mdi',
-      // 'fontawesome'
+      // 'ionicons-v4',
+      // 'mdi-v3',
+      // 'fontawesome-v5'
     ],
     supportIE: false,
     vendor: {
@@ -46,26 +45,21 @@ module.exports = function (ctx) {
     // framework: 'all' --- includes everything; for dev only!
     framework: {
       components: [
-        'QAutocomplete',
         'QCard',
-        'QCardTitle',
-        'QCardMain',
-        'QCardMedia',
-        'QCardSeparator',
+        'QCardSection',
+        'QSeparator',
         'QCardActions',
         'QCheckbox',
         'QDialog',
         'QField',
         'QInput',
         'QLayout',
-        'QLayoutHeader',
-        'QLayoutDrawer',
-        'QLayoutFooter',
+        'QHeader',
+        'QDrawer',
+        'QFooter',
         'QPageContainer',
         'QPage',
-        'QSearch',
         'QTable',
-        'QTableColumns',
         'QTr',
         'QTd',
         'QToggle',
@@ -74,18 +68,13 @@ module.exports = function (ctx) {
         'QBtn',
         'QIcon',
         'QList',
-        'QListHeader',
         'QItem',
-        'QItemMain',
-        'QItemSide',
-        'QItemTile',
-        'QModal',
-        'QModalLayout',
+        'QItemLabel',
+        'QItemSection',
         'QSelect'
       ],
       directives: [
-        'Ripple',
-        'CloseOverlay'
+        'Ripple'
       ],
       plugins: [
         'Notify',
