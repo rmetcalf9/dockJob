@@ -2,15 +2,17 @@
 
 echo 'Inserting Example Jobs'
 
+sleep 5
+
 JSON="{    \"enabled\": false,    \"name\": \"SC Success\",    \"repetitionInterval\": \"\",    \"command\": \"ls -la\"  }"
 STATECHNAGESUCCESSJOBGUID=$(curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "${JSON}" 'http://127.0.0.1:80/api/jobs/' | \
-    python -c "import sys, json; print json.load(sys.stdin)['guid']")
+    python3 -c "import sys, json; print(json.load(sys.stdin)['guid'])")
 JSON="{    \"enabled\": false,    \"name\": \"SC Fail\",    \"repetitionInterval\": \"\",    \"command\": \"ls -la\"  }"
 STATECHNAGEFAILJOBGUID=$(curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "${JSON}" 'http://127.0.0.1:80/api/jobs/' | \
-    python -c "import sys, json; print json.load(sys.stdin)['guid']")
+    python3 -c "import sys, json; print(json.load(sys.stdin)['guid'])")
 JSON="{    \"enabled\": false,    \"name\": \"SC Unknown\",    \"repetitionInterval\": \"\",    \"command\": \"ls -la\"  }"
 STATECHNAGEUNKNOWNJOBGUID=$(curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "${JSON}" 'http://127.0.0.1:80/api/jobs/' | \
-    python -c "import sys, json; print json.load(sys.stdin)['guid']")
+    python3 -c "import sys, json; print(json.load(sys.stdin)['guid'])")
 
 
 
@@ -34,7 +36,7 @@ echo 'Inserting Example Job for Executions'
 JSON="{    \"enabled\": false,    \"name\": \"Job With Executions\",    \"repetitionInterval\": \"\",    \"command\": \"ls -la\"  }"
 
 JWEGUID=$(curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d "${JSON}" 'http://127.0.0.1:80/api/jobs/' | \
-    python -c "import sys, json; print json.load(sys.stdin)['guid']")
+    python3 -c "import sys, json; print(json.load(sys.stdin)['guid'])")
 
 echo "GUID for test executions: ${JWEGUID}"
 for i in `seq 0 12`;
