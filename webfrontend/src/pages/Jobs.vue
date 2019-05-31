@@ -26,6 +26,10 @@
         >Create Job</q-btn>
       </template>
       <template slot="top-right" slot-scope="props">
+      <selectColumns
+        v-model="jobsDataTableSettings.visibleColumns"
+        :columns="jobTableColumns"
+      />
       <q-select
         v-model="localTableVisibleColumns"
         multiple outlined
@@ -94,10 +98,12 @@ import CreateJobModal from '../components/CreateJobModal'
 import callbackHelper from '../callbackHelper'
 import userSettings from '../store/userSettings'
 import restcallutils from '../restcallutils'
+import selectColumns from '../components/selectColumns'
 
 export default {
   components: {
-    CreateJobModal
+    CreateJobModal,
+    selectColumns
   },
   data () {
     return {
