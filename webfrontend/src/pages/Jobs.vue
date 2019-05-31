@@ -26,19 +26,13 @@
         >Create Job</q-btn>
       </template>
       <template slot="top-right" slot-scope="props">
-      VisibleColums:{{ jobsDataTableSettings.visibleColumns }}
       <q-select
-        filled
-        v-model="jobsDataTableSettings.visibleColumns"
-        mutiple
+        v-model="localTableVisibleColumns"
+        multiple outlined
         :options="columnsForEnableDropdown"
-        label="Multiple selection"
-      />
-      <q-table-columns
-        color="secondary"
-        class="q-mr-sm"
-        v-model="jobsDataTableSettings.visibleColumns"
-        :columns="jobTableColumns"
+        label="Fields:"
+        style="width: 250px"
+        v-on:input="updateTableVisibleColumns"
       />
       <q-input
         v-model="jobsDataTableSettings.filter"
@@ -136,7 +130,8 @@ export default {
       ],
       jobData: [],
       loading: false,
-      selectedSecond: []
+      selectedSecond: [],
+      localTableVisibleColumns: []
     }
   },
   methods: {
@@ -238,11 +233,24 @@ export default {
         }
         globalStore.getters.apiFN('DELETE', 'jobs/' + this.selectedSecond[0].guid, undefined, callback)
       })
+    },
+    updateTableVisibleColumns () {
+      // return all the selected columns and the required once
+      // don't need to concat with required values
+      this.jobsDataTableSettings.visibleColumns = this.localTableVisibleColumns.map(function (x) {
+        return x.value
+      })
     }
   },
   computed: {
     columnsForEnableDropdown () {
-      return this.jobTableColumns.filter(function (x) { return !x.required })
+      return this.jobTableColumns.filter(function (x) { return !x.required }).map(function (x) {
+        return {
+          value: x.name,
+          label: x.label,
+          disable: x.required
+        }
+      })
     },
     datastoreState () {
       return globalStore.getters.datastoreState
