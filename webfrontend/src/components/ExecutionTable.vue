@@ -13,13 +13,19 @@
       :rows-per-page-options="rowsPerPageOptions"
     >
       <template slot="top-right" slot-scope="props">
-        <q-table-columns
-          color="secondary"
-          class="q-mr-sm"
+        <selectColumns
           v-model="DataTableSettingsComputed.visibleColumns"
           :columns="jobTableColumns"
         />
-        <q-search clearable hide-underline v-model="DataTableSettingsComputed.filter" />
+        <q-input
+          v-model="DataTableSettingsComputed.filter"
+          debounce="500"
+          placeholder="Search" outlined
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
       </template>
       <q-td slot="body-cell-resultSTDOUT" slot-scope="props" :props="props">
         <STDOutput :val="props.value" maxLinesToShow=3 />
@@ -42,10 +48,12 @@ import restcallutils from '../restcallutils'
 import globalStore from '../store/globalStore'
 import STDOutput from '../components/STDOutput'
 import dataTableSettings from '../store/dataTableSettings'
+import selectColumns from '../components/selectColumns'
 
 export default {
   components: {
-    STDOutput
+    STDOutput,
+    selectColumns
   },
   props: [
     'title',
