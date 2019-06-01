@@ -30,14 +30,6 @@
         v-model="jobsDataTableSettings.visibleColumns"
         :columns="jobTableColumns"
       />
-      <q-select
-        v-model="localTableVisibleColumns"
-        multiple outlined
-        :options="columnsForEnableDropdown"
-        label="Fields:"
-        style="width: 250px"
-        v-on:input="updateTableVisibleColumns"
-      />
       <q-input
         v-model="jobsDataTableSettings.filter"
         debounce="500"
@@ -239,25 +231,9 @@ export default {
         }
         globalStore.getters.apiFN('DELETE', 'jobs/' + this.selectedSecond[0].guid, undefined, callback)
       })
-    },
-    updateTableVisibleColumns () {
-      // return all the selected columns and the required once
-      // don't need to concat with required values
-      this.jobsDataTableSettings.visibleColumns = this.localTableVisibleColumns.map(function (x) {
-        return x.value
-      })
     }
   },
   computed: {
-    columnsForEnableDropdown () {
-      return this.jobTableColumns.filter(function (x) { return !x.required }).map(function (x) {
-        return {
-          value: x.name,
-          label: x.label,
-          disable: x.required
-        }
-      })
-    },
     datastoreState () {
       return globalStore.getters.datastoreState
     },

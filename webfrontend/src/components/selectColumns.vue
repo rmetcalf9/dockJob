@@ -1,12 +1,12 @@
+// https://vuejs.org/v2/guide/components.html
+// TODO Get thie component recieving and emmitting properly
 <template>
-  // https://vuejs.org/v2/guide/components.html
-  // TODO Get thie component recieving and emmitting properly
   <q-select
-    v-model="localTableVisibleColumns"
     multiple outlined
     :options="columnsForEnableDropdown"
     label="Fields:"
     style="width: 300px"
+    v-bind:value="localTableVisibleColumns"
     v-on:input="updateTableVisibleColumns"
   />
 </template>
@@ -25,11 +25,10 @@ export default {
   },
   methods: {
     updateTableVisibleColumns (event) {
-      this.model = this.localTableVisibleColumns.map(function (x) {
+      this.localTableVisibleColumns = event
+      this.$emit('input', this.localTableVisibleColumns.map(function (x) {
         return x.value
-      })
-      console.log('EVENT:', event)
-      this.$emit('input', this.value)
+      }))
     }
   },
   computed: {
