@@ -1,93 +1,97 @@
 <template>
   <div>
     <q-list >
-      <q-item highlight @click.native="openEditJobModalDialog">
-        <q-item-main >
-          <q-item-tile label>Job {{ jobData.name }}</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.guid }}</q-item-tile>
-        </q-item-main>
-        <q-item-side right icon="mode_edit" />
+      <q-item clickable v-ripple highlight @click.native="openEditJobModalDialog">
+        <q-item-section >
+          <q-item-label>Job {{ jobData.name }}</q-item-label>
+          <q-item-label caption>{{ jobData.guid }}</q-item-label>
+        </q-item-section>
+        <q-item-section avatar>
+          <q-icon color="primary" name="mode_edit" />
+        </q-item-section>
       </q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Command</q-item-tile>
-          <q-item-tile sublabel><div v-for="curVal in getLineArray(jobData.command)" :key=curVal.p>{{ curVal.v }}</div></q-item-tile>
-      </q-item-main></q-item>
       <q-item>
-        <q-item-main >
-          <q-item-tile label>Repetition Interval</q-item-tile>
-          <q-item-tile sublabel v-if="jobData.enabled">{{ jobData.repetitionInterval }}</q-item-tile>
-          <q-item-tile sublabel v-if="!jobData.enabled">Automatic running disabled</q-item-tile>
-        </q-item-main>
+        <q-item-section >
+          <q-item-label>Command</q-item-label>
+          <q-item-label caption><div v-for="curVal in getLineArray(jobData.command)" :key=curVal.p>{{ curVal.v }}</div></q-item-label>
+        </q-item-section>
       </q-item>
-      <q-item v-if="jobData.enabled"><q-item-main >
-          <q-item-tile label>Next Scheduled Run</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.nextScheduledRunString }}</q-item-tile>
-      </q-item-main></q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Creation Date</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.creationDateString }}</q-item-tile>
-      </q-item-main></q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Last Update Date</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.lastUpdateDateString }}</q-item-tile>
-      </q-item-main></q-item>
-      <q-item v-if="jobData.mostRecentCompletionStatus === 'Success'"><q-item-main >
-          <q-item-tile label class="bg-positive text-white">Last Run Date</q-item-tile>
-          <q-item-tile sublabel v-if="everRun(jobData)">{{ jobData.lastRunDateString }}</q-item-tile>
-          <q-item-tile sublabel v-if="!everRun(jobData)">Never run</q-item-tile>
-      </q-item-main></q-item>
-      <q-item v-if="jobData.mostRecentCompletionStatus === 'Fail'"><q-item-main >
-          <q-item-tile label class="bg-negative text-white">Last Run Date</q-item-tile>
-          <q-item-tile sublabel v-if="everRun(jobData)">{{ jobData.lastRunDateString }}</q-item-tile>
-          <q-item-tile sublabel v-if="!everRun(jobData)">Never run</q-item-tile>
-      </q-item-main></q-item>
-      <q-item v-if="jobData.mostRecentCompletionStatus === 'Unknown'"><q-item-main >
-          <q-item-tile label class="bg-primary text-white">Last Run Date</q-item-tile>
-          <q-item-tile sublabel v-if="everRun(jobData)">{{ jobData.lastRunDateString }}</q-item-tile>
-          <q-item-tile sublabel v-if="!everRun(jobData)">Never run</q-item-tile>
-      </q-item-main></q-item>
+      <q-item>
+        <q-item-section >
+          <q-item-label>Repetition Interval</q-item-label>
+          <q-item-label caption v-if="jobData.enabled">{{ jobData.repetitionInterval }}</q-item-label>
+          <q-item-label caption v-if="!jobData.enabled">Automatic running disabled</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item v-if="jobData.enabled"><q-item-section >
+          <q-item-label>Next Scheduled Run</q-item-label>
+          <q-item-label caption>{{ jobData.nextScheduledRunString }}</q-item-label>
+      </q-item-section></q-item>
+      <q-item><q-item-section >
+          <q-item-label>Creation Date</q-item-label>
+          <q-item-label caption>{{ jobData.creationDateString }}</q-item-label>
+      </q-item-section></q-item>
+      <q-item><q-item-section >
+          <q-item-label>Last Update Date</q-item-label>
+          <q-item-label caption>{{ jobData.lastUpdateDateString }}</q-item-label>
+      </q-item-section></q-item>
+      <q-item v-if="jobData.mostRecentCompletionStatus === 'Success'"><q-item-section >
+          <q-item-label class="bg-positive text-white">Last Run Date</q-item-label>
+          <q-item-label caption v-if="everRun(jobData)">{{ jobData.lastRunDateString }}</q-item-label>
+          <q-item-label caption v-if="!everRun(jobData)">Never run</q-item-label>
+      </q-item-section></q-item>
+      <q-item v-if="jobData.mostRecentCompletionStatus === 'Fail'"><q-item-section >
+          <q-item-label class="bg-negative text-white">Last Run Date</q-item-label>
+          <q-item-label caption v-if="everRun(jobData)">{{ jobData.lastRunDateString }}</q-item-label>
+          <q-item-label caption v-if="!everRun(jobData)">Never run</q-item-label>
+      </q-item-section></q-item>
+      <q-item v-if="jobData.mostRecentCompletionStatus === 'Unknown'"><q-item-section >
+          <q-item-label class="bg-primary text-white">Last Run Date</q-item-label>
+          <q-item-label caption v-if="everRun(jobData)">{{ jobData.lastRunDateString }}</q-item-label>
+          <q-item-label caption v-if="!everRun(jobData)">Never run</q-item-label>
+      </q-item-section></q-item>
       <div v-if="everRun(jobData)">
-        <q-item><q-item-main >
-            <q-item-tile label>Last Run Return Code</q-item-tile>
-            <q-item-tile sublabel>{{ jobData.lastRunReturnCode }}</q-item-tile>
-        </q-item-main></q-item>
-        <q-item><q-item-main >
-            <q-item-tile label>Last Execution GUID</q-item-tile>
-            <q-item-tile sublabel>{{ jobData.lastRunExecutionGUID }}</q-item-tile>
-        </q-item-main></q-item>
+        <q-item><q-item-section >
+            <q-item-label>Last Run Return Code</q-item-label>
+            <q-item-label caption>{{ jobData.lastRunReturnCode }}</q-item-label>
+        </q-item-section></q-item>
+        <q-item><q-item-section >
+            <q-item-label>Last Execution GUID</q-item-label>
+            <q-item-label caption>{{ jobData.lastRunExecutionGUID }}</q-item-label>
+        </q-item-section></q-item>
       </div>
-      <q-item><q-item-main >
-          <q-item-tile label>Pinned</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.pinned }}</q-item-tile>
-      </q-item-main></q-item>
-      <q-item v-if="typeof(jobData.StateChangeSuccessJobGUID) !== 'undefined' && jobData.StateChangeSuccessJobGUID !== null"><q-item-main >
-          <q-item-tile label>State Change Success Job: {{ jobData.StateChangeSuccessJobNAME }}</q-item-tile>
-          <q-item-tile sublabel>
+      <q-item><q-item-section >
+          <q-item-label>Pinned</q-item-label>
+          <q-item-label caption>{{ jobData.pinned }}</q-item-label>
+      </q-item-section></q-item>
+      <q-item v-if="typeof(jobData.StateChangeSuccessJobGUID) !== 'undefined' && jobData.StateChangeSuccessJobGUID !== null"><q-item-section >
+          <q-item-label>State Change Success Job: {{ jobData.StateChangeSuccessJobNAME }}</q-item-label>
+          <q-item-label caption>
             <router-link :to="'/jobs/' + jobData.StateChangeSuccessJobGUID" tag="a" class="text-grey-8">
               {{ jobData.StateChangeSuccessJobGUID }}
             </router-link>
-          </q-item-tile>
-      </q-item-main></q-item>
-      <q-item v-if="typeof(jobData.StateChangeFailJobGUID) !== 'undefined' && jobData.StateChangeFailJobGUID !== null"><q-item-main >
-          <q-item-tile label>State Change Fail Job: {{ jobData.StateChangeFailJobNAME }}</q-item-tile>
-          <q-item-tile sublabel>
+          </q-item-label>
+      </q-item-section></q-item>
+      <q-item v-if="typeof(jobData.StateChangeFailJobGUID) !== 'undefined' && jobData.StateChangeFailJobGUID !== null"><q-item-section >
+          <q-item-label>State Change Fail Job: {{ jobData.StateChangeFailJobNAME }}</q-item-label>
+          <q-item-label caption>
             <router-link :to="'/jobs/' + jobData.StateChangeFailJobGUID" tag="a" class="text-grey-8">
               {{ jobData.StateChangeFailJobGUID }}
             </router-link>
-          </q-item-tile>
-      </q-item-main></q-item>
-      <q-item v-if="typeof(jobData.StateChangeUnknownJobGUID) !== 'undefined' && jobData.StateChangeUnknownJobGUID !== null"><q-item-main >
-          <q-item-tile label>State Change Unknown Job: {{ jobData.StateChangeUnknownJobNAME }}</q-item-tile>
-          <q-item-tile sublabel>
+          </q-item-label>
+      </q-item-section></q-item>
+      <q-item v-if="typeof(jobData.StateChangeUnknownJobGUID) !== 'undefined' && jobData.StateChangeUnknownJobGUID !== null"><q-item-section >
+          <q-item-label>State Change Unknown Job: {{ jobData.StateChangeUnknownJobNAME }}</q-item-label>
+          <q-item-label caption>
             <router-link :to="'/jobs/' + jobData.StateChangeUnknownJobGUID" tag="a" class="text-grey-8">
               {{ jobData.StateChangeUnknownJobGUID }}
             </router-link>
-          </q-item-tile>
-      </q-item-main></q-item>
-      <q-item v-if="typeof(jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) !== 'undefined' && jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown !== null"><q-item-main >
-          <q-item-tile label>Minutes before setting completion status to Unknown</q-item-tile>
-          <q-item-tile sublabel>{{ jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown }}</q-item-tile>
-      </q-item-main></q-item>
+          </q-item-label>
+      </q-item-section></q-item>
+      <q-item v-if="typeof(jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) !== 'undefined' && jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown !== null"><q-item-section >
+          <q-item-label>Minutes before setting completion status to Unknown</q-item-label>
+          <q-item-label caption>{{ jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown }}</q-item-label>
+      </q-item-section></q-item>
     </q-list>
     <ExecutionTable
       ref="ExecutionTable"
