@@ -2,61 +2,63 @@
   <div>
     <q-list >
       <q-item>
-        <q-item-main >
-          <q-item-tile label v-if='executionData.executionName.length > 0'>Execution Name:
-            {{ executionData.executionName }}
-            <span v-if='executionData.manual'>(Manual Run - {{ executionData.stage }})</span>
-            <span v-if='!executionData.manual'>(Scheduled Run - {{ executionData.stage }})</span>
-          </q-item-tile>
-          <q-item-tile label v-if='executionData.executionName.length === 0'>Unnamed execution
-            <span v-if='executionData.manual'>(Manual Run - {{ executionData.stage }})</span>
-            <span v-if='!executionData.manual'>(Scheduled Run - {{ executionData.stage }})</span>
-          </q-item-tile>
-          <q-item-tile sublabel>{{ executionData.guid }}</q-item-tile>
-        </q-item-main>
+        <q-item-section v-if='executionData.executionName.length > 0'>
+          <q-item-label>Execution Name: {{ executionData.executionName }}</q-item-label>
+          <q-item-label caption v-if='executionData.manual'>(Manual Run - {{ executionData.stage }})</q-item-label>
+          <q-item-label caption v-if='!executionData.manual'>(Scheduled Run - {{ executionData.stage }})</q-item-label>
+          <q-item-label>{{ executionData.guid }}</q-item-label>
+        </q-item-section>
+        <q-item-section v-if='executionData.executionName.length === 0'>
+          <q-item-label>Unnamed execution</q-item-label>
+          <q-item-label caption v-if='executionData.manual'>(Manual Run - {{ executionData.stage }})</q-item-label>
+          <q-item-label caption v-if='!executionData.manual'>(Scheduled Run - {{ executionData.stage }})</q-item-label>
+          <q-item-label>{{ executionData.guid }}</q-item-label>
+        </q-item-section>
       </q-item>
       <q-item>
-        <q-item-main >
-          <q-item-tile label>Job: {{ jobData.name }}</q-item-tile>
-          <q-item-tile sublabel>
+        <q-item-section>
+          <q-item-label>Job: {{ jobData.name }}</q-item-label>
+          <q-item-label caption>
             <router-link :to="'/jobs/' + executionData.jobGUID" tag="a" class="text-grey-8">
               {{ executionData.jobGUID }}
             </router-link>
-          </q-item-tile>
-        </q-item-main>
+          </q-item-label>
+        </q-item-section>
       </q-item>
       <q-item>
-        <q-item-main >
-          <q-item-tile label>Command</q-item-tile>
-          <q-item-tile sublabel><div v-for="curVal in getLineArray(executionData.jobCommand)" :key=curVal.p>{{ curVal.v }}</div></q-item-tile>
-        </q-item-main>
+        <q-item-section>
+          <q-item-label>Command</q-item-label>
+          <q-item-label caption>
+            <div v-for="curVal in getLineArray(executionData.jobCommand)" :key="curVal.p">{{ curVal.v }}</div>
+          </q-item-label>
+        </q-item-section>
       </q-item>
       <q-item>
-        <q-item-main >
-          <q-item-tile label>Stage</q-item-tile>
-          <q-item-tile sublabel>{{ executionData.stage }}</q-item-tile>
-        </q-item-main>
+        <q-item-section >
+          <q-item-label>Stage</q-item-label>
+          <q-item-label caption>{{ executionData.stage }}</q-item-label>
+        </q-item-section>
       </q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Creation Date</q-item-tile>
-          <q-item-tile sublabel>{{ executionData.dateCreatedString }}</q-item-tile>
-      </q-item-main></q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Start Date</q-item-tile>
-          <q-item-tile sublabel>{{ executionData.dateStartedString }}</q-item-tile>
-      </q-item-main></q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Completed Date</q-item-tile>
-          <q-item-tile sublabel>{{ executionData.dateCompletedString }}</q-item-tile>
-      </q-item-main></q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Return Code</q-item-tile>
-          <q-item-tile sublabel>{{ executionData.resultReturnCode }}</q-item-tile>
-      </q-item-main></q-item>
-      <q-item><q-item-main >
-          <q-item-tile label>Output</q-item-tile>
-          <q-item-tile sublabel><STDOutput :val="executionData.resultSTDOUT" /></q-item-tile>
-      </q-item-main></q-item>
+      <q-item><q-item-section >
+          <q-item-label>Creation Date</q-item-label>
+          <q-item-label caption>{{ executionData.dateCreatedString }}</q-item-label>
+      </q-item-section></q-item>
+      <q-item><q-item-section >
+          <q-item-label>Start Date</q-item-label>
+          <q-item-label caption>{{ executionData.dateStartedString }}</q-item-label>
+      </q-item-section></q-item>
+      <q-item><q-item-section >
+          <q-item-label>Completed Date</q-item-label>
+          <q-item-label caption>{{ executionData.dateCompletedString }}</q-item-label>
+      </q-item-section></q-item>
+      <q-item><q-item-section >
+          <q-item-label>Return Code</q-item-label>
+          <q-item-label caption>{{ executionData.resultReturnCode }}</q-item-label>
+      </q-item-section></q-item>
+      <q-item><q-item-section >
+          <q-item-label>Output</q-item-label>
+          <q-item-label caption><STDOutput :val="executionData.resultSTDOUT" /></q-item-label>
+      </q-item-section></q-item>
     </q-list>
   </div>
 </template>

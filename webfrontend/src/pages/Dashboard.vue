@@ -1,26 +1,26 @@
 <template>
   <q-page padding class="card-examples row items-start" v-if="datastoreState === 'LOGGED_IN_SERVERDATA_LOADED'">
     <q-card inline class="q-ma-sm">
-      <q-card-title>
-        Server Info
-        <span slot="subtitle">Basic Server Information</span>
-      </q-card-title>
-      <q-card-main>
+      <q-card-section>
+        <div class="text-h6">Server Info</div>
+        <div class="text-subtitle2">Basic Server Information</div>
+      </q-card-section>
+      <q-card-section>
         <table>
           <tr><td align="right">Server Startup Time:</td><td>{{ serverInfo.Server.ServerStartupTimeString }}</td></tr>
           <tr><td align="right">Current Time on Server:</td><td>{{ serverInfo.Server.ServerDatetimeString }}</td></tr>
           <tr><td align="right">Total jobs setup:</td><td>{{ serverInfo.Jobs.TotalJobs }}</td></tr>
           <tr><td align="right">Total job executions:</td><td>{{ serverInfo.Server.TotalJobExecutions }}</td></tr>
         </table>
-      </q-card-main>
+      </q-card-section>
     </q-card>
 
     <q-card inline class="q-ma-sm">
-      <q-card-title>
-        Next Run
-        <span slot="subtitle">Next Job due to run</span>
-      </q-card-title>
-      <q-card-main>
+      <q-card-section>
+        <div class="text-h6">Next Run</div>
+        <div class="text-subtitle2">Next Job due to run</div>
+      </q-card-section>
+      <q-card-section>
         <div v-if='serverInfo.Jobs.NextJobsToExecute.length === 0'>No runs scheduled</div>
         <table v-if='serverInfo.Jobs.NextJobsToExecute.length !== 0'>
           <tr><td align="right">Name:</td><td>
@@ -30,35 +30,35 @@
           </td></tr>
           <tr><td align="right">When:</td><td>{{ serverInfo.Jobs.NextJobsToExecute[0].nextScheduledRunString }}</td></tr>
         </table>
-      </q-card-main>
+      </q-card-section>
     </q-card>
 
     <q-card inline class="q-ma-sm">
-      <q-card-title>
-        Jobs
-        <span slot="subtitle">Job Information</span>
-      </q-card-title>
-      <q-card-main>
+      <q-card-section>
+        <div class="text-h6">Jobs</div>
+        <div class="text-subtitle2">Job Information</div>
+      </q-card-section>
+      <q-card-section>
         <table>
           <tr v-for="curVal in jobs" :key=curVal.k>
             <td align="right">{{ curVal.text }}</td><td>{{ curVal.val }}</td>
           </tr>
         </table>
-      </q-card-main>
+      </q-card-section>
     </q-card>
     <div v-for="curJob in pinnedJobs" :key=curJob.guid>
       <q-card inline :class="'q-ma-sm ' + getCardClass(curJob)">
-        <q-card-title>
-         {{ curJob.name }}
-          <span slot="subtitle">{{ curJob.mostRecentCompletionStatus }}</span>
-        </q-card-title>
-        <q-card-main>
+        <q-card-section>
+          <div class="text-h6">{{ curJob.name }}</div>
+          <div class="text-subtitle2">{{ curJob.mostRecentCompletionStatus }}</div>
+        </q-card-section>
+        <q-card-section>
           <table>
             <tr><td align="right">Manual:</td><td>{{ !curJob.enabled }}</td></tr>
             <tr><td align="right">Last Run:</td><td>{{ curJob.lastRunDate }}</td></tr>
             <tr><td align="right">Return Code:</td><td>{{ curJob.lastRunReturnCode }}</td></tr>
           </table>
-        </q-card-main>
+        </q-card-section>
         <q-card-actions>
           <q-btn flat round dense icon="rowing" @click="$router.push('/jobs/' + curJob.guid)" />
           <q-btn flat round dense icon="play_arrow" @click="runnow(curJob.guid, curJob.name)" />
@@ -85,7 +85,7 @@ export default {
     runnow (jobGUID, jobName) {
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'Job Execution Request Sent'})
+          Notify.create({color: 'positive', message: 'Job Execution Request Sent'})
           // this.refreshJobData() No point doing this immediately
         },
         error: function (error) {
@@ -101,7 +101,7 @@ export default {
         },
         cancel: true,
         color: 'secondary'
-      }).then(data => {
+      }).onOk(data => {
         var params = {name: data}
         globalStore.getters.apiFN('POST', 'jobs/' + jobGUID + '/execution', params, callback)
       })
@@ -128,7 +128,7 @@ export default {
           TTT.loading = false
 
           if (!response.data.dePaginatorResp.complete) {
-            Notify.create({color: 'info', detail: 'Not all pinned jobs were queried back'})
+            Notify.create({color: 'info', message: 'Not all pinned jobs were queried back'})
           }
         },
         error: function (error) {

@@ -1,24 +1,21 @@
 <template>
   <div>
     <div v-for="curVal in getLineArray(val, maxLinesToShow)" :key=curVal.p @click="expandOutput">{{ curVal.v }}</div>
-    <q-modal v-model="showOutputDialog" :content-css="{minWidth: '80vw', minHeight: '80vh'}">
-      <q-modal-layout>
-        <q-toolbar slot="header">
-          <q-btn
-            flat
-            round
-            dense
-            v-close-overlay
-            icon="keyboard_arrow_left"
-          />
+    <q-dialog v-model="showOutputDialog" :content-css="{minWidth: '80vw', minHeight: '80vh'}">
+      <q-layout view="Lhh lpR fff" container class="bg-white">
+        <q-header class="bg-primary">
           <q-toolbar-title>
+            <q-btn
+              flat
+              round
+              dense
+              v-close-popup
+              icon="keyboard_arrow_left"
+            />
             Job Output
           </q-toolbar-title>
-        </q-toolbar>
-        <div class="layout-padding">
-          <div v-for="curVal in getLineArray(val, undefined)" :key=curVal.p @click="expandOutput">{{ curVal.v }}</div>
-        </div>
-        <q-toolbar slot="footer">
+        </q-header>
+        <q-footer>
           <q-toolbar-title>
             <q-btn
               color="secondary"
@@ -26,9 +23,16 @@
               @click="copyToClipboard"
             />
           </q-toolbar-title>
-        </q-toolbar>
-      </q-modal-layout>
-    </q-modal>
+        </q-footer>
+
+        <q-page-container>
+          <q-page padding>
+            <div v-for="curVal in getLineArray(val, undefined)" :key=curVal.p @click="expandOutput">{{ curVal.v }}</div>
+          </q-page>
+        </q-page-container>
+
+      </q-layout>
+    </q-dialog>
 
   </div>
 </template>
@@ -60,7 +64,7 @@ function copyTextToClipboard (text) {
     return
   }
   navigator.clipboard.writeText(text).then(function () {
-    Notify.create({color: 'positive', detail: 'Async: Copying to clipboard was successful!'})
+    Notify.create({color: 'positive', message: 'Async: Copying to clipboard was successful!'})
   }, function (err) {
     Notify.create('Async: Could not copy text: ' + err)
   })
