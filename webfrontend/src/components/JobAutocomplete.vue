@@ -7,6 +7,8 @@
       fill-input
       input-debounce="0"
       :options="options"
+      :label="label"
+      :error-label="errorlabel"
       @filter="filterFn"
       @filter-abort="abortFilterFn"
     >
@@ -43,7 +45,7 @@ import restcallutils from '../restcallutils'
 export default {
   props: [
     'model',
-    'floatlabel',
+    'label',
     'errorlabel'
   ],
   data: function () {

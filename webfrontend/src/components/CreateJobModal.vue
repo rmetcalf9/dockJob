@@ -27,24 +27,33 @@
 
         <q-page-container>
           <q-page padding>
-            <q-field helper="Name of Job" label="Job Name" :label-width="3" error-label="Job name must have more than two characters">
-              <q-input v-model="showCreateJobDialogData.jobname" :error='createJobInValidJobName' />
-            </q-field>
-            <q-field helper="Command to execute" label="Command" :label-width="3" error-label="Command to run must be supplied">
-              <q-input v-model="showCreateJobDialogData.command" type="textarea" :error='showCreateJobDialogData.command.length <= 2' />
-            </q-field>
+            <q-input
+              v-model="showCreateJobDialogData.jobname"
+              :error='createJobInValidJobName'
+               helper="Name of Job"
+               label="Job Name"
+               :label-width="3"
+               error-label="Job name must have more than two characters"
+            />
+            <q-input
+              v-model="showCreateJobDialogData.command"
+              type="textarea" :error='showCreateJobDialogData.command.length <= 2'
+              helper="Command to execute" label="Command"
+              :label-width="3"
+              error-label="Command to run must be supplied"
+            />
             <q-field helper="" label="Pinned to Dashboard" :label-width="3">
               <q-toggle v-model="showCreateJobDialogData.pinned" />
             </q-field>
-            <q-field helper="" label="State Change Success Job" :label-width="3">
-              <JobAutocomplete
-                ref="success_jobautocomplete"
-                :model="showCreateJobDialogData.StateChangeSuccessJobModel"
-                floatlabel="Job to call when State changes to Success"
-                errorlabel="Error"
-                @modelupdate="showCreateJobDialogData.StateChangeSuccessJobModel = $event"
-              />
-            </q-field>
+            <JobAutocomplete
+              ref="success_jobautocomplete"
+              :model="showCreateJobDialogData.StateChangeSuccessJobModel"
+              label="Job to call when State changes to Success"
+              errorlabel="Error"
+              @modelupdate="showCreateJobDialogData.StateChangeSuccessJobModel = $event"
+              helper=""
+              :label-width="3"
+            />
             <q-field helper="" label="State Change Fail Job" :label-width="3">
               <JobAutocomplete
                 ref="fail_jobautocomplete"
