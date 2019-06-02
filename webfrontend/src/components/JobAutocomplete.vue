@@ -1,5 +1,24 @@
 <template>
   <div>
+    <q-select
+      v-model="jobName"
+      use-input
+      hide-selected
+      fill-input
+      input-debounce="0"
+      :options="options"
+      @filter="filterFn"
+      @filter-abort="abortFilterFn"
+    >
+      <template v-slot:no-option>
+        <q-item>
+          <q-item-section class="text-grey">
+            No results
+          </q-item-section>
+        </q-item>
+      </template>
+    </q-select>
+    <!--
     <q-input
       v-model="jobName"
       type="text"
@@ -13,7 +32,7 @@
         :min-characters="0"
         @selected="selected"
       />
-    </q-input>
+    </q-input>-->
   </div>
 </template>
 
@@ -42,6 +61,12 @@ export default {
     }
   },
   methods: {
+    filterFn (val, update, abort) {
+      return this.search(val, update)
+    },
+    abortFilterFn () {
+      console.log('no abort logic')
+    },
     search (terms, done) {
       // make an AJAX call
       // then call done(Array results)

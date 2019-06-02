@@ -56,6 +56,14 @@ export default {
     }
     this.localTableVisibleColumns = this.value.map(function (x) {
       var col = findCol(x)
+      if (col.length === 0) {
+        // columns are not loaded yet
+        return {
+          value: x,
+          label: x,
+          disable: false
+        }
+      }
       return {
         value: x,
         label: col[0].label,
