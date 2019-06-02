@@ -100,16 +100,19 @@
       :apiPath="'jobs/' + this.$route.params.jobGUID + '/execution'"
     >
     </ExecutionTable>
-    <q-btn
-      color="primary"
-      push
-      @click="refreshJobData"
-    >Refresh</q-btn>
-    <q-btn
-      color="primary"
-      push
-      @click="runnow"
-    >Run Now</q-btn>
+    <table><tr><td>
+      <q-btn
+        color="primary"
+        push
+        @click="refreshJobData"
+      >Refresh</q-btn>
+    </td><td>
+      <q-btn
+        color="primary"
+        push
+        @click="runnow"
+      >Run Now</q-btn>
+    </td></tr></table>
     <CreateJobModal
       ref="createJobModalDialog"
       v-model="createJobModalDialog"
@@ -174,7 +177,7 @@ export default {
       }
       var callback = {
         ok: function (response) {
-          Notify.create({color: 'positive', detail: 'Job Execution Request Sent'})
+          Notify.create({color: 'positive', message: 'Job Execution Request Sent'})
           // this.refreshJobData() No point doing this immediately
         },
         error: function (error) {
@@ -190,7 +193,7 @@ export default {
         },
         cancel: true,
         color: 'secondary'
-      }).then(data => {
+      }).onOk(data => {
         var params = {name: data}
         globalStore.getters.apiFN('POST', 'jobs/' + TTT.$route.params.jobGUID + '/execution', params, callback)
       })

@@ -513,6 +513,7 @@ export default {
       if (this.createJobInValidDayOfMonth) return false
       if (this.createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) return false
 
+      if (typeof (this.$refs.success_jobautocomplete) === 'undefined') return false
       if (this.$refs.success_jobautocomplete.invalid) return false
       if (this.$refs.fail_jobautocomplete.invalid) return false
       if (this.$refs.unknown_jobautocomplete.invalid) return false

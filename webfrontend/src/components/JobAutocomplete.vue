@@ -48,7 +48,8 @@ export default {
   ],
   data: function () {
     return {
-      queriedValues: []
+      queriedValues: [],
+      options: []
     }
   },
   watch: {
@@ -67,32 +68,32 @@ export default {
     abortFilterFn () {
       console.log('no abort logic')
     },
-    search (terms, done) {
+    search (terms, update) {
       // make an AJAX call
-      // then call done(Array results)
+      // then call update(Array results)
       var TTT = this
       var callback = {
         ok: function (response) {
           // TTT.queriedValues = [] Not resetting. Will build up values in case user types previously searched for job name
-          done(response.data.result.map(function (ite) {
+          var respArr = response.data.result.map(function (ite) {
             TTT.queriedValues[ite.name] = ite.guid
-            return {
-              value: ite.name,
-              label: ite.name
-            }
-          }))
-          // done([{value: 'a', label: 'b'}])
+            return ite.name
+          })
+          TTT.options = respArr
+          update(respArr)
+
+          // update([{value: 'a', label: 'b'}])
         },
         error: function (error) {
           console.log('JobAutoComplete Error')
           console.log(error)
-          done([])
+          update([])
         }
       }
       var queryParams = []
       queryParams['query'] = terms
       var queryString = restcallutils.buildQueryString('jobs/', queryParams)
-      // console.log(queryString)
+      console.log('Sending query: ', queryString)
       globalStore.getters.apiFN('GET', queryString, undefined, callback)
     },
     selected (item) {

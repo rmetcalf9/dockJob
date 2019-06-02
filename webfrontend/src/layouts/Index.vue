@@ -61,8 +61,11 @@
       <q-toolbar>
         <table width="100%"><tr>
         <td>
-          <a v-if="! (connectionData.apidocsurl === '_')" v-bind:href="connectionData.apidocsurl" target="_blank">APIdocs</a>
-          <a href="https://github.com/rmetcalf9/dockJob" target="_blank">GitHub</a>
+          <table><tr><td>
+            <a v-if="! (connectionData.apidocsurl === '_')" v-bind:href="connectionData.apidocsurl" target="_blank">APIdocs</a>
+          </td><td>
+            <a href="https://github.com/rmetcalf9/dockJob" target="_blank">GitHub</a>
+          </td></tr></table>
         </td>
         <td align="right">Version: {{connectionData.version}}</td>
         </tr></table>
