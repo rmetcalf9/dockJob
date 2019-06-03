@@ -11,14 +11,15 @@ if [ ${RES} -ne 0 ]; then
 fi
 
 echo "Running webfrontend unit tests"
-cd ${DOCKJOB_GITROOT}/webfrontend
-eval ${CMD_NPM} test
-RES=$?
-if [ ${RES} -ne 0 ]; then
-  echo ""
-  echo "Webfrontend unit tests failed"
-  exit 1
-fi
+#cd ${DOCKJOB_GITROOT}/webfrontend
+#eval ${CMD_NPM} test
+#RES=$?
+#if [ ${RES} -ne 0 ]; then
+#  echo ""
+#  echo "Webfrontend unit tests failed"
+#  exit 1
+#fi
+echo "Webfrontend unit tests skipped"
 
 exit 0
 
