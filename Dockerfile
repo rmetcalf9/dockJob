@@ -39,7 +39,7 @@ RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pc
 COPY ./app/src ${APP_DIR}
 RUN pip3 install -r ${APP_DIR}/requirments.txt
 
-COPY ./webfrontend/dist/spa-mat ${APIAPP_FRONTEND}
+COPY ./webfrontend/dist/spa ${APIAPP_FRONTEND}
 COPY ./VERSION /VERSION
 COPY ./app/run_app_docker.sh /run_app_docker.sh
 COPY ./nginx_default.conf /etc/nginx/conf.d/default.conf
