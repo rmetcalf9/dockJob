@@ -1,5 +1,9 @@
 # Release Log
 
+## 0.4.10
+Updating to new version of Quasar. No milestone 
+
+
 ## 0.4.4
 
 Updating to new version of base app (updates swagger-ui) and fixed a bug that stoped automatic jobs running in certain situations.
