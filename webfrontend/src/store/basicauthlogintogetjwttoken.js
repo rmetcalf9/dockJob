@@ -14,6 +14,12 @@ const state = {
 }
 
 var isCookieSetFN = function () {
+  if (typeof (state) === 'undefined') {
+    return false
+  }
+  if (typeof (state.authmethod) === 'undefined') {
+    return false
+  }
   var r = Cookies.has(state.authmethod.cookiename)
   if (r === false) {
     return false

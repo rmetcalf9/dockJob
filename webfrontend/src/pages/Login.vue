@@ -6,27 +6,27 @@
     <div>
       <div class="error-card shadow-4 bg-white column items-center justify-center no-wrap">
         <q-tabs align="justify" v-if="numTabsVisible > 0" v-model="selectedTab">
-          <q-tab name="usernamePass" slot="title" label="Basic Auth" v-if="tabs.usernamePass"/>
-          <q-tab name="xxx" slot="title" label="XXX" v-if="tabs.xxx"/>
-
-          <q-tab-panels>
-            <q-tab-panel name="usernamePass">
-              <q-input v-model="usernamePass.username" placeholder="Username" />
-              <br>
-              <q-input type="password" v-model="usernamePass.password" placeholder="Password" />
-              <p class="text-center group">
-                <q-btn
-                  color="primary"
-                  push
-                  @click="usernamePassLogin"
-                >
-                  Login
-                </q-btn>
-              </p>
-            </q-tab-panel>
-            <q-tab-panel name="xxx">TODO Next Tab</q-tab-panel>
-          </q-tab-panels>
+          <q-tab name="usernamePass" label="Basic Auth" v-if="tabs.usernamePass"/>
+          <q-tab name="xxx" label="XXX" v-if="tabs.xxx"/>
         </q-tabs>
+        <q-separator />
+        <q-tab-panels v-model="selectedTab" animated>
+          <q-tab-panel name="usernamePass">
+            <q-input v-model="usernamePass.username" placeholder="Username" />
+            <br>
+            <q-input type="password" v-model="usernamePass.password" placeholder="Password" />
+            <p class="text-center group">
+              <q-btn
+                color="primary"
+                push
+                @click="usernamePassLogin"
+              >
+                Login
+              </q-btn>
+            </p>
+          </q-tab-panel>
+          <q-tab-panel name="xxx">TODO Next Tab</q-tab-panel>
+        </q-tab-panels>
       </div>
       Version: {{connectionData.version}}
     </div>

@@ -7,7 +7,8 @@ export APIAPP_FRONTEND=_
 export APIAPP_APIURL=http://somefunnyhostname.com:5080/api
 export APIAPP_APIDOCSURL=http://somefunnyhostname.com:5080/apidocs
 export APIAPP_FRONTENDURL=http://somefunnyhostname.com:5080/frontend
-export APIAPP_APIACCESSSECURITY=[]
+###export APIAPP_APIACCESSSECURITY=[]
+export APIAPP_APIACCESSSECURITY="[{\"type\": \"basic-auth\" }]"
 export APIAPP_USERFORJOBS=dockjobuser
 export APIAPP_GROUPFORJOBS=dockjobgroup
 
