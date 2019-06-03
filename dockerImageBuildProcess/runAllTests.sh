@@ -10,15 +10,15 @@ fi
 
 
 echo "Running integration tests"
-cd ${DOCKJOB_GITROOT}/integrationtests
-eval ${CMD_CODECEPTJS} run
-RES=$?
-if [ ${RES} -ne 0 ]; then
-  echo ""
-  echo "Integration tests failed - all of Selinum, python app and web frontend all running?"
-  exit 1
-fi
-
+#cd ${DOCKJOB_GITROOT}/integrationtests
+#eval ${CMD_CODECEPTJS} run
+#RES=$?
+#if [ ${RES} -ne 0 ]; then
+#  echo ""
+#  echo "Integration tests failed - all of Selinum, python app and web frontend all running?"
+#  exit 1
+#fi
+echo " Frontend tests disabled"
 
 
 
