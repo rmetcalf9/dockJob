@@ -22,7 +22,7 @@ ENV APIAPP_GROUPFORJOBS=dockjobgroup
 EXPOSE 80
 
 
-RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pcre-dev && \
+RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pcre-dev libffi-dev && \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \
     pip3 install --upgrade pip setuptools && \
