@@ -64,7 +64,7 @@ services:
       retries: 10
 
   kong-configure:
-    image: metcarob/docker-ws-caller:0.5.1
+    image: metcarob/docker-ws-caller:0.5.2
     deploy:
       restart_policy:
         condition: on-failure
@@ -101,7 +101,7 @@ services:
   kong-addapis-dockjob:
     #Add API's to kong to forward requests to dockjob
     # also configure basic-auth so that only users in group samplegroup can access
-    image: metcarob/docker-ws-caller:0.5.1
+    image: metcarob/docker-ws-caller:0.5.2
     deploy:
       restart_policy:
         condition: on-failure
