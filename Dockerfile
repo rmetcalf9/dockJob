@@ -1,4 +1,4 @@
-FROM nginx:1.13.12-alpine
+FROM nginx:1.15.12-alpine
 
 MAINTAINER Robert Metcalf
 
@@ -33,7 +33,8 @@ RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pc
     addgroup -S ${APIAPP_GROUPFORJOBS} && \
     adduser -S -G ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
     mkdir /var/log/uwsgi && \
-    pip3 install uwsgi
+    pip3 install uwsgi && \
+    pip3 install cffi
 
 COPY ./app/src ${APP_DIR}
 RUN pip3 install -r ${APP_DIR}/requirments.txt
