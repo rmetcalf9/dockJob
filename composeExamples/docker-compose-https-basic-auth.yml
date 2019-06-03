@@ -29,18 +29,20 @@ services:
       retries: 5
 
   kong-migration:
-    image: kong:0.13
+    image: kong:1.1.2
     deploy:
       restart_policy:
         condition: on-failure
     environment:
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=kong-database
-    command: kong migrations up
+    command: kong migrations bootstrap
+    deploy:
+      restart_policy:
+        condition: on-failure
 
   kong:
-    #tried changing to kong:0.12.0-alpine but didn't work as health check needs curl
-    image: kong:0.13
+    image: kong:1.1.2
     deploy:
       restart_policy:
         condition: on-failure
@@ -50,7 +52,6 @@ services:
     environment:
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=kong-database
-      - KONG_PG_DATABASE=kong
       - KONG_SSL_CERT=/run/secrets/webservices_cert
       - KONG_SSL_CERT_KEY=/run/secrets/webservices_key
       - KONG_ADMIN_LISTEN=0.0.0.0:8001
@@ -63,7 +64,7 @@ services:
       retries: 10
 
   kong-configure:
-    image: metcarob/docker-ws-caller:0.0.9
+    image: metcarob/docker-ws-caller:0.5.1
     deploy:
       restart_policy:
         condition: on-failure
@@ -100,16 +101,16 @@ services:
   kong-addapis-dockjob:
     #Add API's to kong to forward requests to dockjob
     # also configure basic-auth so that only users in group samplegroup can access
-    image: metcarob/docker-ws-caller:0.0.9
+    image: metcarob/docker-ws-caller:0.5.1
     deploy:
       restart_policy:
         condition: on-failure
         delay: 6s
     entrypoint: "/bin/sh"
     command:    "-c \" \
-                   (kong_install_service_and_route http://kong:8001 dockjobapi http dockjob 80 \\\"/api\\\" https /dockjobapi) && \
-                   (kong_install_service_and_route http://kong:8001 dockjobapidocs http dockjob 80 \\\"/apidocs\\\" https /dockjobapidocs) && \
-                   (kong_install_service_and_route http://kong:8001 dockjob http dockjob 80 \\\"/frontend\\\" https /dockjob) && \
+                   (kong_install_service_and_route http://kong:8001 dockjobapi http dockjob 80 \\\"/api\\\" https \\\"\\\" /dockjobapi \\\"\\\" null null) && \
+                   (kong_install_service_and_route http://kong:8001 dockjobapidocs http dockjob 80 \\\"/apidocs\\\" https \\\"\\\" /dockjobapidocs \\\"\\\" null null) && \
+                   (kong_install_service_and_route http://kong:8001 dockjob http dockjob 80 \\\"/frontend\\\" https \\\"\\\" /dockjob \\\"\\\" null null) && \
                    (curl -i -X POST \
                      --url http://kong:8001/services/dockjobapi/plugins \
                      --data 'name=acl' \
@@ -121,11 +122,29 @@ services:
                      --data 'config.hide_credentials=true') \
                 \""
 
+
+#                   (kong_install_service_and_route http://kong:8001 dockjobapi http dockjob 80 \\\"/api\\\" https dockjob /dockjobapi \\\"\\\" null null) && \
+#                   (kong_install_service_and_route http://kong:8001 dockjobapidocs http dockjob 80 \\\"/apidocs\\\" https dockjob /dockjobapidocs \\\"\\\" null null) && \
+#                   (kong_install_service_and_route http://kong:8001 dockjob http dockjob 80 \\\"/frontend\\\" https dockjob /dockjob \\\"\\\" null null) \
+
+#KONG_URL=${1}
+#SERVICE_NAME=${2}
+#SERVICE_PROTOCOL=${3}
+#SERVICE_HOST=${4}
+#SERVICE_PORT=${5}
+#SERVICE_PATH=${6}
+#ROUTE_PROTOCOLS=${7}
+#ROUTE_HOSTS=${8}
+#ROUTE_PATHS=${9}
+#ROUTE_METHODS=${10}
+#ROUTE_STRIP_PATH=${11}
+#ROUTE_PRESERVE_HOST=${12}
+
 ##The next section starts a UI for kong called konga. 
 ##We only need a ui for development experimentation and can be removed if no UI is required
 ## when it is running it can be accessed on port 1337
   konga:
-    image: pantsel/konga
+    image: pantsel/konga:0.14.1
     deploy:
       restart_policy:
         condition: on-failure
