@@ -2,13 +2,15 @@
   <div>
     <q-select
       v-model="jobName"
+      clearable
       use-input
       hide-selected
       fill-input
       input-debounce="0"
       :options="options"
       :label="label"
-      :error-label="errorlabel"
+      :error-message="errormessage"
+      :error="error"
       @filter="filterFn"
       @filter-abort="abortFilterFn"
     >
@@ -25,7 +27,7 @@
       v-model="jobName"
       type="text"
       :float-label="floatlabel"
-      :error-label="errorlabel"
+      :error-message="errorlabel"
       :error="invalid"
       :clearable="true"
     >
@@ -46,7 +48,8 @@ export default {
   props: [
     'model',
     'label',
-    'errorlabel'
+    'errormessage',
+    'error'
   ],
   data: function () {
     return {
@@ -95,7 +98,7 @@ export default {
       var queryParams = []
       queryParams['query'] = terms
       var queryString = restcallutils.buildQueryString('jobs/', queryParams)
-      console.log('Sending query: ', queryString)
+      // console.log('Sending query: ', queryString)
       globalStore.getters.apiFN('GET', queryString, undefined, callback)
     },
     selected (item) {

@@ -1,6 +1,6 @@
 <template>
     <q-dialog v-model="showCreateJobDialog">
-      <q-layout view="Lhh lpR fff" container class="bg-white">
+      <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
         <q-header class="bg-primary">
           <q-toolbar>
             <q-toolbar-title>
@@ -49,85 +49,94 @@
               ref="success_jobautocomplete"
               :model="showCreateJobDialogData.StateChangeSuccessJobModel"
               label="Job to call when State changes to Success"
-              errorlabel="Error"
+              errormessage="Error"
+              :error="false"
               @modelupdate="showCreateJobDialogData.StateChangeSuccessJobModel = $event"
               helper=""
               :label-width="3"
             />
-            <q-field helper="" label="State Change Fail Job" :label-width="3">
-              <JobAutocomplete
-                ref="fail_jobautocomplete"
-                :model="showCreateJobDialogData.StateChangeFailJobModel"
-                floatlabel="Job to call when State changes to Fail"
-                errorlabel="Error"
-                @modelupdate="showCreateJobDialogData.StateChangeFailJobModel = $event"
-              />
-            </q-field>
-            <q-field helper="" label="State Change Unknown Job" :label-width="3">
-              <JobAutocomplete
-                ref="unknown_jobautocomplete"
-                :model="showCreateJobDialogData.StateChangeUnknownJobModel"
-                floatlabel="Job to call when State changes to Unknown"
-                errorlabel="Error"
-                @modelupdate="showCreateJobDialogData.StateChangeUnknownJobModel = $event"
-              />
-            </q-field>
-            <q-field helper="" label="Unknown Timeout Override" :label-width="3">
-              <q-input v-model="showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown" type="number" float-label="Minutes to wait before setting status to unknown (if Job hasn't been executed)"
-                error-label="Error"
-                :error="createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown"
-              />
-            </q-field>
-            <q-field helper="Automatic Schedule Enabled" label="Automatic Schedule Enabled" :label-width="3">
-              <q-toggle v-model="showCreateJobDialogData.enabled" />
-            </q-field>
-            <q-field label="Repetition Interval" :label-width="3" v-if="showCreateJobDialogData.enabled">
-              <q-select
-                v-model="showCreateJobDialogData.repetitionInterval.mode"
-               :options="showCreateJobDialogData.repetitionInterval.modeOptions"
-               :disable="!showCreateJobDialogData.enabled"
-                v-if="showCreateJobDialogData.enabled"
-              />
-              <q-input v-model="showCreateJobDialogData.repetitionInterval.hour" type="number" float-label="Hour (24 hour format)"
-                error-label="Hour must be a number between 0 and 23"
-                :error="createJobInValidRepHour"
-                :disable="createJobHourDisabled"
-                v-if="!createJobHourDisabled"
-              />
-              <q-input v-model="showCreateJobDialogData.repetitionInterval.minute" type="number" float-label="Minute" error-label="Minute must be a number between 0 and 59"
-                :error="createJobInValidRepMinute"
-                :disable="createJobMinuteDisabled"
-                v-if="!createJobMinuteDisabled"
-              />
-              <q-input v-model="showCreateJobDialogData.repetitionInterval.hourlyMinuteString" type="text" float-label="Comma seperates list of Minutes past hour to run" error-label="Comma seperated list of minutes past hour to run job (0-59)"
-                :error="createJobInValidRepHourlyMinuteString"
-                :disable="createJobHourlyMinuteStringDisabled"
-                v-if="!createJobHourlyMinuteStringDisabled"
-              />
-              <q-select
-                toggle
-                multiple
-                v-model="showCreateJobDialogData.repetitionInterval.days"
-                :options="showCreateJobDialogData.repetitionInterval.dayOptions"
-                :error="createJobInValidDays"
-                :disable="createJobDaysDisabled"
-                v-if="!createJobDaysDisabled"
-                float-label="Day(s) of week"
-                error-label="Minute must be a number between 0 and 59"
-              />
-              <q-input v-model="showCreateJobDialogData.repetitionInterval.dayofmonth" type="text" float-label="Comma seperates list of day of months to run" error-label="Comma seperated list of days of monyh to run job (1-31)"
-                :error="createJobInValidDayOfMonth"
-                :disable="createJobDOMDisabled"
-                v-if="!createJobDOMDisabled"
-              />
-              <q-input
-                v-model="showCreateJobDialogData.repetitionInterval.timezone"
-                float-label="Timezone"
-                :disable="createJobTimezoneDisabled"
-                v-if="!createJobTimezoneDisabled"
-                :error="createJobInValidTimezone"
-              />
-            </q-field>
+            <JobAutocomplete
+              ref="fail_jobautocomplete"
+              :model="showCreateJobDialogData.StateChangeFailJobModel"
+              label="Job to call when State changes to Fail"
+              errormessage="Error"
+              :error="false"
+              @modelupdate="showCreateJobDialogData.StateChangeFailJobModel = $event"
+              helper=""
+              :label-width="3"
+            />
+            <JobAutocomplete
+              ref="unknown_jobautocomplete"
+              :model="showCreateJobDialogData.StateChangeUnknownJobModel"
+              label="Job to call when State changes to Unknown"
+              errormessage="Error"
+              :error="false"
+              @modelupdate="showCreateJobDialogData.StateChangeUnknownJobModel = $event"
+              helper=""
+              :label-width="3"
+            />
+            <q-input v-model="showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown" type="number" label="Unknown Timeout - Minutes to wait before setting status to unknown (if Job hasn't been executed)"
+              error-label="Error"
+              :error="createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown"
+            />
+            <q-toggle v-model="showCreateJobDialogData.enabled" label="Automatic Schedule Enabled"/>
+            <q-card
+              v-if="showCreateJobDialogData.enabled"
+            >
+              <q-card-section>
+                <div class="text-h6">Repetition Interval</div>
+              </q-card-section>
+              <q-card-section>
+                <q-select
+                  v-model="showCreateJobDialogData.repetitionInterval.mode"
+                 :options="showCreateJobDialogData.repetitionInterval.modeOptions"
+                 :disable="!showCreateJobDialogData.enabled"
+                  v-if="showCreateJobDialogData.enabled"
+                  emit-value
+                />
+                <q-input v-model="showCreateJobDialogData.repetitionInterval.hour" type="number" label="Hour (24 hour format)"
+                  error-label="Hour must be a number between 0 and 23"
+                  :error="createJobInValidRepHour"
+                  :disable="createJobHourDisabled"
+                  v-if="!createJobHourDisabled"
+                />
+                <q-input v-model="showCreateJobDialogData.repetitionInterval.minute" type="number" label="Minute" error-label="Minute must be a number between 0 and 59"
+                  :error="createJobInValidRepMinute"
+                  :disable="createJobMinuteDisabled"
+                  v-if="!createJobMinuteDisabled"
+                />
+                <q-input v-model="showCreateJobDialogData.repetitionInterval.hourlyMinuteString" type="text" label="Comma seperates list of Minutes past hour to run" error-label="Comma seperated list of minutes past hour to run job (0-59)"
+                  :error="createJobInValidRepHourlyMinuteString"
+                  :disable="createJobHourlyMinuteStringDisabled"
+                  v-if="!createJobHourlyMinuteStringDisabled"
+                />
+                <q-select
+                  toggle
+                  multiple
+                  emit-value
+                  map-options
+                  v-model="showCreateJobDialogData.repetitionInterval.days"
+                  :options="showCreateJobDialogData.repetitionInterval.dayOptions"
+                  :error="createJobInValidDays"
+                  :disable="createJobDaysDisabled"
+                  v-if="!createJobDaysDisabled"
+                  label="Day(s) of week"
+                  error-label="Minute must be a number between 0 and 59"
+                />
+                <q-input v-model="showCreateJobDialogData.repetitionInterval.dayofmonth" type="text" float-label="Comma seperates list of day of months to run" error-label="Comma seperated list of days of month to run job (1-31)"
+                  :error="createJobInValidDayOfMonth"
+                  :disable="createJobDayOfMonthDisabled"
+                  v-if="!createJobDayOfMonthDisabled"
+                />
+                <q-input
+                  v-model="showCreateJobDialogData.repetitionInterval.timezone"
+                  label="Timezone"
+                  :disable="createJobTimezoneDisabled"
+                  v-if="!createJobTimezoneDisabled"
+                  :error="createJobInValidTimezone"
+                />
+              </q-card-section>
+            </q-card>
           </q-page>
         </q-page-container>
       </q-layout>
@@ -474,7 +483,7 @@ export default {
     createJobTimezoneDisabled () {
       return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))
     },
-    createJobDOMDisabled () {
+    createJobDayOfMonthDisabled () {
       return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode === 'MONTHLY'))
     },
     // ---------------- END DISABLE -------------------
@@ -494,7 +503,7 @@ export default {
       return commaSeperatedIntListIsInvalid(this.showCreateJobDialogData.repetitionInterval.hourlyMinuteString.trim(), 0, 59)
     },
     createJobInValidDayOfMonth () {
-      if (this.createJobDOMDisabled) {
+      if (this.createJobDayOfMonthDisabled) {
         return false
       }
       return commaSeperatedIntListIsInvalid(this.showCreateJobDialogData.repetitionInterval.dayofmonth.trim(), 1, 31)
@@ -522,10 +531,6 @@ export default {
       if (this.createJobInValidDayOfMonth) return false
       if (this.createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) return false
 
-      if (typeof (this.$refs.success_jobautocomplete) === 'undefined') return false
-      if (this.$refs.success_jobautocomplete.invalid) return false
-      if (this.$refs.fail_jobautocomplete.invalid) return false
-      if (this.$refs.unknown_jobautocomplete.invalid) return false
       return true
     }
   }

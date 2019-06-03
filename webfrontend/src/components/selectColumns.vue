@@ -3,6 +3,7 @@
 <template>
   <q-select
     multiple outlined
+    hide-selected
     :options="columnsForEnableDropdown"
     label="Fields:"
     style="width: 300px"

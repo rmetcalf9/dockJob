@@ -1,28 +1,33 @@
 <template>
   <div>
     <div v-for="curVal in getLineArray(val, maxLinesToShow)" :key=curVal.p @click="expandOutput">{{ curVal.v }}</div>
-    <q-dialog v-model="showOutputDialog" :content-css="{minWidth: '80vw', minHeight: '80vh'}">
-      <q-layout view="Lhh lpR fff" container class="bg-white">
+    <q-dialog v-model="showOutputDialog">
+      <q-layout view="Lhh lpR fff" container class="bg-white" style="width: 700px; max-width: 80vw;">
         <q-header class="bg-primary">
-          <q-toolbar-title>
-            <q-btn
-              flat
-              round
-              dense
-              v-close-popup
-              icon="keyboard_arrow_left"
-            />
-            Job Output
-          </q-toolbar-title>
+          <q-toolbar>
+            <q-toolbar-title>
+              <q-btn
+                flat
+                round
+                dense
+                v-close-popup
+                icon="keyboard_arrow_left"
+              />
+              Job Output
+            </q-toolbar-title>
+            <q-btn flat v-close-popup round dense icon="close" />
+          </q-toolbar>
         </q-header>
         <q-footer>
-          <q-toolbar-title>
-            <q-btn
-              color="secondary"
-              :label="'Copy to Clipboard'"
-              @click="copyToClipboard"
-            />
-          </q-toolbar-title>
+          <q-toolbar inset>
+            <q-toolbar-title>
+              <q-btn
+                color="secondary"
+                :label="'Copy to Clipboard'"
+                @click="copyToClipboard"
+              />
+            </q-toolbar-title>
+          </q-toolbar>
         </q-footer>
 
         <q-page-container>
