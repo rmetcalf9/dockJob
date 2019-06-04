@@ -1,5 +1,8 @@
 # Release Log
 
+## 0.4.11
+Security fixes recomended by github
+
 ## 0.4.10
 Updating to new version of Quasar. No milestone 
 
