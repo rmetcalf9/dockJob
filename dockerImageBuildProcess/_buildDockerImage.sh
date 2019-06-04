@@ -2,6 +2,12 @@
 
 source ./setEnviroment.sh
 
+if [[ $(whoami) != 'root' ]]; then
+  echo "Must run as root"
+  exit 1
+fi
+
+
 cd ${START_DIR}
 ./checkRequiredProgramsAreInstalled.sh
 RES=$?
