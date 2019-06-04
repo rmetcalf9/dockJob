@@ -8,9 +8,15 @@ if [[ $(whoami) != 'root' ]]; then
 fi
 
 TR=./run_app_developer.sh
-if [[ E${1} == 'Ewc' ]]; then
-  TR=./run_app_developer_workClient.sh
+if [[ $# -eq 1 ]]; then
+  if [[ E${1} == 'Ewc' ]]; then
+    TR=./run_app_developer_workClient.sh
+  else
+    echo "Option must be wc or nothing"
+    exit 1
+  fi
 fi
+
 
 tmux \
   new-session  "cd ./app ; ${TR}" \; \
