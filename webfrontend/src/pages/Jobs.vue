@@ -34,6 +34,7 @@
         v-model="jobsDataTableSettings.filter"
         debounce="500"
         placeholder="Search" outlined
+        clearable
       >
         <template v-slot:append>
           <q-icon name="search" />
