@@ -12,16 +12,16 @@
 
         <q-footer class="bg-black text-white">
           <q-toolbar inset>
-        <q-btn
-          color="primary"
-          :label="displayValues.okButtonText"
-          :disable="!createJobValidAll"
-          @click="createJobMethod"
-        />
-        <q-btn
-          v-close-popup
-          label="Cancel"
-        />
+            <q-btn
+              color="primary"
+              :label="displayValues.okButtonText"
+              :disable="!createJobValidAll"
+              @click="createJobMethod"
+            />
+            <q-btn
+              v-close-popup
+              label="Cancel"
+            />
           </q-toolbar>
         </q-footer>
 
