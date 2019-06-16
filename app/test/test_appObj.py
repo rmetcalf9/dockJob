@@ -26,7 +26,7 @@ class test_appObjClass(testHelperAPIClient):
         'JobsLastExecutionFailed': 0
       },
       'Server': {
-        'DefaultUserTimezone': 'Europe/London', 
+        'DefaultUserTimezone': 'Europe/London',
         'ServerDatetime': curDatetime.isoformat(),
         'ServerStartupTime': '2018-01-01T13:46:00+00:00',
         'TotalJobExecutions': 0,
@@ -116,6 +116,7 @@ class test_appObjClass(testHelperAPIClient):
 
   def test_FrontendRedirect(self):
     result = self.testClient.get('/frontend')
-    self.assertEqual(result.status_code, 301)
+    if result.status_code != 301:
+      if result.status_code != 308:
+        self.assertTrue(False,"Returned status code must be either 301 or 308")
     self.assertEqual(result.headers['location'], 'http://frontenddummytestxxx/')
-
