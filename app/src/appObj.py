@@ -14,6 +14,7 @@ from flask_restplus import fields
 from JobExecutor import JobExecutorClass
 import time
 import datetime
+from object_store_abstraction import createObjectStoreInstance
 
 class appObjClass(parAppObj):
   jobExecutor = None
@@ -22,6 +23,7 @@ class appObjClass(parAppObj):
   serverStartTime = None
   curDateTimeOverrideForTesting = None
   minutesBeforeMostRecentCompletionStatusBecomesUnknown = None
+  objectStore = None
 
   def init(self, env, serverStartTime, testingMode = False):
     self.minutesBeforeMostRecentCompletionStatusBecomesUnknown = 49 * 60
@@ -44,6 +46,18 @@ class appObjClass(parAppObj):
     #When we are testing we will launch the loop iterations manually
     if not testingMode:
       self.jobExecutor.start()
+
+    objectStoreConfigJSON = readFromEnviroment(env, 'APIAPP_OBJECTSTORECONFIG', '{}', None)
+    objectStoreConfigDict = None
+    try:
+      if objectStoreConfigJSON != '{}':
+        objectStoreConfigDict = json.loads(objectStoreConfigJSON)
+    except Exception as err:
+      print(err) # for the repr
+      print(str(err)) # for just the message
+      print(err.args) # the arguments that the exception has been called with.
+      raise(InvalidObjectStoreConfigInvalidJSONException)
+
 
   def initOnce(self):
     super(appObjClass, self).initOnce()
@@ -70,7 +84,7 @@ class appObjClass(parAppObj):
     return appObj.flastRestPlusAPIObject.model('ServerInfo', {
       'Server': fields.Nested(serverInfoServerModel),
       'Jobs': fields.Nested(getJobServerInfoModel(appObj))
-    })  
+    })
 
   #curDateTime must be in UTC
   def getServerInfoJSON(self, curDateTime):
@@ -97,4 +111,3 @@ class appObjClass(parAppObj):
     super(appObjClass, self).exit_gracefully(signum, frame)
 
 appObj = appObjClass()
-
