@@ -29,8 +29,8 @@ class jobsDataClass():
       paginatedParamValues = {
         'offset': 0,
         'pagesize': 100000,
-        'query': '',
-        'sort': '',
+        'query': None,
+        'sort': None,
       }
       loadedData = connectionContext.getPaginatedResult(objectType, paginatedParamValues=paginatedParamValues, outputFN=None)
       ##print(loadedData)
