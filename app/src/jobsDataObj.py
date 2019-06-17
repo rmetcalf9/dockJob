@@ -33,16 +33,16 @@ class jobsDataClass():
         'sort': '',
       }
       loadedData = connectionContext.getPaginatedResult(objectType, paginatedParamValues=paginatedParamValues, outputFN=None)
-      print(loadedData)
+      ##print(loadedData)
       print("Found " + str(len(loadedData["result"])) + " jobs in datastore")
       for curRecord in loadedData["result"]:
         print(curRecord)
         # call init Job Obj
         #call _addJob(self, job)
         raise Exception("Load data Not Implemented")
-        
-    storeConnection.executeInsideTransaction(someFn)  
-  
+
+    storeConnection.executeInsideTransaction(someFn)
+
 
   def _saveJobToObjectStore(self, jobGUID):
     storeConnection = self.appObj.objectStore._getConnectionContext()
@@ -50,14 +50,14 @@ class jobsDataClass():
       #print(self.jobs[jobGUID]._caculatedDict(self.appObj))
       newObjectVersion = connectionContext.saveJSONObject(objectType, jobGUID, self.jobs[jobGUID]._caculatedDict(self.appObj), objectVersion = self.jobs[jobGUID].objectVersion)
       self.jobs[jobGUID].objectVersion = newObjectVersion
-    storeConnection.executeInsideTransaction(someFn)  
+    storeConnection.executeInsideTransaction(someFn)
 
-    
+
   def _deleteJobFromObjectStore(self, jobGUID, objectVersion):
     storeConnection = self.appObj.objectStore._getConnectionContext()
     def someFn(connectionContext):
       connectionContext.removeJSONObject(objectType, jobGUID, objectVersion = objectVersion, ignoreMissingObject = False)
-    storeConnection.executeInsideTransaction(someFn)  
+    storeConnection.executeInsideTransaction(someFn)
 
   #Run Job loop iteration
   def loopIteration(self, appObj, curTime):
@@ -91,7 +91,7 @@ class jobsDataClass():
       'JobsCompletingSucessfully': JobsCompletingSucessfully,
       'JobsLastExecutionFailed': JobsLastExecutionFailed
     }
-    
+
   def getJob(self, guid):
     try:
       r = self.jobs[str(guid)]
@@ -156,7 +156,7 @@ class jobsDataClass():
       newValues['command'],
       newValues['enabled'],
       newValues['repetitionInterval'],
-      newValues.get('pinned',False), 
+      newValues.get('pinned',False),
       newValues.get('overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown',None),
       newValues.get('StateChangeSuccessJobGUID',None),
       newValues.get('StateChangeFailJobGUID',None),
@@ -190,7 +190,7 @@ class jobsDataClass():
   #  - Delete job if it is the next to execute
   #  - Executing a job
   #  - Editing a job
-  # None is a valid next job to execute but when it 
+  # None is a valid next job to execute but when it
   nextJobToExecute = None
   nextJobToExecuteCalcRequired = True
   def getNextJobToExecute(self):
@@ -215,4 +215,3 @@ class jobsDataClass():
     for jobIdx in self.jobs:
       self.jobs[jobIdx].setNextScheduledRun(curTime)
     self.nextJobToExecuteCalcRequired = True
-

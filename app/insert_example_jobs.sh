@@ -2,6 +2,13 @@
 
 echo 'Inserting Example Jobs'
 
+read -p "Continue (y/n)?" CONT
+if [ "$CONT" != "y" ]; then
+  if [ "$CONT" != "Y" ]; then
+    exit 0;
+  fi
+fi
+
 sleep 5
 
 JSON="{    \"enabled\": false,    \"name\": \"SC Success\",    \"repetitionInterval\": \"\",    \"command\": \"ls -la\"  }"
@@ -47,4 +54,3 @@ do
 done
 
 exit 0
-

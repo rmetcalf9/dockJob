@@ -10,6 +10,7 @@ export APIAPP_FRONTENDURL=http://localhost/frontend
 export APIAPP_APIACCESSSECURITY=[]
 export APIAPP_USERFORJOBS=dockjobuser
 export APIAPP_GROUPFORJOBS=dockjobgroup
+export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"SimpleFileStore\", \"BaseLocation\": \"./test/TestFileStore\"}"
 
 
 export APIAPP_VERSION=
@@ -26,5 +27,5 @@ fi
 
 
 #Python app reads parameters from environment variables
-python3 ./src/app.py
+python3.6 ./src/app.py
 
