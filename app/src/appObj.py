@@ -14,7 +14,11 @@ from flask_restplus import fields
 from JobExecutor import JobExecutorClass
 import time
 import datetime
+import json
 from object_store_abstraction import createObjectStoreInstance
+
+InvalidObjectStoreConfigInvalidJSONException = Exception('APIAPP_OBJECTSTORECONFIG value is not valid JSON')
+
 
 class appObjClass(parAppObj):
   jobExecutor = None
@@ -26,46 +30,49 @@ class appObjClass(parAppObj):
   objectStore = None
 
   def init(self, env, serverStartTime, testingMode = False):
-    self.minutesBeforeMostRecentCompletionStatusBecomesUnknown = 49 * 60
-    self.curDateTimeOverrideForTesting = None
-    self.serverStartTime = serverStartTime
-    if self.jobExecutor is not None:
-      #for testing we init multiple times. We need to stop the thread running in this case
-      self.jobExecutor.stopThreadRunning()
-      if self.jobExecutor.isAlive():
-        self.jobExecutor.join()
-      self.jobExecutor = None
-    super(appObjClass, self).init(env, serverStartTime, testingMode)
-    resetJobsData(self)
-
-    self.userforjobs = readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, None)
-    self.groupforjobs = readFromEnviroment(env, 'APIAPP_GROUPFORJOBS', None, None)
-    skipUserCheck = readFromEnviroment(env, 'APIAPP_SKIPUSERCHECK', False, [False, True])
-    self.jobExecutor = JobExecutorClass(self, skipUserCheck)
-
-    #When we are testing we will launch the loop iterations manually
-    if not testingMode:
-      self.jobExecutor.start()
-
-    objectStoreConfigJSON = readFromEnviroment(env, 'APIAPP_OBJECTSTORECONFIG', '{}', None)
-    objectStoreConfigDict = None
     try:
-      if objectStoreConfigJSON != '{}':
-        objectStoreConfigDict = json.loads(objectStoreConfigJSON)
-    except Exception as err:
-      print(err) # for the repr
-      print(str(err)) # for just the message
-      print(err.args) # the arguments that the exception has been called with.
-      raise(InvalidObjectStoreConfigInvalidJSONException)
+      self.minutesBeforeMostRecentCompletionStatusBecomesUnknown = 49 * 60
+      self.curDateTimeOverrideForTesting = None
+      self.serverStartTime = serverStartTime
+      if self.jobExecutor is not None:
+        #for testing we init multiple times. We need to stop the thread running in this case
+        self.jobExecutor.stopThreadRunning()
+        if self.jobExecutor.isAlive():
+          self.jobExecutor.join()
+        self.jobExecutor = None
+      super(appObjClass, self).init(env, serverStartTime, testingMode)
+      resetJobsData(self)
 
-    fns = {
-      'getCurDateTime': self.getCurDateTime,
-      'getPaginatedResult': self.getPaginatedResult
-    }
-    self.objectStore = createObjectStoreInstance(objectStoreConfigDict, fns)
+      self.userforjobs = readFromEnviroment(env, 'APIAPP_USERFORJOBS', None, None)
+      self.groupforjobs = readFromEnviroment(env, 'APIAPP_GROUPFORJOBS', None, None)
+      skipUserCheck = readFromEnviroment(env, 'APIAPP_SKIPUSERCHECK', False, [False, True])
+      self.jobExecutor = JobExecutorClass(self, skipUserCheck)
 
-    appObj.appData['jobsData'].loadFromObjectStore()
-    
+      #When we are testing we will launch the loop iterations manually
+      if not testingMode:
+        self.jobExecutor.start()
+
+      objectStoreConfigJSON = readFromEnviroment(env, 'APIAPP_OBJECTSTORECONFIG', '{}', None)
+      objectStoreConfigDict = None
+      try:
+        if objectStoreConfigJSON != '{}':
+          objectStoreConfigDict = json.loads(objectStoreConfigJSON)
+      except Exception as err:
+        print(err) # for the repr
+        print(str(err)) # for just the message
+        print(err.args) # the arguments that the exception has been called with.
+        raise(InvalidObjectStoreConfigInvalidJSONException)
+
+      fns = {
+        'getCurDateTime': self.getCurDateTime,
+        'getPaginatedResult': self.getPaginatedResult
+      }
+      self.objectStore = createObjectStoreInstance(objectStoreConfigDict, fns)
+
+      appObj.appData['jobsData'].loadFromObjectStore()
+    except Exception as a:
+      self.stopThread()
+      raise a
 
 
   def initOnce(self):

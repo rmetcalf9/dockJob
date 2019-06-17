@@ -32,14 +32,17 @@ class jobsDataClass():
         'query': '',
         'sort': '',
       }
-      return connectionContext.getPaginatedResult(objectType, paginatedParamValues=paginatedParamValues, outputFN=None)
-    loadedData = storeConnection.executeInsideTransaction(someFn)  
+      loadedData = connectionContext.getPaginatedResult(objectType, paginatedParamValues=paginatedParamValues, outputFN=None)
+      print(loadedData)
+      print("Found " + str(len(loadedData["result"])) + " jobs in datastore")
+      for curRecord in loadedData["result"]:
+        print(curRecord)
+        # call init Job Obj
+        #call _addJob(self, job)
+        raise Exception("Load data Not Implemented")
+        
+    storeConnection.executeInsideTransaction(someFn)  
   
-    for curRecord in loadedData["result"]:
-      print(curRecord)
-      # call init Job Obj
-      #call _addJob(self, job)
-      raise Exception("Load data Not Implemented")
 
   def _saveJobToObjectStore(self, jobGUID):
     storeConnection = self.appObj.objectStore._getConnectionContext()

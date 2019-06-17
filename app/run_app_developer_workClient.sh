@@ -11,6 +11,7 @@ export APIAPP_FRONTENDURL=http://somefunnyhostname.com:5080/frontend
 export APIAPP_APIACCESSSECURITY="[{\"type\": \"basic-auth\" }]"
 export APIAPP_USERFORJOBS=dockjobuser
 export APIAPP_GROUPFORJOBS=dockjobgroup
+export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"SimpleFileStore\", \"BaseLocation\": \"./test/TestFileStore\"}"
 
 
 export APIAPP_VERSION=
