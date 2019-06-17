@@ -62,6 +62,7 @@ class test_api(testHelperAPIClient):
     resultJSON['Jobs']['NextJobsToExecute'][0]['lastUpdateDate'] = 'IGNORE'
     resultJSON['Jobs']['NextJobsToExecute'][0]['nextScheduledRun'] = 'IGNORE'
     expRes['Jobs']['NextJobsToExecute'][0]['name'] = data_simpleJobCreateExpRes['name'] + "001"
+    del expRes['Jobs']['NextJobsToExecute'][0]['objectVersion']
     self.assertJSONStringsEqual(resultJSON['Jobs']['NextJobsToExecute'], expRes['Jobs']['NextJobsToExecute'], msg='Next Job To execute detail mismatch') # Check just jobs first
     
     self.assertJSONStringsEqual(resultJSON, expRes, msg='Full comparison missmatch')

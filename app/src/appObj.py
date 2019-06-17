@@ -58,6 +58,15 @@ class appObjClass(parAppObj):
       print(err.args) # the arguments that the exception has been called with.
       raise(InvalidObjectStoreConfigInvalidJSONException)
 
+    fns = {
+      'getCurDateTime': self.getCurDateTime,
+      'getPaginatedResult': self.getPaginatedResult
+    }
+    self.objectStore = createObjectStoreInstance(objectStoreConfigDict, fns)
+
+    appObj.appData['jobsData'].loadFromObjectStore()
+    
+
 
   def initOnce(self):
     super(appObjClass, self).initOnce()

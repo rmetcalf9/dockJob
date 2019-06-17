@@ -9,7 +9,7 @@ from werkzeug.exceptions import BadRequest
 # One instance of this class is held by the appObj
 # this class keeps track of all the jobObjcets
 
-class jobsDataClass():
+class MOCKjobsDataClass():
   # map of Jobs keyed by GUID
   jobs = None
   # map of Job name to guid
@@ -20,6 +20,10 @@ class jobsDataClass():
     self.jobs = SortedDict()
     self.jobs_name_lookup = SortedDict()
     self.appObj = appObj
+
+  def loadFromObjectStore(self):
+    pass
+
 
   #Run Job loop iteration
   def loopIteration(self, appObj, curTime):

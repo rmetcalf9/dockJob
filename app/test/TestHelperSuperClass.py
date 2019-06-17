@@ -29,6 +29,7 @@ class testHelperSuperClass(unittest.TestCase):
     result['nextScheduledRun'] = expectedResult['nextScheduledRun']
     result['creationDate'] = expectedResult['creationDate']
     result['lastUpdateDate'] = expectedResult['lastUpdateDate']
+    result['objectVersion'] = expectedResult['objectVersion']
     self.assertJSONStringsEqual(result, expectedResult);
 
   def checkGotRightException(self, context, ExpectedException):

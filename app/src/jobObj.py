@@ -29,6 +29,7 @@ class jobClass():
   StateChangeUnknownJobGUID = None
 
   CompletionstatusLock = None
+  objectVersion = None
 
   def __repr__(self):
     ret = 'jobClass('
@@ -115,6 +116,8 @@ class jobClass():
     #fields excluded from JSON output
     self.resetCompletionStatusToUnknownTime = None
     self.CompletionstatusLock = Lock()
+    
+    self.objectVersion = None
 
   def _getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(self, appObj):
     if self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown == None:

@@ -33,6 +33,7 @@ data_simpleJobCreateExpRes = {
   "StateChangeFailJobNAME": None,
   "StateChangeUnknownJobGUID": None,
   "StateChangeUnknownJobNAME": None,
+  "objectVersion": 1
 }
 
 data_simpleManualJobCreateParamsWithAllOptionalFields = dict(data_simpleJobCreateParams)

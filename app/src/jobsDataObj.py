@@ -5,9 +5,10 @@ from sortedcontainers import SortedDict
 
 from werkzeug.exceptions import BadRequest
 
+objectType = "jobsData"
 
 # One instance of this class is held by the appObj
-# this class keeps track of all the jobObjcets
+# this class keeps track of all the jobObjects
 
 class jobsDataClass():
   # map of Jobs keyed by GUID
@@ -20,6 +21,40 @@ class jobsDataClass():
     self.jobs = SortedDict()
     self.jobs_name_lookup = SortedDict()
     self.appObj = appObj
+
+  #Called by appObj when the program is started and objectstore is setup
+  def loadFromObjectStore(self):
+    storeConnection = self.appObj.objectStore._getConnectionContext()
+    def someFn(connectionContext):
+      paginatedParamValues = {
+        'offset': 0,
+        'pagesize': 100000,
+        'query': '',
+        'sort': '',
+      }
+      return connectionContext.getPaginatedResult(objectType, paginatedParamValues=paginatedParamValues, outputFN=None)
+    loadedData = storeConnection.executeInsideTransaction(someFn)  
+  
+    for curRecord in loadedData["result"]:
+      print(curRecord)
+      # call init Job Obj
+      #call _addJob(self, job)
+      raise Exception("Load data Not Implemented")
+
+  def _saveJobToObjectStore(self, jobGUID):
+    storeConnection = self.appObj.objectStore._getConnectionContext()
+    def someFn(connectionContext):
+      #print(self.jobs[jobGUID]._caculatedDict(self.appObj))
+      newObjectVersion = connectionContext.saveJSONObject(objectType, jobGUID, self.jobs[jobGUID]._caculatedDict(self.appObj), objectVersion = self.jobs[jobGUID].objectVersion)
+      self.jobs[jobGUID].objectVersion = newObjectVersion
+    storeConnection.executeInsideTransaction(someFn)  
+
+    
+  def _deleteJobFromObjectStore(self, jobGUID, objectVersion):
+    storeConnection = self.appObj.objectStore._getConnectionContext()
+    def someFn(connectionContext):
+      connectionContext.removeJSONObject(objectType, jobGUID, objectVersion = objectVersion, ignoreMissingObject = False)
+    storeConnection.executeInsideTransaction(someFn)  
 
   #Run Job loop iteration
   def loopIteration(self, appObj, curTime):
@@ -63,8 +98,8 @@ class jobsDataClass():
   def getJobByName(self, name):
     return self.jobs[str(self.jobs_name_lookup[jobClass.uniqueJobNameStatic(name)])]
 
-  # return GUID or error
-  def addJob(self, job):
+  # Adds job to internal structures but not objectstore
+  def _addJob(self, job):
     uniqueJobName = job.uniqueName()
     if (str(job.guid) in self.jobs):
       return {'msg': 'GUID already in use', 'guid':''}
@@ -74,6 +109,14 @@ class jobsDataClass():
     self.jobs_name_lookup[uniqueJobName] = job.guid
     self.nextJobToExecuteCalcRequired = True
     return {'msg': 'OK', 'guid':job.guid}
+
+
+  # return GUID or error
+  def addJob(self, job):
+    retVal = self._addJob(job)
+    if retVal['msg']=='OK':
+      self._saveJobToObjectStore(str(retVal['guid']))
+    return retVal
 
   def updateJob(self, jobObj, newValues):
     jobClass.assertValidName(newValues['name'])
@@ -116,8 +159,11 @@ class jobsDataClass():
       newValues.get('StateChangeFailJobGUID',None),
       newValues.get('StateChangeUnknownJobGUID',None)
     )
+    self._saveJobToObjectStore(str(jobObj.guid))
+
 
   def deleteJob(self, jobObj):
+    objectVersionOfObjectToDelete = jobObj.objectVersion
     uniqueJobName = jobObj.uniqueName()
     tmpVar = self.jobs_name_lookup.pop(uniqueJobName)
     if tmpVar is None:
@@ -131,6 +177,7 @@ class jobsDataClass():
     if self.nextJobToExecute != None:
       if jobObj.guid == self.nextJobToExecute.guid:
         self.nextJobToExecuteCalcRequired = True
+    self._deleteJobFromObjectStore(str(jobObj.guid), objectVersionOfObjectToDelete)
 
   #nextJobToExecute holds the next job scheduled to execute
   # When ever any actions are preformed that may change this the CalcRequired flag is set to true
@@ -160,7 +207,7 @@ class jobsDataClass():
   def registerRunDetails(self, jobGUID, newLastRunDate, newLastRunReturnCode, triggerExecutionObj):
     self.jobs[str(jobGUID)].registerRunDetails(self.appObj, newLastRunDate, newLastRunReturnCode, triggerExecutionObj)
 
-  #funciton for testing allowing us to pretend it is currently a different time
+  #function for testing allowing us to pretend it is currently a different time
   def recaculateExecutionTimesBasedonNewTime(self, curTime):
     for jobIdx in self.jobs:
       self.jobs[jobIdx].setNextScheduledRun(curTime)
