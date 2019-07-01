@@ -15,10 +15,11 @@ if ! [ -x "$(command -v ${CMD_NPM})" ]; then
   exit 1
 fi
 
-if ! [ -x "$(command -v ${CMD_CODECEPTJS})" ]; then
-  echo "Error: ${CMD_CODECEPTJS} is not installed." >&2
-  exit 1
-fi
+echo "Tests disabled"
+#if ! [ -x "$(command -v ${CMD_CODECEPTJS})" ]; then
+#  echo "Error: ${CMD_CODECEPTJS} is not installed." >&2
+#  exit 1
+#fi
 
 if ! [ -x "$(command -v ${CMD_QUASAR})" ]; then
   echo "Error: ${CMD_QUASAR} is not installed." >&2
@@ -36,4 +37,3 @@ if ! [ -x "$(command -v ${CMD_GIT})" ]; then
 fi
 
 exit 0
-
