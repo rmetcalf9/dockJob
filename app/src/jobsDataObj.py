@@ -39,7 +39,7 @@ class jobsDataClass():
         print(curRecord)
         # call init Job Obj
         #call _addJob(self, job)
-        raise Exception("Load data Not Implemented")
+        ##raise Exception("Load data Not Implemented")
 
     storeConnection.executeInsideTransaction(someFn)
 

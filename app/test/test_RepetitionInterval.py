@@ -546,6 +546,3 @@ class test_RepetitionInterval(testHelperSuperClass):
     with self.assertRaises(Exception) as context:
       a = RepetitionIntervalClass("DAILY:1:11:-------:UTC")
     self.checkGotRightException(context,badParamater)
-
-
-
