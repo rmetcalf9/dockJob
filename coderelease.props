@@ -1,3 +1,5 @@
-export svnMode=RJMDOCKERSIMPLE
+export svnMode=RJMDOCKERWITHQUASARFRONTEND
 export DOCKER_USERNAME=metcarob
 export DOCKER_IMAGENAME=dockjob
+export DOCKER_QUASARBUILDMODE=pwa
+export DOCKER_FRONTENDDIR=/webfrontend
