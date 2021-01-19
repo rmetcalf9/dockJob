@@ -1,0 +1,3 @@
+export svnMode=RJMDOCKERSIMPLE
+export DOCKER_USERNAME=metcarob
+export DOCKER_IMAGENAME=dockjob
