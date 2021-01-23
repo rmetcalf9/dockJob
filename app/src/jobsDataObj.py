@@ -1,4 +1,5 @@
 from jobObj import jobClass, jobFactory
+import copy
 
 #I need jobs to be stored in order so pagination works
 from sortedcontainers import SortedDict
@@ -35,9 +36,23 @@ class jobsDataClass():
       loadedData = connectionContext.getPaginatedResult(objectType, paginatedParamValues=paginatedParamValues, outputFN=None)
       ##print(loadedData)
       print("Found " + str(len(loadedData["result"])) + " jobs in datastore")
-      for curRecord in loadedData["result"]:
-        jobObj = jobFactory.loadFromDB(curRecord, appObj=self.appObj)
-        self._addJob(jobObj)
+      jobsToLoad = copy.deepcopy(loadedData["result"])
+      lastLen = -1
+      while len(jobsToLoad) > 0:
+        if lastLen == len(jobsToLoad):
+          print("Remaining jobs to load:", jobsToLoad)
+          raise Exception("ERROR - there must be a circular job dependancy in datastore")
+        lastLen = len(jobsToLoad)
+
+        jobsThatFailedToLoad = []
+        for curRecord in jobsToLoad:
+          try:
+            jobObj = jobFactory.loadFromDB(curRecord, appObj=self.appObj)
+            self._addJob(jobObj)
+          except:
+            jobsThatFailedToLoad.append(curRecord)
+
+        jobsToLoad = jobsThatFailedToLoad
 
     storeConnection.executeInsideTransaction(someFn)
 

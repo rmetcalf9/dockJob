@@ -18,6 +18,19 @@ sampleJob = jobObj.jobClass(
   StateChangeFailJobGUID=None,
   StateChangeUnknownJobGUID=None
 )
+sampleJobDependingOnLastJob = jobObj.jobClass(
+  appObj=appObj,
+  name="sampleJob",
+  command="ls -la",
+  enabled=False,
+  repetitionInterval=None,
+  pinned=True,
+  overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown=123,
+  StateChangeSuccessJobGUID=sampleJob.guid,
+  StateChangeFailJobGUID=None,
+  StateChangeUnknownJobGUID=None,
+  verifyDependentJobGuids=False
+)
 
 class helperClass(TestHelperSuperClass.testHelperAPIClient):
   def addJobToStore(self, objectStore, job):
@@ -27,13 +40,14 @@ class helperClass(TestHelperSuperClass.testHelperAPIClient):
       newObjectVersion = connectionContext.saveJSONObject(
         jobsDataObj.objectType,
         job.guid,
-        job._caculatedDict(appObj),
+        job._caculatedDictWithoutAppObjDependancy(),
         objectVersion = job.objectVersion
       )
       job.objectVersion = newObjectVersion
     storeConnection.executeInsideTransaction(someFn)
 
   def objectStorePopulationHook(self, objectStore):
+    self.addJobToStore(objectStore=objectStore, job=sampleJobDependingOnLastJob)
     self.addJobToStore(objectStore=objectStore, job=sampleJob)
 
 

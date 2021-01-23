@@ -109,7 +109,8 @@ class jobClass():
       StateChangeSuccessJobGUID,
       StateChangeFailJobGUID,
       StateChangeUnknownJobGUID,
-      guid=None #used when loading from DB
+      guid=None, #used when loading from DB
+      verifyDependentJobGuids=True #False when testing
   ):
     jobClass.assertValidName(name)
     jobClass.assertValidRepetitionInterval(repetitionInterval, enabled)
@@ -134,9 +135,14 @@ class jobClass():
       overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = None
     self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
     self.mostRecentCompletionStatus = 'Unknown'
-    self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID, self.guid)
-    self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID, self.guid)
-    self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID, self.guid)
+    if verifyDependentJobGuids:
+      self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID, self.guid)
+      self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID, self.guid)
+      self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID, self.guid)
+    else:
+      self.StateChangeSuccessJobGUID = StateChangeSuccessJobGUID
+      self.StateChangeFailJobGUID = StateChangeFailJobGUID
+      self.StateChangeUnknownJobGUID = StateChangeUnknownJobGUID
 
     #fields excluded from JSON output
     self.resetCompletionStatusToUnknownTime = None
@@ -160,8 +166,7 @@ class jobClass():
     else:
       return "Fail"
 
-  # Needed when we use extra caculated values in the dict
-  def _caculatedDict(self, appObj):
+  def _caculatedDictWithoutAppObjDependancy(self):
     ret = dict(self.__dict__)
     del ret['CompletionstatusLock']
     del ret['resetCompletionStatusToUnknownTime']
@@ -172,6 +177,13 @@ class jobClass():
     ret['StateChangeSuccessJobNAME'] = None
     ret['StateChangeFailJobNAME'] = None
     ret['StateChangeUnknownJobNAME'] = None
+
+    return ret
+
+  # Needed when we use extra caculated values in the dict
+  def _caculatedDict(self, appObj):
+    ret = self._caculatedDictWithoutAppObjDependancy()
+
     if self.StateChangeSuccessJobGUID is not None:
       ret['StateChangeSuccessJobNAME'] = appObj.appData['jobsData'].getJob(self.StateChangeSuccessJobGUID).name
     if self.StateChangeFailJobGUID is not None:
