@@ -9,6 +9,10 @@ import datetime
 import pytz
 from baseapp_for_restapi_backend_with_swagger import from_iso8601
 
+from nose.plugins.attrib import attr
+def wipd(f):
+    return attr('wip')(f)
+
 
 env = {
   'APIAPP_MODE': 'DOCKER',

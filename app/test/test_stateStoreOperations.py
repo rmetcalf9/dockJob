@@ -1,0 +1,8 @@
+import TestHelperSuperClass
+import unittest
+import json
+from commonJSONStrings import data_simpleJobCreateParams, data_simpleJobCreateExpRes, data_simpleManualJobCreateParams
+
+@TestHelperSuperClass.wipd
+class test_stateStoreOperations(TestHelperSuperClass.testHelperAPIClient):
+  pass
