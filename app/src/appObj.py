@@ -29,7 +29,7 @@ class appObjClass(parAppObj):
   minutesBeforeMostRecentCompletionStatusBecomesUnknown = None
   objectStore = None
 
-  def init(self, env, serverStartTime, testingMode = False):
+  def init(self, env, serverStartTime, testingMode = False, objectStoreTestingPopulationHookFn = None):
     try:
       self.minutesBeforeMostRecentCompletionStatusBecomesUnknown = 49 * 60
       self.curDateTimeOverrideForTesting = None
@@ -67,6 +67,11 @@ class appObjClass(parAppObj):
         'getCurDateTime': self.getCurDateTime
       }
       self.objectStore = createObjectStoreInstance(objectStoreConfigDict, fns)
+
+      if testingMode:
+        if objectStoreTestingPopulationHookFn is not None:
+          # Give our tests the chance to inject some base data
+          objectStoreTestingPopulationHookFn(objectStore = self.objectStore)
 
       appObj.appData['jobsData'].loadFromObjectStore()
     except Exception as a:

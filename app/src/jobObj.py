@@ -6,6 +6,27 @@ from threading import Lock
 from dateutil.relativedelta import relativedelta
 from RepetitionInterval import RepetitionIntervalClass
 
+class jobFactoryClass():
+  def loadFromDB(self, jobFromDBTuple, appObj):
+    jobFromDB = jobFromDBTuple[0]
+    repetitionInterval = jobFromDB["repetitionInterval"]
+    print("repetitionInterval:", repetitionInterval, ":")
+    return jobClass(
+      appObj = appObj,
+      name = jobFromDB["name"],
+      command = jobFromDB["command"],
+      enabled = jobFromDB["enabled"],
+      repetitionInterval = repetitionInterval,
+      pinned = jobFromDB["pinned"],
+      overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = jobFromDB["overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown"],
+      StateChangeSuccessJobGUID = jobFromDB["StateChangeSuccessJobGUID"],
+      StateChangeFailJobGUID = jobFromDB["StateChangeUnknownJobGUID"],
+      StateChangeUnknownJobGUID = jobFromDB["StateChangeUnknownJobGUID"],
+      guid = jobFromDB["guid"]
+  )
+
+jobFactory = jobFactoryClass()
+
 
 #Class to represent a job
 class jobClass():
@@ -87,12 +108,16 @@ class jobClass():
       overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown,
       StateChangeSuccessJobGUID,
       StateChangeFailJobGUID,
-      StateChangeUnknownJobGUID
+      StateChangeUnknownJobGUID,
+      guid=None #used when loading from DB
   ):
     jobClass.assertValidName(name)
     jobClass.assertValidRepetitionInterval(repetitionInterval, enabled)
     curTime = datetime.datetime.now(pytz.timezone("UTC"))
-    self.guid = str(uuid.uuid4())
+    if guid is None:
+      self.guid = str(uuid.uuid4())
+    else:
+      self.guid = guid
     self.name = name
     self.command = command
     self.enabled = enabled

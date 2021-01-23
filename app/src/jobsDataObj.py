@@ -1,4 +1,4 @@
-from jobObj import jobClass
+from jobObj import jobClass, jobFactory
 
 #I need jobs to be stored in order so pagination works
 from sortedcontainers import SortedDict
@@ -36,10 +36,8 @@ class jobsDataClass():
       ##print(loadedData)
       print("Found " + str(len(loadedData["result"])) + " jobs in datastore")
       for curRecord in loadedData["result"]:
-        print(curRecord)
-        # call init Job Obj
-        #call _addJob(self, job)
-        ##raise Exception("Load data Not Implemented")
+        jobObj = jobFactory.loadFromDB(curRecord, appObj=self.appObj)
+        self._addJob(jobObj)
 
     storeConnection.executeInsideTransaction(someFn)
 

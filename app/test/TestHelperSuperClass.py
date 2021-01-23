@@ -79,10 +79,13 @@ class testHelperAPIClient(testHelperSuperClass):
   testClient = None
   standardStartupTime = pytz.timezone('Europe/London').localize(datetime.datetime(2018,1,1,13,46,0,0))
 
+  def objectStorePopulationHook(self, objectStore):
+    pass #designed to be overriden
+
   def setUp(self):
     # curDatetime = datetime.datetime.now(pytz.utc)
     # for testing always pretend the server started at a set datetime
-    appObj.init(env, self.standardStartupTime, testingMode = True)
+    appObj.init(env, self.standardStartupTime, testingMode = True, objectStoreTestingPopulationHookFn = self.objectStorePopulationHook)
     self.testClient = appObj.flaskAppObject.test_client()
     self.testClient.testing = True 
   def tearDown(self):
@@ -97,7 +100,7 @@ class testHelperAPIClient(testHelperSuperClass):
     
   def assertCorrectTotalJobs(self, num):
     # Ensure total reflected in serverinfo
-    self.assertEqual(self.getTotalJobs(), num, msg='Server Info Total Jobs field not correct');
+    self.assertEqual(self.getTotalJobs(), num, msg='Server Info Total Jobs field not correct')
 
   def findRecord(self, params, name):
     for cur in params:
