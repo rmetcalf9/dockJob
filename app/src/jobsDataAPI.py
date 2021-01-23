@@ -1,5 +1,5 @@
 from flask import request
-from flask_restplus import Resource, fields, apidoc
+from flask_restx import Resource, fields, apidoc
 from werkzeug.exceptions import BadRequest
 import uuid
 import json

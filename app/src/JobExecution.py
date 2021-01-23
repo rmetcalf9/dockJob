@@ -3,7 +3,7 @@ import datetime
 import pytz
 import uuid
 from subprocess import TimeoutExpired
-from flask_restplus import fields
+from flask_restx import fields
 
 JobExecutionCreationModel = None
 def getJobExecutionCreationModel(appObj):

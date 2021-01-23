@@ -10,7 +10,7 @@ from baseapp_for_restapi_backend_with_swagger import AppObjBaseClass as parAppOb
 from serverInfoAPI import registerAPI as registerMainApi
 from jobsDataAPI import registerAPI as registerJobsApi, resetData as resetJobsData, getJobServerInfoModel
 from jobExecutionsDataAPI import registerAPI as registerJobExecutionsApi
-from flask_restplus import fields
+from flask_restx import fields
 from JobExecutor import JobExecutorClass
 import time
 import datetime
