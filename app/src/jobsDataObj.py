@@ -38,9 +38,12 @@ class jobsDataClass():
       print("Found " + str(len(loadedData["result"])) + " jobs in datastore")
       jobsToLoad = copy.deepcopy(loadedData["result"])
       lastLen = -1
+      lastException = None
       while len(jobsToLoad) > 0:
         if lastLen == len(jobsToLoad):
-          print("Remaining jobs to load:", jobsToLoad)
+          print("There are " + str(len(jobsToLoad)) + " jobs that could not be loaded")
+          print("Detail:", jobsToLoad)
+          print("Last exception on loading job:", lastException)
           raise Exception("ERROR - there must be a circular job dependancy in datastore")
         lastLen = len(jobsToLoad)
 
@@ -49,7 +52,8 @@ class jobsDataClass():
           try:
             jobObj = jobFactory.loadFromDB(curRecord, appObj=self.appObj)
             self._addJob(jobObj)
-          except:
+          except Exception as e:
+            lastException = e
             jobsThatFailedToLoad.append(curRecord)
 
         jobsToLoad = jobsThatFailedToLoad
@@ -57,7 +61,7 @@ class jobsDataClass():
     storeConnection.executeInsideTransaction(someFn)
 
 
-  def _saveJobToObjectStore(self, jobGUID):
+  def _saveJobToObjectStore(self, jobGUID, connectionContext):
     storeConnection = self.appObj.objectStore._getConnectionContext()
     def someFn(connectionContext):
       #print(self.jobs[jobGUID]._caculatedDict(self.appObj))
@@ -66,11 +70,8 @@ class jobsDataClass():
     storeConnection.executeInsideTransaction(someFn)
 
 
-  def _deleteJobFromObjectStore(self, jobGUID, objectVersion):
-    storeConnection = self.appObj.objectStore._getConnectionContext()
-    def someFn(connectionContext):
-      connectionContext.removeJSONObject(objectType, jobGUID, objectVersion = objectVersion, ignoreMissingObject = False)
-    storeConnection.executeInsideTransaction(someFn)
+  def _deleteJobFromObjectStore(self, jobGUID, objectVersion, connectionContext):
+    connectionContext.removeJSONObject(objectType, jobGUID, objectVersion = objectVersion, ignoreMissingObject = False)
 
   #Run Job loop iteration
   def loopIteration(self, appObj, curTime):
@@ -106,13 +107,19 @@ class jobsDataClass():
     }
 
   def getJob(self, guid):
+    r = None
     try:
       r = self.jobs[str(guid)]
     except KeyError:
-      raise BadRequest('Invalid Job GUID')
+      raise BadRequest('getJob - Invalid Job GUID - ' + str(guid))
     return r
   def getJobByName(self, name):
-    return self.jobs[str(self.jobs_name_lookup[jobClass.uniqueJobNameStatic(name)])]
+    r = None
+    try:
+      r = self.jobs[str(self.jobs_name_lookup[jobClass.uniqueJobNameStatic(name)])]
+    except KeyError:
+      raise BadRequest('getJob - Invalid Job NAME - ' + str(name))
+    return r
 
   # Adds job to internal structures but not objectstore
   def _addJob(self, job):
@@ -128,13 +135,13 @@ class jobsDataClass():
 
 
   # return GUID or error
-  def addJob(self, job):
+  def addJob(self, job, connectionContext):
     retVal = self._addJob(job)
     if retVal['msg']=='OK':
-      self._saveJobToObjectStore(str(retVal['guid']))
+      self._saveJobToObjectStore(str(retVal['guid']), connectionContext)
     return retVal
 
-  def updateJob(self, jobObj, newValues):
+  def updateJob(self, jobObj, newValues, connectionContext):
     jobClass.assertValidName(newValues['name'])
     jobClass.assertValidRepetitionInterval(newValues['repetitionInterval'], newValues['enabled'])
 
@@ -175,10 +182,11 @@ class jobsDataClass():
       newValues.get('StateChangeFailJobGUID',None),
       newValues.get('StateChangeUnknownJobGUID',None)
     )
-    self._saveJobToObjectStore(str(jobObj.guid))
 
+    # must happen after setting values otherwise old values will be written
+    self._saveJobToObjectStore(str(jobObj.guid), connectionContext)
 
-  def deleteJob(self, jobObj):
+  def deleteJob(self, jobObj, connectionContext):
     objectVersionOfObjectToDelete = jobObj.objectVersion
     uniqueJobName = jobObj.uniqueName()
     tmpVar = self.jobs_name_lookup.pop(uniqueJobName)
@@ -187,13 +195,24 @@ class jobsDataClass():
     tmpVar2 = self.jobs.pop(jobObj.guid)
     if tmpVar2 is None:
       raise Execption('Failed to delete a job could not get it out of the jobs')
+
+    # If this job is called by any other jobs we must update those jobs setting the values to None
+    for curJob in self.jobs:
+      cubJobObj = self.jobs[curJob]
+      if jobObj.guid == curJob:
+        raise Exception("deleteJob should not reach this code job was just removed")
+
+      needsSave = cubJobObj.removeRemoveRelianceOnOtherJob(guid=jobObj.guid)
+      if needsSave:
+        self._saveJobToObjectStore(str(cubJobObj.guid), connectionContext)
+
     # Delete any executions
     self.appObj.jobExecutor.deleteExecutionsForJob(jobObj.guid)
     # If it is next to execute we need to recaculate
     if self.nextJobToExecute != None:
       if jobObj.guid == self.nextJobToExecute.guid:
         self.nextJobToExecuteCalcRequired = True
-    self._deleteJobFromObjectStore(str(jobObj.guid), objectVersionOfObjectToDelete)
+    self._deleteJobFromObjectStore(str(jobObj.guid), objectVersionOfObjectToDelete, connectionContext)
 
   #nextJobToExecute holds the next job scheduled to execute
   # When ever any actions are preformed that may change this the CalcRequired flag is set to true

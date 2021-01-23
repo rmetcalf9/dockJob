@@ -124,7 +124,12 @@ def registerAPI(appObj):
         content.get('StateChangeFailJobGUID',None),
         content.get('StateChangeUnknownJobGUID',None)
       )
-      res = appObj.appData['jobsData'].addJob(jobObj)
+
+      storeConnection = appObj.objectStore._getConnectionContext()
+      def someFn(connectionContext):
+        return appObj.appData['jobsData'].addJob(jobObj, connectionContext)
+      res = storeConnection.executeInsideTransaction(someFn)
+
       if res['msg']!='OK':
         raise BadRequest(res['msg'])
       return appObj.appData['jobsData'].getJob(res['guid'])._caculatedDict(appObj)
@@ -143,8 +148,9 @@ def registerAPI(appObj):
       except:
         try:
           return appObj.appData['jobsData'].getJobByName(guid)._caculatedDict(appObj)
-        except:
-          raise BadRequest('Invalid Job Identifier')
+        except Exception as e:
+          raise BadRequest("Failed to find job with guid or name matching " + guid)
+          #raise BadRequest(type(e).__name__ + " - " + str(e.args))
       return None
 
     @nsJobs.doc('delete_job')
@@ -160,7 +166,12 @@ def registerAPI(appObj):
           deletedJob = appObj.appData['jobsData'].getJobByName(guid)
         except:
           raise BadRequest('Invalid Job Identifier')
-      appObj.appData['jobsData'].deleteJob(deletedJob)
+
+      storeConnection = appObj.objectStore._getConnectionContext()
+      def someFn(connectionContext):
+        appObj.appData['jobsData'].deleteJob(deletedJob, connectionContext)
+      storeConnection.executeInsideTransaction(someFn)
+
       return deletedJob._caculatedDict(appObj)
 
     @nsJobs.doc('update_job')
@@ -178,7 +189,12 @@ def registerAPI(appObj):
           Job = appObj.appData['jobsData'].getJobByName(guid)
         except:
           raise BadRequest('Invalid Job Identifier')
-      appObj.appData['jobsData'].updateJob(Job, request.get_json())
+
+      storeConnection = appObj.objectStore._getConnectionContext()
+      def someFn(connectionContext):
+        appObj.appData['jobsData'].updateJob(Job, request.get_json(), connectionContext)
+      storeConnection.executeInsideTransaction(someFn)
+
       return Job._caculatedDict(appObj)
 
   @nsJobs.route('/<string:guid>/execution')

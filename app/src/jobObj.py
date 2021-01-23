@@ -10,7 +10,6 @@ class jobFactoryClass():
   def loadFromDB(self, jobFromDBTuple, appObj):
     jobFromDB = jobFromDBTuple[0]
     repetitionInterval = jobFromDB["repetitionInterval"]
-    print("repetitionInterval:", repetitionInterval, ":")
     return jobClass(
       appObj = appObj,
       name = jobFromDB["name"],
@@ -22,7 +21,8 @@ class jobFactoryClass():
       StateChangeSuccessJobGUID = jobFromDB["StateChangeSuccessJobGUID"],
       StateChangeFailJobGUID = jobFromDB["StateChangeUnknownJobGUID"],
       StateChangeUnknownJobGUID = jobFromDB["StateChangeUnknownJobGUID"],
-      guid = jobFromDB["guid"]
+      guid = jobFromDB["guid"],
+      loadingObjectVersion = jobFromDBTuple[1]
   )
 
 jobFactory = jobFactoryClass()
@@ -110,7 +110,8 @@ class jobClass():
       StateChangeFailJobGUID,
       StateChangeUnknownJobGUID,
       guid=None, #used when loading from DB
-      verifyDependentJobGuids=True #False when testing
+      verifyDependentJobGuids=True, #False when testing
+      loadingObjectVersion=None #used when loading from DB
   ):
     jobClass.assertValidName(name)
     jobClass.assertValidRepetitionInterval(repetitionInterval, enabled)
@@ -148,7 +149,7 @@ class jobClass():
     self.resetCompletionStatusToUnknownTime = None
     self.CompletionstatusLock = Lock()
     
-    self.objectVersion = None
+    self.objectVersion = loadingObjectVersion
 
   def _getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(self, appObj):
     if self.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown == None:
@@ -218,6 +219,20 @@ class jobClass():
     self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID, self.guid)
     self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID, self.guid)
     self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID, self.guid)
+
+  def removeRemoveRelianceOnOtherJob(self, guid):
+    # return True if a change is made
+    changed = False
+    if self.StateChangeSuccessJobGUID == guid:
+      self.StateChangeSuccessJobGUID = None
+      changed = True
+    if self.StateChangeFailJobGUID == guid:
+      self.StateChangeFailJobGUID = None
+      changed = True
+    if self.StateChangeUnknownJobGUID == guid:
+      self.StateChangeUnknownJobGUID = None
+      changed = True
+    return changed
 
   def setNextScheduledRun(self, curTime):
     ri = None
@@ -302,3 +317,4 @@ class jobClass():
         newStatus='Unknown',
         triggerExecutionObj=None
       )
+

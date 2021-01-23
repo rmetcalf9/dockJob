@@ -51,7 +51,7 @@ class helperClass(TestHelperSuperClass.testHelperAPIClient):
     self.addJobToStore(objectStore=objectStore, job=sampleJob)
 
 
-@TestHelperSuperClass.wipd
+##@TestHelperSuperClass.wipd
 class test_stateStoreOperations(helperClass):
 
   def test_loadSingleJobFromStore(self):
