@@ -105,6 +105,11 @@
                   :disable="createJobMinuteDisabled"
                   v-if="!createJobMinuteDisabled"
                 />
+                <q-input v-model="showCreateJobDialogData.repetitionInterval.sethourHourString" type="text" label="Comma seperates list of hours to run job" error-label="Comma seperated list of hours to run job (0-23)"
+                  :error="createJobInValidRepSetHourHourString"
+                  :disable="createJobSetHourHourStringDisabled"
+                  v-if="!createJobSetHourHourStringDisabled"
+                />
                 <q-input v-model="showCreateJobDialogData.repetitionInterval.hourlyMinuteString" type="text" label="Comma seperates list of Minutes past hour to run" error-label="Comma seperated list of minutes past hour to run job (0-59)"
                   :error="createJobInValidRepHourlyMinuteString"
                   :disable="createJobHourlyMinuteStringDisabled"
@@ -183,10 +188,15 @@ function initShowCreateJobDialogData () {
         {
           label: 'Hourly',
           value: 'HOURLY'
+        },
+        {
+          label: 'Set Hours',
+          value: 'SETHOUR'
         }
       ],
       minute: 1,
       hourlyMinuteString: '15,45',
+      sethourHourString: '01,22',
       hour: 1,
       days: [],
       dayOptions: [
@@ -258,6 +268,9 @@ function getRepIntervalString (dialogData) {
   // Even if it is disabled still output the RI string
   // if (!dialogData.enabled) return ''
 
+  if (dialogData.repetitionInterval.mode === 'SETHOUR') {
+    return 'SETHOUR:' + pad(dialogData.repetitionInterval.minute, 2) + ':' + dialogData.repetitionInterval.sethourHourString.trim() + ':' + dialogData.repetitionInterval.timezone
+  }
   if (dialogData.repetitionInterval.mode === 'HOURLY') {
     return 'HOURLY:' + dialogData.repetitionInterval.hourlyMinuteString.trim()
   }
@@ -391,6 +404,12 @@ export default {
             // this.showCreateJobDialogData.repetitionInterval.days = []
             // this.showCreateJobDialogData.repetitionInterval.timezone = arr[4]
             // this.showCreateJobDialogData.repetitionInterval.dayofmonth = arr[3]
+          } else if (this.origJobObject.repetitionInterval.startsWith('SETHOUR')) {
+            arr = this.origJobObject.repetitionInterval.split(':')
+            this.showCreateJobDialogData.repetitionInterval.mode = 'SETHOUR'
+            this.showCreateJobDialogData.repetitionInterval.minute = arr[1]
+            this.showCreateJobDialogData.repetitionInterval.sethourHourString = arr[2]
+            this.showCreateJobDialogData.repetitionInterval.timezone = arr[3]
           } else {
             console.log('Unrecognised type - "' + origJobObject.repetitionInterval + '"')
           }
@@ -469,10 +488,16 @@ export default {
   },
   computed: {
     createJobHourDisabled () {
+      if (this.showCreateJobDialogData.repetitionInterval.mode === 'SETHOUR') {
+        return true
+      }
       return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))
     },
     createJobMinuteDisabled () {
       return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode !== 'HOURLY'))
+    },
+    createJobSetHourHourStringDisabled () {
+      return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode === 'SETHOUR'))
     },
     createJobHourlyMinuteStringDisabled () {
       return !((this.showCreateJobDialogData.enabled) && (this.showCreateJobDialogData.repetitionInterval.mode === 'HOURLY'))
@@ -495,6 +520,12 @@ export default {
     },
     createJobInValidRepMinute () {
       return (!this.createJobMinuteDisabled) && ((this.showCreateJobDialogData.repetitionInterval.minute < 0) || (this.showCreateJobDialogData.repetitionInterval.minute > 59))
+    },
+    createJobInValidRepSetHourHourString () {
+      if (this.createJobSetHourHourStringDisabled) {
+        return false
+      }
+      return commaSeperatedIntListIsInvalid(this.showCreateJobDialogData.repetitionInterval.sethourHourString.trim(), 0, 23)
     },
     createJobInValidRepHourlyMinuteString () {
       if (this.createJobHourlyMinuteStringDisabled) {
@@ -528,6 +559,7 @@ export default {
       if (this.createJobInValidDays) return false
       if (this.createJobInValidTimezone) return false
       if (this.createJobInValidRepHourlyMinuteString) return false
+      if (this.createJobInValidRepSetHourHourString) return false
       if (this.createJobInValidDayOfMonth) return false
       if (this.createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) return false
 
