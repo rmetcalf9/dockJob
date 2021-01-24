@@ -10,7 +10,7 @@
       :pagination.sync="jobsDataTableSettings.serverPagination"
       :loading="loading"
       @request="request"
-      selection="single"
+      selection="multiple"
       :selected.sync="selectedSecond"
       :rows-per-page-options="rowsPerPageOptions"
     >
@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import { Notify, Dialog } from 'quasar'
+import { Notify } from 'quasar'
 import globalStore from '../store/globalStore'
 import dataTableSettings from '../store/dataTableSettings'
 import CreateJobModal from '../components/CreateJobModal'
@@ -209,29 +209,60 @@ export default {
     },
     deleteJob () {
       var TTT = this
-      Dialog.create({
-        title: 'Confirm',
-        message: 'Delete ' + this.selectedSecond[0].name,
-        ok: 'Confirm',
-        cancel: 'Cancel'
-      }).then(() => {
+      if (TTT.selectedSecond.length === 0) {
+        return
+      }
+      var msg = ''
+      if (TTT.selectedSecond.length === 1) {
+        msg = 'Are you sure you want to delete ' + TTT.selectedSecond[0].name
+      } else {
+        msg = 'Are you sure you want to delete ' + TTT.selectedSecond.length + ' jobs'
+      }
+      TTT.getConfirmedActionFn(
+        msg,
+        undefined,
+        TTT.deleteJobConfirmed
+      )()
+    },
+    deleteJobConfirmed () {
+      var TTT = this
+      TTT.selectedSecond.map(function (jobItem) {
         var callback = {
           ok: function (response) {
-            // console.log(response.data.name)
-            TTT.selectedSecond = []
-            TTT.request({
-              pagination: TTT.jobsDataTableSettings.serverPagination,
-              filter: TTT.jobsDataTableSettings.filter
+            Notify.create({color: 'positive', message: 'Job "' + response.data.name + '" Deleted'})
+            TTT.jobData = TTT.jobData.filter(function (jobDataItem) {
+              return jobDataItem.guid !== jobItem.guid
             })
-            Notify.create({color: 'positive', detail: 'Job "' + response.data.name + '" Deleted'})
           },
           error: function (error) {
-            TTT.loading = false
-            Notify.create('Job delete failed - ' + callbackHelper.getErrorFromResponse(error))
+            Notify.create({color: 'negetive', message: 'Job delete failed - ' + callbackHelper.getErrorFromResponse(error)})
           }
         }
-        globalStore.getters.apiFN('DELETE', 'jobs/' + this.selectedSecond[0].guid, undefined, callback)
+        globalStore.getters.apiFN('DELETE', 'jobs/' + jobItem.guid, undefined, callback)
       })
+      TTT.selectedSecond = []
+    },
+    getConfirmedActionFn (text, param, fn) {
+      var TTT = this
+      return function (event) {
+        TTT.$q.dialog({
+          title: 'Confirm',
+          message: text,
+          ok: {
+            push: true,
+            label: 'Yes'
+          },
+          cancel: {
+            push: true,
+            label: 'Cancel'
+          }
+          // preventClose: false,TTT._GetLinkText(link)
+          // noBackdropDismiss: false,
+          // noEscDismiss: false
+        }).onOk(() => {
+          fn(event, param)
+        })
+      }
     }
   },
   computed: {
