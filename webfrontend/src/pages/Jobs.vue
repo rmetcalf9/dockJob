@@ -26,20 +26,21 @@
         >Create Job</q-btn>
       </template>
       <template slot="top-right" slot-scope="props">
-      <selectColumns
-        v-model="jobsDataTableSettings.visibleColumns"
-        :columns="jobTableColumns"
-      />
-      <q-input
-        v-model="jobsDataTableSettings.filter"
-        debounce="500"
-        placeholder="Search" outlined
-        clearable
-      >
-        <template v-slot:append>
-          <q-icon name="search" />
-        </template>
-      </q-input>
+        <q-btn flat round delete icon="refresh" @click="refresh" />
+        <selectColumns
+          v-model="jobsDataTableSettings.visibleColumns"
+          :columns="jobTableColumns"
+        />
+        <q-input
+          v-model="jobsDataTableSettings.filter"
+          debounce="500"
+          placeholder="Search" outlined
+          clearable
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
       </template>
 
       <q-td  slot="body-cell-name" slot-scope="props" :props="props">
@@ -263,6 +264,12 @@ export default {
           fn(event, param)
         })
       }
+    },
+    refresh () {
+      this.request({
+        pagination: this.jobsDataTableSettings.serverPagination,
+        filter: this.jobsDataTableSettings.filter
+      })
     }
   },
   computed: {
@@ -275,10 +282,7 @@ export default {
   },
   mounted () {
     // once mounted, we need to trigger the initial server data fetch
-    this.request({
-      pagination: this.jobsDataTableSettings.serverPagination,
-      filter: this.jobsDataTableSettings.filter
-    })
+    this.refresh()
   }
 }
 </script>
