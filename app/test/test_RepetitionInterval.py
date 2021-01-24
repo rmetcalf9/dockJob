@@ -1,10 +1,10 @@
-from TestHelperSuperClass import testHelperSuperClass
+import TestHelperSuperClass
 from RepetitionInterval import RepetitionIntervalClass, badModeException, badNumberOfModeParamaters, badParamater, unknownTimezone, missingTimezoneException, curDateTimeTimezoneNotUTCException
 import datetime
 from datetime import timedelta
 import pytz
 
-class test_RepetitionInterval(testHelperSuperClass):
+class repetitionIntervalHelper(TestHelperSuperClass.testHelperSuperClass):
   def checkNextRun(self, riOBj, curTime, expTime, msg=''):
     nextRun = riOBj.getNextOccuranceDatetime(curTime)
     if str(nextRun.tzinfo) != 'UTC':
@@ -15,6 +15,10 @@ class test_RepetitionInterval(testHelperSuperClass):
       print("Expected:" + str(expTime) + ' (Expected UTC=' + str(expTimeUTC) + ')')
       print(msg)
     self.assertEqual(nextRun, expTime)
+
+
+@TestHelperSuperClass.wipd
+class test_RepetitionInterval(repetitionIntervalHelper):
 
 #-----------------------------------------------
 # Helpers above actual tests below

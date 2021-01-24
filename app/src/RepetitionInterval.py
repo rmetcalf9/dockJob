@@ -11,10 +11,26 @@ unknownTimezone = Exception('Unknown Timezone')
 missingTimezoneException = Exception('datetime objects passed must be timezone awear')
 curDateTimeTimezoneNotUTCException = Exception('Current Date/Time passed is not UTC')
 
+
+def getCheckedInt(value, rangeMin, rangeMax):
+  retVal = value.strip()
+  if (" " in retVal):
+    raise badParamater
+  try:
+    retVal = int(retVal)
+  except ValueError:
+    raise badParamater
+  if (retVal < rangeMin):
+    raise badParamater
+  if (retVal > rangeMax):
+    raise badParamater
+  return retVal
+
 class ModeType(Enum):
   HOURLY = 1 #Single paramater which is the minute past the error
   DAILY = 2  #three params, minute, hour, days (+-+-+-- Each char represents DOW mon-sun + means include day, - do not), final paramater is the timezone the passed in date is
   MONTHLY = 3	#Same hour and minute each day of the month (24 hour clock)	"MONTHLY:39:13:3" = Run at 1:39pm each 3rd of month, final paramater is the timezone the passed in date is
+  SETHOUR = 4 #3 params - minute past hour, hour list, timezone
   # params are always minute:hour:day
 
   #                       | HOURLY  | DAILY  | MONTHLY |
@@ -29,12 +45,15 @@ class ModeType(Enum):
       return 4
     if (self == ModeType.MONTHLY):
       return 4
+    if (self == ModeType.SETHOUR):
+      return 3
     return -1
 
 class RepetitionIntervalClass():
   mode = None;
   minute = -1;
   hourlyModeMinutes = SortedDict() # In hourly mode mutiple minutes can be specified
+  sethourModeHours = SortedDict()
   hour = -1; #hour in 24 hour format
   dayOfMonth = SortedDict(); #only used in monthly mode
   timezone = pytz.timezone("UTC")
@@ -67,35 +86,39 @@ class RepetitionIntervalClass():
     a = intervalString.split(":")
     if (len(a) == 0):
       raise badModeException
-    modeType = None
+    modeTypeVar = None
     a[0] = a[0].upper().strip()
     for name, curModeType in ModeType.__members__.items():
       if (curModeType.name == a[0]):
-        modeType = curModeType
-    if (None == modeType):
+        modeTypeVar = curModeType
+    if (None == modeTypeVar):
       raise badModeException
-    if ((1+modeType.getExpectedNumParams()) != len(a)):
+    if ((1+modeTypeVar.getExpectedNumParams()) != len(a)):
       raise badNumberOfModeParamaters
-    self.mode = modeType
+    self.mode = modeTypeVar
 
+    if self.mode == ModeType.SETHOUR:
+      self.initForSetHour(a)
+    else:
+      self.initForMainModetypes(a)
+
+  def initForSetHour(self, a):
+    self.minute = getCheckedInt(a[1], 0, 59)
+    self.sethourModeHours = self.getIntArrayFromCommaListWithRangeCheck(a[2], 0, 23)
+    try:
+      self.timezone = pytz.timezone(a[3].strip())
+    except pytz.exceptions.UnknownTimeZoneError:
+      raise unknownTimezone
+
+  def initForMainModetypes(self, a):
     #minute is always there and is always first param
-    if (modeType == modeType.HOURLY):
+    if (self.mode == ModeType.HOURLY):
       self.hourlyModeMinutes = self.getIntArrayFromCommaListWithRangeCheck(a[1],0,59)
     else:
-      self.minute = a[1].strip()
-      if (" " in self.minute):
-        raise badParamater
-      try:
-        self.minute = int(self.minute)
-      except ValueError:
-        raise badParamater
-      if (self.minute < 0):
-        raise badParamater
-      if (self.minute > 59):
-        raise badParamater
+      self.minute = getCheckedInt(a[1],0, 59)
 
     #work out hour always second param if it is there
-    if (modeType.getExpectedNumParams() > 1):
+    if (self.mode.getExpectedNumParams() > 1):
       self.hour = a[2].strip()
       if (" " in self.hour):
         raise badParamater
@@ -109,8 +132,8 @@ class RepetitionIntervalClass():
         raise badParamater
 
     #work out thrid paramater if it is there
-    if (modeType.getExpectedNumParams() > 2):
-      if (modeType == modeType.DAILY):
+    if (self.mode.getExpectedNumParams() > 2):
+      if (self.mode == ModeType.DAILY):
         daysOfWeek = a[3].strip()
         if (len(daysOfWeek) != 7):
           raise badParamater
@@ -132,7 +155,7 @@ class RepetitionIntervalClass():
         self.dayOfMonth = self.getIntArrayFromCommaListWithRangeCheck(a[3],1,31)
 
     #if it is there the 4th paramter is always the timezone the passed in date is.
-    if (modeType.getExpectedNumParams() > 3):
+    if (self.mode.getExpectedNumParams() > 3):
       try:
         self.timezone = pytz.timezone(a[4].strip())
       except pytz.exceptions.UnknownTimeZoneError:
@@ -167,6 +190,33 @@ class RepetitionIntervalClass():
     if (nd <= curDateTime):
       nd = self.addTimeInUTC(nd, timedelta(hours=1))
     return nd
+
+  def _getNextOccuranceDatetimeForSetHourMode(self, curDateTime):
+    for curHour in self.sethourModeHours:
+      nd = datetime.datetime(
+        curDateTime.year,
+        curDateTime.month,
+        curDateTime.day,
+        curHour,
+        self.minute,
+        0,
+        0,
+        curDateTime.tzinfo
+      )
+      if (nd > curDateTime):
+        return nd
+    # There is no time TODAY that should be run, so the next time should be tomorrow and first hour
+    todayFirstHour = datetime.datetime(
+      curDateTime.year,
+      curDateTime.month,
+      curDateTime.day,
+      self.sethourModeHours[self.sethourModeHours.keys()[0]],
+      self.minute,
+      0,
+      0,
+      curDateTime.tzinfo
+    )
+    return self.addTimeInUTC(todayFirstHour, timedelta(days=1))
 
   def _getNextOccuranceDatetimeForHourlyMode(self, curDateTime):
     minRetVal = pytz.timezone('UTC').localize(datetime.datetime(4016,1,14,13,0,1,0))
@@ -220,7 +270,7 @@ class RepetitionIntervalClass():
         minRetVal = rv
         cc = False
     if cc:
-      raise Exception("Algroythm Error")
+      raise Exception("Algorithm Error")
     return minRetVal
 
   #Returns the next time that the repetition interval defines according to the current datetime passed in
@@ -252,6 +302,9 @@ class RepetitionIntervalClass():
 
     if (self.mode == ModeType.MONTHLY):
       return self._getNextOccuranceDatetimeForMonthlyMode(curDateTime)
+
+    if (self.mode == ModeType.SETHOUR):
+      return self._getNextOccuranceDatetimeForSetHourMode(curDateTime)
 
     raise Exception('Mode Not Implemented')
 
@@ -287,6 +340,17 @@ class RepetitionIntervalClass():
         else:
           sf += ","
         sf += str(curDOM).zfill(2)
+      sf += ":" + self.timezone.__str__()
+      return sf
+    if (self.mode == ModeType.SETHOUR):
+      sf = 'SETHOUR:' + str(self.minute).zfill(2) + ":"
+      fir = True
+      for curHour in self.sethourModeHours:
+        if fir:
+          fir = False
+        else:
+          sf += ","
+        sf += str(curHour).zfill(2)
       sf += ":" + self.timezone.__str__()
       return sf
     raise Exception('Invalid mode encountered in RepetitionIntervalClass.__str__')

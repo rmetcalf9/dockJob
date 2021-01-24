@@ -10,7 +10,7 @@ from appObj import appObj
 class helperClass(TestHelperWithAPIOperations.TestHelperWithAPIOperationsClass):
   pass
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class test_jobsDataAPI_deleteLogic(helperClass):
 
   def test_deleteJobCausesJobsThatUseItToBecomeRemoved(self):
