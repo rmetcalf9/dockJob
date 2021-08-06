@@ -21,7 +21,7 @@ class test_JobExecution(testHelperAPIClient):
     )
 
   def createJobObj(self, command='echo "This is a test"'):
-    return jobClass(appObj, 'TestJob123', command, False, '', False, None, None, None, None)
+    return jobClass(appObj, 'TestJob123', command, False, '', False, None, None, None, None, None, None, None)
 
   def aquireJobExecutionLock(self):
     if not self.JobExecutionLock.acquire(blocking=True, timeout=0.5): #timeout value is in seconds
@@ -66,7 +66,7 @@ class test_JobExecution(testHelperAPIClient):
   #  self.assertEqual(a.stage, 'Timeout')
   #  self.assertEqual(a.resultReturnCode, -1)
 
-  #I don't have this test working yet
+  #I don't hcreateJobObjave this test working yet
   #def test_bigoutput(self):
   #  jobObj = jobClass('TestJob123', 'find /', True, '')
   #  a = JobExecutionClass(jobObj)
