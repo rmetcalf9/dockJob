@@ -6,16 +6,21 @@ from appObj import appObj
 import datetime
 import pytz
 import time
+import TestHelperSuperClass
+import copy
+from jobsDataObj import jobsDataClass
 from dateutil.relativedelta import relativedelta
 from commonJSONStrings import data_simpleJobCreateParams, data_simpleManualJobCreateParams, data_simpleJobCreateExpRes, data_simpleJobExecutionCreateExpRes, data_simpleManualJobCreateParamsWithAllOptionalFields, data_simpleManualJobCreateParamsWithAllOptionalFieldsExpRes
 
+#@TestHelperSuperClass.wipd
 class test_jobsData(testHelperAPIClient):
+  #@TestHelperSuperClass.wipd
   def test_JobCreate(self):
     result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
     self.assertResponseCodeEqual(result, 200)
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertEqual(len(resultJSON['guid']), 36, msg='Invalid GUID - must be 36 chars')
-    self.assertEqual(resultJSON['creationDate'], resultJSON['lastUpdateDate'], msg='Creation date dosen''t match last update')
+    self.assertEqual(resultJSON['creationDate'], resultJSON['lastUpdateDate'], msg='Creation date doesn''t match last update')
     tim = from_iso8601(resultJSON['creationDate'])
     self.assertTimeCloseToCurrent(tim)
     self.assertJSONJobStringsEqual(resultJSON, data_simpleJobCreateExpRes)
@@ -26,7 +31,7 @@ class test_jobsData(testHelperAPIClient):
     self.assertResponseCodeEqual(result, 200, msg='Job Create Failed')
     resultJSON = json.loads(result.get_data(as_text=True))
     self.assertEqual(len(resultJSON['guid']), 36, msg='Invalid GUID - must be 36 chars')
-    self.assertEqual(resultJSON['creationDate'], resultJSON['lastUpdateDate'], msg='Creation date dosen''t match last update')
+    self.assertEqual(resultJSON['creationDate'], resultJSON['lastUpdateDate'], msg='Creation date doesn''t match last update')
     tim = from_iso8601(resultJSON['creationDate'])
     self.assertTimeCloseToCurrent(tim)
     self.assertJSONJobStringsEqual(resultJSON, data_simpleManualJobCreateParamsWithAllOptionalFieldsExpRes)
@@ -1183,6 +1188,39 @@ class test_jobsData(testHelperAPIClient):
     self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_GUID'],executionGUID, msg='enviroment var DOCKJOB_TRIGGEREXECUTION_GUID wrong')
     self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_NAME'],'TestJobExecutionName', msg='enviroment var DOCKJOB_TRIGGEREXECUTION_NAME wrong')
     self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_STDOUT'],testJobOutput, msg='enviroment var DOCKJOB_TRIGGEREXECUTION_STDOUT wrong')
+
+  @TestHelperSuperClass.wipd
+  def test_JobSavesFollowOnJobFields(self):
+    resultOtherJobsJSON = []
+    for x in range(0,3):
+      baseJob = copy.deepcopy(data_simpleJobCreateParams)
+      baseJob["name"] = "TESTSSSS" + str(x)
+      result = self.testClient.post('/api/jobs/', data=json.dumps(baseJob), content_type='application/json')
+      self.assertResponseCodeEqual(result, 200)
+      resultOtherJobsJSON.append(json.loads(result.get_data(as_text=True)))
+
+
+    createParamsWithOtherJobs = copy.deepcopy(data_simpleJobCreateParams)
+    createParamsWithOtherJobs["name"] = "TESTJOB2"
+    createParamsWithOtherJobs["StateChangeSuccessJobGUID"] = resultOtherJobsJSON[0]["guid"]
+    createParamsWithOtherJobs["StateChangeFailJobGUID"] = resultOtherJobsJSON[1]["guid"]
+    createParamsWithOtherJobs["StateChangeUnknownJobGUID"] = resultOtherJobsJSON[2]["guid"]
+    result2 = self.testClient.post('/api/jobs/', data=json.dumps(createParamsWithOtherJobs), content_type='application/json')
+    self.assertResponseCodeEqual(result2, 200)
+    mainJob = json.loads(result2.get_data(as_text=True))
+
+    #Make sure other fields are correct
+    self.assertEqual(mainJob["StateChangeSuccessJobGUID"], resultOtherJobsJSON[0]["guid"])
+    self.assertEqual(mainJob["StateChangeFailJobGUID"], resultOtherJobsJSON[1]["guid"])
+    self.assertEqual(mainJob["StateChangeUnknownJobGUID"], resultOtherJobsJSON[2]["guid"])
+
+    #Now simulate reloading from disk and retest
+    reloadedJobDataClass = jobsDataClass(appObj)
+    reloadedJobDataClass.loadFromObjectStore()
+    reloadedJobObj = reloadedJobDataClass.getJob(mainJob["guid"])
+    self.assertEqual(reloadedJobObj.StateChangeSuccessJobGUID, resultOtherJobsJSON[0]["guid"], msg="StateChangeSuccessJobGUID wrong on reloaded job")
+    self.assertEqual(reloadedJobObj.StateChangeFailJobGUID, resultOtherJobsJSON[1]["guid"], msg="StateChangeFailJobGUID wrong on reloaded job")
+    self.assertEqual(reloadedJobObj.StateChangeUnknownJobGUID, resultOtherJobsJSON[2]["guid"], msg="StateChangeUnknownJobGUID wrong on reloaded job")
 
 
 

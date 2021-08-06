@@ -17,7 +17,7 @@ class repetitionIntervalHelper(TestHelperSuperClass.testHelperSuperClass):
     self.assertEqual(nextRun, expTime)
 
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class test_RepetitionInterval(repetitionIntervalHelper):
 
 #-----------------------------------------------

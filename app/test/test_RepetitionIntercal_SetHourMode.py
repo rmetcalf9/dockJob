@@ -6,7 +6,7 @@ import pytz
 from test_RepetitionInterval import repetitionIntervalHelper
 from sortedcontainers import SortedDict
 
-@TestHelperSuperClass.wipd
+#@TestHelperSuperClass.wipd
 class test_RepetitionIntercal_SetHourMode(repetitionIntervalHelper):
   def test_WrongNumberOfParams(self):
     with self.assertRaises(Exception) as context:

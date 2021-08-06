@@ -10,6 +10,10 @@ class jobFactoryClass():
   def loadFromDB(self, jobFromDBTuple, appObj):
     jobFromDB = jobFromDBTuple[0]
     repetitionInterval = jobFromDB["repetitionInterval"]
+
+    #fieldsToDefaultToNine = ["AfterSuccessJobGUID", "AfterFailJobGUID",]
+    #if "StateChangeSuccessJobGUID" not in
+
     return jobClass(
       appObj = appObj,
       name = jobFromDB["name"],
@@ -19,7 +23,7 @@ class jobFactoryClass():
       pinned = jobFromDB["pinned"],
       overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown = jobFromDB["overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown"],
       StateChangeSuccessJobGUID = jobFromDB["StateChangeSuccessJobGUID"],
-      StateChangeFailJobGUID = jobFromDB["StateChangeUnknownJobGUID"],
+      StateChangeFailJobGUID = jobFromDB["StateChangeFailJobGUID"],
       StateChangeUnknownJobGUID = jobFromDB["StateChangeUnknownJobGUID"],
       guid = jobFromDB["guid"],
       loadingObjectVersion = jobFromDBTuple[1]
