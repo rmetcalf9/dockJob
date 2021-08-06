@@ -296,79 +296,53 @@ class jobClass():
   def uniqueName(self):
     return jobClass.uniqueJobNameStatic(self.name)
 
+
+  def _startPostCompletionJob(self, jobGuid, eventName, triggerExecutionObj, appObj):
+    #Send a post completion event
+    appObj.jobExecutor.submitJobForExecution(
+      jobGuid,
+      executionName='Event - ' + eventName,
+      manual=False,
+      triggerJobObj=self,
+      triggerEvent=eventName,
+      callerHasJobExecutionLock=True,
+      triggerExecutionObj=triggerExecutionObj
+    )
+
   #Called from job execution thread and request processing threads
   def _setNewCompletionStatus(self, appObj, newStatus, triggerExecutionObj):
     if self.mostRecentCompletionStatus == newStatus:
       if newStatus == 'Success':
         if self.AfterSuccessJobGUID is not None:
-          appObj.jobExecutor.submitJobForExecution(
-            self.AfterSuccessJobGUID,
-            executionName='Event - AfterSuccess',
-            manual=False,
-            triggerJobObj=self,
-            triggerEvent='AfterSuccess',
-            callerHasJobExecutionLock=True,
-            triggerExecutionObj=triggerExecutionObj
-          )
+          self._startPostCompletionJob(self.AfterSuccessJobGUID, "AfterSuccess", triggerExecutionObj, appObj)
       elif newStatus == 'Fail':
         if self.AfterFailJobGUID is not None:
-          appObj.jobExecutor.submitJobForExecution(
-            self.AfterFailJobGUID,
-            executionName='Event - AfterFail',
-            manual=False,
-            triggerJobObj=self,
-            triggerEvent='AfterFail',
-            callerHasJobExecutionLock=True,
-            triggerExecutionObj=triggerExecutionObj
-          )
+          self._startPostCompletionJob(self.AfterFailJobGUID, "AfterFail", triggerExecutionObj, appObj)
       else:
         if self.AfterUnknownJobGUID is not None:
-          appObj.jobExecutor.submitJobForExecution(
-            self.AfterUnknownJobGUID,
-            executionName='Event - AfterUnknown',
-            manual=False,
-            triggerJobObj=self,
-            triggerEvent='AfterUnknown',
-            callerHasJobExecutionLock=True,
-            triggerExecutionObj=triggerExecutionObj
-          )
+          self._startPostCompletionJob(self.AfterUnknownJobGUID, "AfterUnknown", triggerExecutionObj, appObj)
       return
     self.CompletionstatusLock.acquire()
     self.mostRecentCompletionStatus = newStatus
     self.CompletionstatusLock.release()
     if newStatus=='Success':
       if self.StateChangeSuccessJobGUID is not None:
-        appObj.jobExecutor.submitJobForExecution(
-          self.StateChangeSuccessJobGUID,
-          executionName='Event - StateChangeToSuccess',
-          manual=False,
-          triggerJobObj=self,
-          triggerEvent = 'StateChangeToSuccess',
-          callerHasJobExecutionLock=True,
-          triggerExecutionObj=triggerExecutionObj
-        )
+        self._startPostCompletionJob(self.StateChangeSuccessJobGUID, "StateChangeToSuccess", triggerExecutionObj, appObj)
+      else:
+        if self.AfterSuccessJobGUID is not None:
+          self._startPostCompletionJob(self.AfterSuccessJobGUID, "AfterSuccess", triggerExecutionObj, appObj)
     elif newStatus=='Fail':
       if self.StateChangeFailJobGUID is not None:
-        appObj.jobExecutor.submitJobForExecution(
-          self.StateChangeFailJobGUID,
-          executionName='Event - StateChangeToFail',
-          manual=False,
-          triggerJobObj=self,
-          triggerEvent = 'StateChangeToFail',
-          callerHasJobExecutionLock=True,
-          triggerExecutionObj=triggerExecutionObj
-        )
+        self._startPostCompletionJob(self.StateChangeFailJobGUID, "StateChangeToFail", triggerExecutionObj, appObj)
+      else:
+        if self.AfterFailJobGUID is not None:
+          self._startPostCompletionJob(self.AfterFailJobGUID, "AfterFail", triggerExecutionObj, appObj)
     else:
       if self.StateChangeUnknownJobGUID is not None:
-        appObj.jobExecutor.submitJobForExecution(
-          self.StateChangeUnknownJobGUID,
-          executionName='Event - StateChangeToUnknown',
-          manual=False,
-          triggerJobObj=self,
-          triggerEvent = 'StateChangeToUnknown',
-          callerHasJobExecutionLock=True,
-          triggerExecutionObj=triggerExecutionObj #Always None in the unknown case
-        )
+        self._startPostCompletionJob(self.StateChangeUnknownJobGUID, "StateChangeToUnknown", triggerExecutionObj, appObj)
+      else:
+        if self.AfterUnknownJobGUID is not None:
+          self._startPostCompletionJob(self.AfterUnknownJobGUID, "AfterUnknown", triggerExecutionObj, appObj)
 
   def registerRunDetails(self, appObj, newLastRunDate, newLastRunReturnCode, triggerExecutionObj):
     #print('registerRunDetails for job ' + self.name + ' - lastrundate=' + newLastRunDate.isoformat())

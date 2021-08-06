@@ -118,7 +118,10 @@ class MOCKjobsDataClass():
       newValues.get('overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown',None),
       newValues.get('StateChangeSuccessJobGUID',None),
       newValues.get('StateChangeFailJobGUID',None),
-      newValues.get('StateChangeUnknownJobGUID',None)
+      newValues.get('StateChangeUnknownJobGUID', None),
+      AfterSuccessJobGUID=newValues.get('AfterSuccessJobGUID', None),
+      AfterFailJobGUID=newValues.get('AfterFailJobGUID', None),
+      AfterUnknownJobGUID=newValues.get('AfterUnknownJobGUID', None)
     )
 
   def deleteJob(self, jobObj):

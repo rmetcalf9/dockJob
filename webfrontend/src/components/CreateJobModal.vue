@@ -45,36 +45,17 @@
             <q-field helper="" label="Pinned to Dashboard" :label-width="3">
               <q-toggle v-model="showCreateJobDialogData.pinned" />
             </q-field>
-            <JobAutocomplete
-              ref="success_jobautocomplete"
-              :model="showCreateJobDialogData.StateChangeSuccessJobModel"
-              label="Job to call when State changes to Success"
-              errormessage="Error"
-              :error="false"
-              @modelupdate="showCreateJobDialogData.StateChangeSuccessJobModel = $event"
-              helper=""
-              :label-width="3"
-            />
-            <JobAutocomplete
-              ref="fail_jobautocomplete"
-              :model="showCreateJobDialogData.StateChangeFailJobModel"
-              label="Job to call when State changes to Fail"
-              errormessage="Error"
-              :error="false"
-              @modelupdate="showCreateJobDialogData.StateChangeFailJobModel = $event"
-              helper=""
-              :label-width="3"
-            />
-            <JobAutocomplete
-              ref="unknown_jobautocomplete"
-              :model="showCreateJobDialogData.StateChangeUnknownJobModel"
-              label="Job to call when State changes to Unknown"
-              errormessage="Error"
-              :error="false"
-              @modelupdate="showCreateJobDialogData.StateChangeUnknownJobModel = $event"
-              helper=""
-              :label-width="3"
-            />
+            <div v-for="stateChangeJobObj in stateChangeJobObjs" :key=stateChangeJobObj.id>
+              <JobAutocomplete
+                :model="showCreateJobDialogData[stateChangeJobObj.jobModelFieldName]"
+                :label="stateChangeJobObj.createDialogLabel"
+                errormessage="Error"
+                :error="false"
+                @modelupdate="showCreateJobDialogData[stateChangeJobObj.jobModelFieldName] = $event"
+                helper=""
+                :label-width="3"
+              />
+            </div>
             <q-input v-model="showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown" type="number" label="Unknown Timeout - Minutes to wait before setting status to unknown (if Job hasn't been executed)"
               error-label="Error"
               :error="createJobInValidOverrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown"
@@ -153,6 +134,7 @@ import globalStore from '../store/globalStore'
 import { Notify } from 'quasar'
 import callbackHelper from '../callbackHelper'
 import JobAutocomplete from '../components/JobAutocomplete'
+import globalUtils from '../globalUtils'
 
 function initShowCreateJobDialogData () {
   return {
@@ -171,7 +153,18 @@ function initShowCreateJobDialogData () {
       guid: '',
       name: ''
     },
-
+    AfterSuccessJobModel: {
+      guid: '',
+      name: ''
+    },
+    AfterFailJobModel: {
+      guid: '',
+      name: ''
+    },
+    AfterUnknownJobModel: {
+      guid: '',
+      name: ''
+    },
     overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown: 0,
     enabled: true,
     repetitionInterval: {
@@ -343,22 +336,18 @@ export default {
           this.showCreateJobDialogData.enabled = origJobObject.enabled
         }
         this.showCreateJobDialogData.pinned = origJobObject.pinned
-        if (typeof (origJobObject.StateChangeSuccessJobGUID) !== 'undefined' && origJobObject.StateChangeSuccessJobGUID !== null) {
-          this.showCreateJobDialogData.StateChangeSuccessJobModel = {
-            guid: origJobObject.StateChangeSuccessJobGUID,
-            name: origJobObject.StateChangeSuccessJobNAME
-          }
-        }
-        if (typeof (origJobObject.StateChangeFailJobGUID) !== 'undefined' && origJobObject.StateChangeFailJobGUID !== null) {
-          this.showCreateJobDialogData.StateChangeFailJobModel = {
-            guid: origJobObject.StateChangeFailJobGUID,
-            name: origJobObject.StateChangeFailJobNAME
-          }
-        }
-        if (typeof (origJobObject.StateChangeUnknownJobGUID) !== 'undefined' && origJobObject.StateChangeUnknownJobGUID !== null) {
-          this.showCreateJobDialogData.StateChangeUnknownJobModel = {
-            guid: origJobObject.StateChangeUnknownJobGUID,
-            name: origJobObject.StateChangeUnknownJobNAME
+        var lis = globalUtils.getPostCompletionJobTypeList()
+        for (var x in lis) {
+          if (typeof (origJobObject[lis[x].guidFieldName]) !== 'undefined' && origJobObject[lis[x].guidFieldName] !== null) {
+            this.showCreateJobDialogData[lis[x].jobModelFieldName] = {
+              guid: origJobObject[lis[x].guidFieldName],
+              name: origJobObject[lis[x].nameFieldName]
+            }
+          } else {
+            this.showCreateJobDialogData[lis[x].jobModelFieldName] = {
+              guid: '',
+              name: ''
+            }
           }
         }
 
@@ -460,14 +449,11 @@ export default {
         'pinned': this.showCreateJobDialogData.pinned,
         'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown': this.showCreateJobDialogData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown
       }
-      if (this.showCreateJobDialogData.StateChangeSuccessJobGUID !== '') {
-        payload.StateChangeSuccessJobGUID = this.showCreateJobDialogData.StateChangeSuccessJobModel.guid
-      }
-      if (this.showCreateJobDialogData.StateChangeFailJobGUID !== '') {
-        payload.StateChangeFailJobGUID = this.showCreateJobDialogData.StateChangeFailJobModel.guid
-      }
-      if (this.showCreateJobDialogData.StateChangeUnknownJobGUID !== '') {
-        payload.StateChangeUnknownJobGUID = this.showCreateJobDialogData.StateChangeUnknownJobModel.guid
+      var lis = globalUtils.getPostCompletionJobTypeList()
+      for (var x in lis) {
+        if (this.showCreateJobDialogData[lis[x].guidFieldName] !== '') {
+          payload[lis[x].guidFieldName] = this.showCreateJobDialogData[lis[x].jobModelFieldName].guid
+        }
       }
       if (typeof (this.origJobObject) !== 'undefined') {
         // console.log('PUT With')
@@ -487,6 +473,9 @@ export default {
     }
   },
   computed: {
+    stateChangeJobObjs () {
+      return globalUtils.getPostCompletionJobTypeList()
+    },
     createJobHourDisabled () {
       if (this.showCreateJobDialogData.repetitionInterval.mode === 'SETHOUR') {
         return true
