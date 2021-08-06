@@ -64,30 +64,16 @@
           <q-item-label>Pinned</q-item-label>
           <q-item-label caption>{{ jobData.pinned }}</q-item-label>
       </q-item-section></q-item>
-      <q-item v-if="typeof(jobData.StateChangeSuccessJobGUID) !== 'undefined' && jobData.StateChangeSuccessJobGUID !== null"><q-item-section >
-          <q-item-label>State Change Success Job: {{ jobData.StateChangeSuccessJobNAME }}</q-item-label>
-          <q-item-label caption>
-            <router-link :to="'/jobs/' + jobData.StateChangeSuccessJobGUID" tag="a" class="text-grey-8">
-              {{ jobData.StateChangeSuccessJobGUID }}
-            </router-link>
-          </q-item-label>
-      </q-item-section></q-item>
-      <q-item v-if="typeof(jobData.StateChangeFailJobGUID) !== 'undefined' && jobData.StateChangeFailJobGUID !== null"><q-item-section >
-          <q-item-label>State Change Fail Job: {{ jobData.StateChangeFailJobNAME }}</q-item-label>
-          <q-item-label caption>
-            <router-link :to="'/jobs/' + jobData.StateChangeFailJobGUID" tag="a" class="text-grey-8">
-              {{ jobData.StateChangeFailJobGUID }}
-            </router-link>
-          </q-item-label>
-      </q-item-section></q-item>
-      <q-item v-if="typeof(jobData.StateChangeUnknownJobGUID) !== 'undefined' && jobData.StateChangeUnknownJobGUID !== null"><q-item-section >
-          <q-item-label>State Change Unknown Job: {{ jobData.StateChangeUnknownJobNAME }}</q-item-label>
-          <q-item-label caption>
-            <router-link :to="'/jobs/' + jobData.StateChangeUnknownJobGUID" tag="a" class="text-grey-8">
-              {{ jobData.StateChangeUnknownJobGUID }}
-            </router-link>
-          </q-item-label>
-      </q-item-section></q-item>
+      <div v-for="stateChangeJobObj in stateChangeJobObjs" :key=stateChangeJobObj.id>
+        <q-item v-if="typeof(jobData[stateChangeJobObj.guidFieldName]) !== 'undefined' && jobData[stateChangeJobObj.guidFieldName] !== null"><q-item-section >
+            <q-item-label>Post completion {{ stateChangeJobObj.text }} Job: {{ jobData[stateChangeJobObj.nameFieldName] }}</q-item-label>
+            <q-item-label caption>
+              <router-link :to="'/jobs/' + jobData[stateChangeJobObj.guidFieldName]" tag="a" class="text-grey-8">
+                {{ jobData[stateChangeJobObj.guidFieldName] }}
+              </router-link>
+            </q-item-label>
+        </q-item-section></q-item>
+      </div>
       <q-item v-if="typeof(jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown) !== 'undefined' && jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown !== null"><q-item-section >
           <q-item-label>Minutes before setting completion status to Unknown</q-item-label>
           <q-item-label caption>{{ jobData.overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown }}</q-item-label>
@@ -127,6 +113,7 @@ import callbackHelper from '../callbackHelper'
 import ExecutionTable from '../components/ExecutionTable'
 import CreateJobModal from '../components/CreateJobModal'
 import userSettings from '../store/userSettings'
+import globalUtils from '../globalUtils'
 
 function addDateStringsToJobData (obj) {
   obj.creationDateString = userSettings.getters.userTimeStringFN(obj.creationDate)
@@ -218,6 +205,9 @@ export default {
   computed: {
     datastoreState () {
       return globalStore.getters.datastoreState
+    },
+    stateChangeJobObjs () {
+      return globalUtils.getPostCompletionJobTypeList()
     }
   },
   mounted () {

@@ -32,9 +32,15 @@ def getJobModel(appObj):
       'StateChangeSuccessJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Success'),
       'StateChangeFailJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Fail'),
       'StateChangeUnknownJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Unknown'),
+      'AfterSuccessJobGUID': fields.String(default=None,description='GUID of job to call when this completes and is still in the success state'),
+      'AfterFailJobGUID': fields.String(default=None,description='GUID of job to call when this completes and is still in the fail state'),
+      'AfterUnknownJobGUID': fields.String(default=None,description='GUID of job to call when this completes and is still in the unknown state'),
       'StateChangeSuccessJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this jobs state changes to Success'),
       'StateChangeFailJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this jobs state changes to Fail'),
       'StateChangeUnknownJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this jobs state changes to Unknown'),
+      'AfterSuccessJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this completes and is still in the success state'),
+      'AfterFailJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this completes and is still in the fail state'),
+      'AfterUnknownJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this completes and is still in the unknown state'),
     })
   return jobModel
 
@@ -50,6 +56,9 @@ def getJobCreationModel(appObj):
     'StateChangeSuccessJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Success'),
     'StateChangeFailJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Fail'),
     'StateChangeUnknownJobGUID': fields.String(default=None,description='GUID of job to call when this jobs state changes to Unknown'),
+    'AfterSuccessJobGUID': fields.String(default=None,description='GUID of job to call when this completes and is still in the success state'),
+    'AfterFailJobGUID': fields.String(default=None,description='GUID of job to call when this completes and is still in the fail state'),
+    'AfterUnknownJobGUID': fields.String(default=None,description='GUID of job to call when this completes and is still in the unknown state'),
   })
 
 def getJobServerInfoModel(appObj):
@@ -122,7 +131,10 @@ def registerAPI(appObj):
         content.get('overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown',None),
         content.get('StateChangeSuccessJobGUID',None),
         content.get('StateChangeFailJobGUID',None),
-        content.get('StateChangeUnknownJobGUID',None)
+        content.get('StateChangeUnknownJobGUID',None),
+        content.get('AfterSuccessJobGUID', None),
+        content.get('AfterFailJobGUID', None),
+        content.get('AfterUnknownJobGUID', None)
       )
 
       storeConnection = appObj.objectStore._getConnectionContext()

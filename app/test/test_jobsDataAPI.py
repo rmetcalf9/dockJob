@@ -1192,7 +1192,7 @@ class test_jobsData(testHelperAPIClient):
   @TestHelperSuperClass.wipd
   def test_JobSavesFollowOnJobFields(self):
     resultOtherJobsJSON = []
-    for x in range(0,3):
+    for x in range(0,6):
       baseJob = copy.deepcopy(data_simpleJobCreateParams)
       baseJob["name"] = "TESTSSSS" + str(x)
       result = self.testClient.post('/api/jobs/', data=json.dumps(baseJob), content_type='application/json')
@@ -1205,6 +1205,9 @@ class test_jobsData(testHelperAPIClient):
     createParamsWithOtherJobs["StateChangeSuccessJobGUID"] = resultOtherJobsJSON[0]["guid"]
     createParamsWithOtherJobs["StateChangeFailJobGUID"] = resultOtherJobsJSON[1]["guid"]
     createParamsWithOtherJobs["StateChangeUnknownJobGUID"] = resultOtherJobsJSON[2]["guid"]
+    createParamsWithOtherJobs["AfterSuccessJobGUID"] = resultOtherJobsJSON[3]["guid"]
+    createParamsWithOtherJobs["AfterFailJobGUID"] = resultOtherJobsJSON[4]["guid"]
+    createParamsWithOtherJobs["AfterUnknownJobGUID"] = resultOtherJobsJSON[5]["guid"]
     result2 = self.testClient.post('/api/jobs/', data=json.dumps(createParamsWithOtherJobs), content_type='application/json')
     self.assertResponseCodeEqual(result2, 200)
     mainJob = json.loads(result2.get_data(as_text=True))
@@ -1213,6 +1216,17 @@ class test_jobsData(testHelperAPIClient):
     self.assertEqual(mainJob["StateChangeSuccessJobGUID"], resultOtherJobsJSON[0]["guid"])
     self.assertEqual(mainJob["StateChangeFailJobGUID"], resultOtherJobsJSON[1]["guid"])
     self.assertEqual(mainJob["StateChangeUnknownJobGUID"], resultOtherJobsJSON[2]["guid"])
+    self.assertEqual(mainJob["AfterSuccessJobGUID"], resultOtherJobsJSON[3]["guid"])
+    self.assertEqual(mainJob["AfterFailJobGUID"], resultOtherJobsJSON[4]["guid"])
+    self.assertEqual(mainJob["AfterUnknownJobGUID"], resultOtherJobsJSON[5]["guid"])
+
+    self.assertEqual(mainJob["StateChangeSuccessJobNAME"], resultOtherJobsJSON[0]["name"])
+    self.assertEqual(mainJob["StateChangeFailJobNAME"], resultOtherJobsJSON[1]["name"])
+    self.assertEqual(mainJob["StateChangeUnknownJobNAME"], resultOtherJobsJSON[2]["name"])
+    self.assertEqual(mainJob["AfterSuccessJobNAME"], resultOtherJobsJSON[3]["name"])
+    self.assertEqual(mainJob["AfterFailJobNAME"], resultOtherJobsJSON[4]["name"])
+    self.assertEqual(mainJob["AfterUnknownJobNAME"], resultOtherJobsJSON[5]["name"])
+
 
     #Now simulate reloading from disk and retest
     reloadedJobDataClass = jobsDataClass(appObj)
@@ -1221,6 +1235,17 @@ class test_jobsData(testHelperAPIClient):
     self.assertEqual(reloadedJobObj.StateChangeSuccessJobGUID, resultOtherJobsJSON[0]["guid"], msg="StateChangeSuccessJobGUID wrong on reloaded job")
     self.assertEqual(reloadedJobObj.StateChangeFailJobGUID, resultOtherJobsJSON[1]["guid"], msg="StateChangeFailJobGUID wrong on reloaded job")
     self.assertEqual(reloadedJobObj.StateChangeUnknownJobGUID, resultOtherJobsJSON[2]["guid"], msg="StateChangeUnknownJobGUID wrong on reloaded job")
+    self.assertEqual(reloadedJobObj.AfterSuccessJobGUID, resultOtherJobsJSON[3]["guid"], msg="AfterSuccessJobGUID wrong on reloaded job")
+    self.assertEqual(reloadedJobObj.AfterFailJobGUID, resultOtherJobsJSON[4]["guid"], msg="AfterFailJobGUID wrong on reloaded job")
+    self.assertEqual(reloadedJobObj.AfterUnknownJobGUID, resultOtherJobsJSON[5]["guid"], msg="AfterUnknownJobGUID wrong on reloaded job")
+
+    #no point in this as name is calculated
+    # self.assertEqual(reloadedJobObj.StateChangeSuccessJobNAME, resultOtherJobsJSON[0]["name"], msg="StateChangeSuccessJobNAME wrong on reloaded job")
+    # self.assertEqual(reloadedJobObj.StateChangeFailJobNAME, resultOtherJobsJSON[1]["name"], msg="StateChangeFailJobNAME wrong on reloaded job")
+    # self.assertEqual(reloadedJobObj.StateChangeUnknownJobNAME, resultOtherJobsJSON[2]["name"], msg="StateChangeUnknownJobNAME wrong on reloaded job")
+    # self.assertEqual(reloadedJobObj.AfterSuccessJobNAME, resultOtherJobsJSON[3]["name"], msg="AfterSuccessJobNAME wrong on reloaded job")
+    # self.assertEqual(reloadedJobObj.AfterFailJobNAME, resultOtherJobsJSON[4]["name"], msg="AfterFailJobNAME wrong on reloaded job")
+    # self.assertEqual(reloadedJobObj.AfterUnknownJobNAME, resultOtherJobsJSON[5]["name"], msg="AfterUnknownJobNAME wrong on reloaded job")
 
 
 

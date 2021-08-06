@@ -11,8 +11,10 @@ class jobFactoryClass():
     jobFromDB = jobFromDBTuple[0]
     repetitionInterval = jobFromDB["repetitionInterval"]
 
-    #fieldsToDefaultToNine = ["AfterSuccessJobGUID", "AfterFailJobGUID",]
-    #if "StateChangeSuccessJobGUID" not in
+    fieldsToDefaultToNone = ["AfterSuccessJobGUID", "AfterFailJobGUID", "AfterUnknownJobGUID"]
+    for fieldToDefault in fieldsToDefaultToNone:
+      if fieldToDefault not in jobFromDB:
+        jobFromDB[fieldToDefault] = None
 
     return jobClass(
       appObj = appObj,
@@ -25,6 +27,9 @@ class jobFactoryClass():
       StateChangeSuccessJobGUID = jobFromDB["StateChangeSuccessJobGUID"],
       StateChangeFailJobGUID = jobFromDB["StateChangeFailJobGUID"],
       StateChangeUnknownJobGUID = jobFromDB["StateChangeUnknownJobGUID"],
+      AfterSuccessJobGUID = jobFromDB["AfterSuccessJobGUID"],
+      AfterFailJobGUID = jobFromDB["AfterFailJobGUID"],
+      AfterUnknownJobGUID = jobFromDB["AfterUnknownJobGUID"],
       guid = jobFromDB["guid"],
       loadingObjectVersion = jobFromDBTuple[1]
   )
@@ -52,6 +57,9 @@ class jobClass():
   StateChangeSuccessJobGUID = None
   StateChangeFailJobGUID = None
   StateChangeUnknownJobGUID = None
+  AfterSuccessJobGUID =None
+  AfterFailJobGUID = None
+  AfterUnknownJobGUID = None
 
   CompletionstatusLock = None
   objectVersion = None
@@ -113,6 +121,9 @@ class jobClass():
       StateChangeSuccessJobGUID,
       StateChangeFailJobGUID,
       StateChangeUnknownJobGUID,
+      AfterSuccessJobGUID,
+      AfterFailJobGUID,
+      AfterUnknownJobGUID,
       guid=None, #used when loading from DB
       verifyDependentJobGuids=True, #False when testing
       loadingObjectVersion=None #used when loading from DB
@@ -144,10 +155,16 @@ class jobClass():
       self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID, self.guid)
       self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID, self.guid)
       self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID, self.guid)
+      self.AfterSuccessJobGUID = self.verifyJobGUID(appObj, AfterSuccessJobGUID, self.guid)
+      self.AfterFailJobGUID = self.verifyJobGUID(appObj, AfterFailJobGUID, self.guid)
+      self.AfterUnknownJobGUID = self.verifyJobGUID(appObj, AfterUnknownJobGUID, self.guid)
     else:
       self.StateChangeSuccessJobGUID = StateChangeSuccessJobGUID
       self.StateChangeFailJobGUID = StateChangeFailJobGUID
       self.StateChangeUnknownJobGUID = StateChangeUnknownJobGUID
+      self.AfterSuccessJobGUID = AfterSuccessJobGUID
+      self.AfterFailJobGUID = AfterFailJobGUID
+      self.AfterUnknownJobGUID = AfterUnknownJobGUID
 
     #fields excluded from JSON output
     self.resetCompletionStatusToUnknownTime = None
@@ -182,6 +199,9 @@ class jobClass():
     ret['StateChangeSuccessJobNAME'] = None
     ret['StateChangeFailJobNAME'] = None
     ret['StateChangeUnknownJobNAME'] = None
+    ret['AfterSuccessJobNAME'] = None
+    ret['AfterFailJobNAME'] = None
+    ret['AfterUnknownJobNAME'] = None
 
     return ret
 
@@ -195,6 +215,12 @@ class jobClass():
       ret['StateChangeFailJobNAME'] = appObj.appData['jobsData'].getJob(self.StateChangeFailJobGUID).name
     if self.StateChangeUnknownJobGUID is not None:
       ret['StateChangeUnknownJobNAME'] = appObj.appData['jobsData'].getJob(self.StateChangeUnknownJobGUID).name
+    if self.AfterSuccessJobGUID is not None:
+      ret['AfterSuccessJobNAME'] = appObj.appData['jobsData'].getJob(self.AfterSuccessJobGUID).name
+    if self.AfterFailJobGUID is not None:
+      ret['AfterFailJobNAME'] = appObj.appData['jobsData'].getJob(self.AfterFailJobGUID).name
+    if self.AfterUnknownJobGUID is not None:
+      ret['AfterUnknownJobNAME'] = appObj.appData['jobsData'].getJob(self.AfterUnknownJobGUID).name
 
     return ret
 
@@ -209,7 +235,10 @@ class jobClass():
     overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown,
     StateChangeSuccessJobGUID,
     StateChangeFailJobGUID,
-    StateChangeUnknownJobGUID
+    StateChangeUnknownJobGUID,
+    AfterSuccessJobGUID,
+    AfterFailJobGUID,
+    AfterUnknownJobGUID
   ):
     self.name = name
     self.command = command
@@ -223,6 +252,9 @@ class jobClass():
     self.StateChangeSuccessJobGUID = self.verifyJobGUID(appObj, StateChangeSuccessJobGUID, self.guid)
     self.StateChangeFailJobGUID = self.verifyJobGUID(appObj, StateChangeFailJobGUID, self.guid)
     self.StateChangeUnknownJobGUID = self.verifyJobGUID(appObj, StateChangeUnknownJobGUID, self.guid)
+    self.AfterSuccessJobGUID = self.verifyJobGUID(appObj, AfterSuccessJobGUID, self.guid)
+    self.AfterFailJobGUID = self.verifyJobGUID(appObj, AfterFailJobGUID, self.guid)
+    self.AfterUnknownJobGUID = self.verifyJobGUID(appObj, AfterUnknownJobGUID, self.guid)
 
   def removeRemoveRelianceOnOtherJob(self, guid):
     # return True if a change is made
@@ -236,6 +268,16 @@ class jobClass():
     if self.StateChangeUnknownJobGUID == guid:
       self.StateChangeUnknownJobGUID = None
       changed = True
+    if self.AfterSuccessJobGUID == guid:
+      self.AfterSuccessJobGUID = None
+      changed = True
+    if self.AfterFailJobGUID == guid:
+      self.AfterFailJobGUID = None
+      changed = True
+    if self.AfterUnknownJobGUID == guid:
+      self.AfterUnknownJobGUID = None
+      changed = True
+
     return changed
 
   def setNextScheduledRun(self, curTime):
@@ -257,6 +299,39 @@ class jobClass():
   #Called from job execution thread and request processing threads
   def _setNewCompletionStatus(self, appObj, newStatus, triggerExecutionObj):
     if self.mostRecentCompletionStatus == newStatus:
+      if newStatus == 'Success':
+        if self.AfterSuccessJobGUID is not None:
+          appObj.jobExecutor.submitJobForExecution(
+            self.AfterSuccessJobGUID,
+            executionName='Event - AfterSuccess',
+            manual=False,
+            triggerJobObj=self,
+            triggerEvent='AfterSuccess',
+            callerHasJobExecutionLock=True,
+            triggerExecutionObj=triggerExecutionObj
+          )
+      elif newStatus == 'Fail':
+        if self.AfterFailJobGUID is not None:
+          appObj.jobExecutor.submitJobForExecution(
+            self.AfterFailJobGUID,
+            executionName='Event - AfterFail',
+            manual=False,
+            triggerJobObj=self,
+            triggerEvent='AfterFail',
+            callerHasJobExecutionLock=True,
+            triggerExecutionObj=triggerExecutionObj
+          )
+      else:
+        if self.AfterUnknownJobGUID is not None:
+          appObj.jobExecutor.submitJobForExecution(
+            self.AfterUnknownJobGUID,
+            executionName='Event - AfterUnknown',
+            manual=False,
+            triggerJobObj=self,
+            triggerEvent='AfterUnknown',
+            callerHasJobExecutionLock=True,
+            triggerExecutionObj=triggerExecutionObj
+          )
       return
     self.CompletionstatusLock.acquire()
     self.mostRecentCompletionStatus = newStatus

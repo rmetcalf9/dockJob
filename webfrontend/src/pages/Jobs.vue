@@ -126,6 +126,9 @@ export default {
         { name: 'StateChangeSuccessJobGUID', required: false, label: 'State Change Success Job', align: 'left', field: 'StateChangeSuccessJobGUID', sortable: true, filter: true },
         { name: 'StateChangeFailJobGUID', required: false, label: 'State Change Fail Job', align: 'left', field: 'StateChangeFailJobGUID', sortable: true, filter: true },
         { name: 'StateChangeUnknownJobGUID', required: false, label: 'State Change Unknown Job', align: 'left', field: 'StateChangeUnknownJobGUID', sortable: true, filter: true },
+        { name: 'AfterSuccessJobGUID', required: false, label: 'After Success Job', align: 'left', field: 'AfterSuccessJobGUID', sortable: true, filter: true },
+        { name: 'AfterFailJobGUID', required: false, label: 'After Fail Job', align: 'left', field: 'AfterFailJobGUID', sortable: true, filter: true },
+        { name: 'AfterUnknownJobGUID', required: false, label: 'After Unknown Job', align: 'left', field: 'AfterUnknownJobGUID', sortable: true, filter: true },
         { name: '...', required: true, label: '...', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobData: [],

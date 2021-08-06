@@ -16,7 +16,10 @@ sampleJob = jobObj.jobClass(
   overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown=123,
   StateChangeSuccessJobGUID=None,
   StateChangeFailJobGUID=None,
-  StateChangeUnknownJobGUID=None
+  StateChangeUnknownJobGUID=None,
+  AfterSuccessJobGUID=None,
+  AfterFailJobGUID=None,
+  AfterUnknownJobGUID=None
 )
 sampleJobDependingOnLastJob = jobObj.jobClass(
   appObj=appObj,
@@ -29,6 +32,9 @@ sampleJobDependingOnLastJob = jobObj.jobClass(
   StateChangeSuccessJobGUID=sampleJob.guid,
   StateChangeFailJobGUID=None,
   StateChangeUnknownJobGUID=None,
+  AfterSuccessJobGUID=None,
+  AfterFailJobGUID=None,
+  AfterUnknownJobGUID=None,
   verifyDependentJobGuids=False
 )
 
