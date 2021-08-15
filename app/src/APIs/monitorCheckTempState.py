@@ -19,7 +19,8 @@ def getPostNumberModel(appObj):
 
 def getResultsModel(appObj):
   return appObj.flastRestPlusAPIObject.model('resultsModel', {
-    #'value': fields.String(default='DEFAULT', description='Number Value')
+    'value': fields.String(default=None, description='Number Value'),
+    'message': fields.String(default=None, description='Number Value')
   })
 
 def checkCredentials(appObj, requestRecieved):
@@ -46,8 +47,8 @@ def registerAPI(appObj, APInamespace):
     @APInamespace.doc('Save a number')
     @APInamespace.expect(getPostNumberModel(appObj))
     @appObj.flastRestPlusAPIObject.response(400, 'Validation error')
-    @appObj.flastRestPlusAPIObject.response(200, 'Success')
-    @appObj.flastRestPlusAPIObject.marshal_with(getResultsModel(appObj), code=200, description='Post Number', skip_none=True)
+    @appObj.flastRestPlusAPIObject.response(201, 'Success')
+    @appObj.flastRestPlusAPIObject.marshal_with(getResultsModel(appObj), code=201, description='Post Number', skip_none=True)
     @APInamespace.response(403, 'Forbidden')
     def post(self, uuidStr):
       '''Post Number'''
@@ -58,10 +59,14 @@ def registerAPI(appObj, APInamespace):
       checkCredentials(appObj, request)
       checkValidUuid(uuidStr)
 
-      raise BadRequest("value must be a number")
+      try:
+        if str(int(content['value'])) != content['value'].strip():
+          raise BadRequest("value must be a number")
+      except ValueError:
+        raise BadRequest("value must be a number")
 
       try:
-        pass
+        return appObj.monitorCheckTempState.storeNumber(uuidStr=uuidStr, number=content['value']), 201
       except Exception as err:
         raise err
 
@@ -77,13 +82,9 @@ def registerAPI(appObj, APInamespace):
       checkValidUuid(uuidStr)
 
       try:
-        retVal = {"value": "123"}
-        return retVal
-      except Logic.LogicException as e:
-        raise BadRequest(str(e))
-      except MultiTenantObjectStore.InvalidTenantNameException as e:
-        raise BadRequest(str(e))
-      except ClientError as e:
-        print("boto Client")
-        print(" tenantName:", tenantName)
+        retVal = appObj.monitorCheckTempState.getNumber(uuidStr=uuidStr)
+        if retVal==None:
+          return {"message": "No number with that uuid present."}, 404
+        return retVal, 200
+      except Exception as e:
         raise e

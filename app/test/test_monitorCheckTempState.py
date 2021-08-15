@@ -39,7 +39,7 @@ class helper(testHelperAPIClient):
     )
     if not checkAndParseResponse:
       return result
-    self.assertEqual(result.status_code, 200, str(msg) + " - " + result.get_data(as_text=True))
+    self.assertEqual(result.status_code, 201, str(msg) + " - " + result.get_data(as_text=True))
     return json.loads(result.get_data(as_text=True))
 
   def getNumber(self, uuidStr, credential, msg="", checkAndParseResponse=True):
@@ -147,5 +147,104 @@ class test_jobsData(helper):
     self.assertEqual(response.get_data(as_text=True).strip(), "{\"message\": \"value must be a number\"}".strip())
 
 
-# TODO Test number not found
-# TODO Test only 10 stored, last one drops off
+  def test_post_number_canberetrieved(self):
+    appObj.resetData()
+    numberToStore="1234"
+    uuidStr = str(uuid.uuid4())
+    response = self.storeNumber(
+      uuidStr = uuidStr,
+      number = numberToStore,
+      credential = validCredentails,
+      msg= "",
+      checkAndParseResponse = True
+    )
+    self.assertEqual(response["value"], numberToStore)
+
+    responseFromGet = self.getNumber(
+      uuidStr = uuidStr,
+      credential = validCredentails,
+      msg= "",
+      checkAndParseResponse = True
+    )
+    self.assertEqual(responseFromGet["value"], numberToStore)
+
+  def test_get_numbernotthere_notfound(self):
+    appObj.resetData()
+    uuidStr = str(uuid.uuid4())
+    responseFromGet = self.getNumber(
+      uuidStr = uuidStr,
+      credential = validCredentails,
+      msg= "",
+      checkAndParseResponse = False
+    )
+    self.assertEqual(responseFromGet.status_code, 404)
+    self.assertEqual(responseFromGet.get_data(as_text=True).strip(), "{\"value\": null, \"message\": \"No number with that uuid present.\"}".strip())
+
+  def test_post_elevennumbers_firstonenotfound(self):
+    appObj.resetData()
+
+    numbersToStore = []
+    for a in range(100,110):
+      uuidStr2 = str(uuid.uuid4())
+      numbersToStore.append((a, uuidStr2))
+
+    # Store first two numbers before the main number
+    for b in [numbersToStore[0], numbersToStore[1]]:
+      responseStore = self.storeNumber(
+        uuidStr=b[1],
+        number=b[0],
+        credential=validCredentails,
+        msg="",
+        checkAndParseResponse=True
+      )
+      self.assertEqual(responseStore["value"], str(b[0]))
+
+
+    numberToStore="1234"
+    uuidStr = str(uuid.uuid4())
+    responseStoreFirstNumber = self.storeNumber(
+      uuidStr = uuidStr,
+      number = numberToStore,
+      credential = validCredentails,
+      msg= "",
+      checkAndParseResponse = True
+    )
+    self.assertEqual(responseStoreFirstNumber["value"], numberToStore)
+
+    #make sure it is there at least once
+    responseFromGet = self.getNumber(
+      uuidStr = uuidStr,
+      credential = validCredentails,
+      msg= "",
+      checkAndParseResponse = True
+    )
+    self.assertEqual(responseFromGet["value"], numberToStore)
+
+    for b in numbersToStore:
+      responseStore = self.storeNumber(
+        uuidStr=b[1],
+        number=b[0],
+        credential=validCredentails,
+        msg="",
+        checkAndParseResponse=True
+      )
+      self.assertEqual(responseStore["value"], str(b[0]))
+
+    # verify the last 10 we stored
+    for b in numbersToStore:
+      responseFromGet = self.getNumber(
+        uuidStr=b[1],
+        credential=validCredentails,
+        msg="",
+        checkAndParseResponse=True
+      )
+      self.assertEqual(responseFromGet["value"], str(b[0]))
+
+    responseFromGet = self.getNumber(
+      uuidStr = uuidStr,
+      credential = validCredentails,
+      msg= "",
+      checkAndParseResponse = False
+    )
+    self.assertEqual(responseFromGet.status_code, 404)
+    self.assertEqual(responseFromGet.get_data(as_text=True).strip(), "{\"value\": null, \"message\": \"No number with that uuid present.\"}".strip())

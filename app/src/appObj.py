@@ -148,4 +148,8 @@ class appObjClass(parAppObj):
     self.stopThread()
     super(appObjClass, self).exit_gracefully(signum, frame)
 
+  def resetData(self):
+    resetJobsData(self)
+    self.monitorCheckTempState.resetData()
+
 appObj = appObjClass()
