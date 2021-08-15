@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ContinousTest wip" type="ShConfigurationType">
+    <option name="SCRIPT_PATH" value="$PROJECT_DIR$/app/continous_test_from_pycharm.sh" />
+    <option name="SCRIPT_OPTIONS" value="wip" />
+    <option name="INTERPRETER_PATH" value="/bin/bash" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <method v="2" />
+  </configuration>
+</component>

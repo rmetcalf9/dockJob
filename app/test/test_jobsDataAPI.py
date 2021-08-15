@@ -1189,7 +1189,7 @@ class test_jobsData(testHelperAPIClient):
     self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_NAME'],'TestJobExecutionName', msg='enviroment var DOCKJOB_TRIGGEREXECUTION_NAME wrong')
     self.assertEqual(envVarDict['DOCKJOB_TRIGGEREXECUTION_STDOUT'],testJobOutput, msg='enviroment var DOCKJOB_TRIGGEREXECUTION_STDOUT wrong')
 
-  @TestHelperSuperClass.wipd
+  #@TestHelperSuperClass.wipd
   def test_JobSavesFollowOnJobFields(self):
     resultOtherJobsJSON = []
     for x in range(0,6):
