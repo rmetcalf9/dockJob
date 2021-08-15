@@ -10,6 +10,9 @@ from baseapp_for_restapi_backend_with_swagger import AppObjBaseClass as parAppOb
 from serverInfoAPI import registerAPI as registerMainApi
 from jobsDataAPI import registerAPI as registerJobsApi, resetData as resetJobsData, getJobServerInfoModel
 from jobExecutionsDataAPI import registerAPI as registerJobExecutionsApi
+import APIs
+import Logic
+
 from flask_restx import fields
 from JobExecutor import JobExecutorClass
 import time
@@ -18,7 +21,7 @@ import json
 from object_store_abstraction import createObjectStoreInstance
 
 InvalidObjectStoreConfigInvalidJSONException = Exception('APIAPP_OBJECTSTORECONFIG value is not valid JSON')
-
+InvalidMonitorCheckTempStateConfigInvalidJSONException = Exception('APIAPP_MONITORCHECKTEMPSTATECONFIG value is not valid JSON')
 
 class appObjClass(parAppObj):
   jobExecutor = None
@@ -28,6 +31,7 @@ class appObjClass(parAppObj):
   curDateTimeOverrideForTesting = None
   minutesBeforeMostRecentCompletionStatusBecomesUnknown = None
   objectStore = None
+  monitorCheckTempState = None
 
   def init(self, env, serverStartTime, testingMode = False, objectStoreTestingPopulationHookFn = None):
     try:
@@ -73,6 +77,19 @@ class appObjClass(parAppObj):
           # Give our tests the chance to inject some base data
           objectStoreTestingPopulationHookFn(objectStore = self.objectStore)
 
+      monitorCheckTempStateConfigJSON = readFromEnviroment(env, 'APIAPP_MONITORCHECKTEMPSTATECONFIG', '{}', None)
+      monitorCheckTempStateConfigDict = None
+      try:
+        if monitorCheckTempStateConfigJSON != '{}':
+          monitorCheckTempStateConfigDict = json.loads(monitorCheckTempStateConfigJSON)
+      except Exception as err:
+        print(err) # for the repr
+        print(str(err)) # for just the message
+        print(err.args) # the arguments that the exception has been called with.
+        raise(InvalidMonitorCheckTempStateConfigInvalidJSONException)
+
+      self.monitorCheckTempState = Logic.MonitorCheckTempState(monitorCheckTempStateConfigDict, fns)
+
       appObj.appData['jobsData'].loadFromObjectStore()
     except Exception as a:
       self.stopThread()
@@ -84,6 +101,7 @@ class appObjClass(parAppObj):
     registerMainApi(self)
     registerJobsApi(self)
     registerJobExecutionsApi(self)
+    APIs.registerAPIs(self)
 
   def setTestingDateTime(self, val):
     self.curDateTimeOverrideForTesting = val

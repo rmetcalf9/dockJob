@@ -4,6 +4,7 @@
 import unittest
 import json
 from appObj import appObj
+from base64 import b64encode
 
 import datetime
 import pytz
@@ -13,6 +14,7 @@ from nose.plugins.attrib import attr
 def wipd(f):
     return attr('wip')(f)
 
+monitorCheckTempStateAPIPrefix = '/api/monitorCheckTempState'
 
 env = {
   'APIAPP_MODE': 'DOCKER',
@@ -24,6 +26,7 @@ env = {
   'APIAPP_USERFORJOBS': 'root',
   'APIAPP_GROUPFORJOBS': 'root',
   'APIAPP_SKIPUSERCHECK': True,
+  'APIAPP_MONITORCHECKTEMPSTATECONFIG': '{ "username": "abc", "password": "123" }'
 }
 
 class testHelperSuperClass(unittest.TestCase):
@@ -192,3 +195,25 @@ class testHelperAPIClient(testHelperSuperClass):
 
     return execution_guids
 
+  # acceptedResultList can be none then never assert
+  def assertAPIResult(self, methodFN, url, session, data, headers):
+    if session != None:
+      headers[constants.jwtHeaderName] = SessionMock.from_Session(session).getJWTToken()
+    if methodFN.__name__ == 'get':
+      if data != None:
+        raise Exception("Trying to send post data to a get request")
+    result = methodFN(
+      url,
+      headers=headers,
+      data=json.dumps(data),
+      content_type='application/json'
+    )
+    return result
+
+  def assertMonitorCheckTempStateAPIResult(self, methodFN, url, session, data, credential):
+    headers = {}
+    if credential != None:
+      userAndPassBin = (credential["user"] + ":" + credential["password"]).encode()
+      userAndPass = b64encode(userAndPassBin).decode("ascii")
+      headers["Authorization"] = 'Basic %s' % userAndPass
+    return self.assertAPIResult(methodFN, monitorCheckTempStateAPIPrefix + url, session, data, headers)

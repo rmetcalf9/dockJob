@@ -12,7 +12,7 @@ export APIAPP_USERFORJOBS=dockjobuser
 export APIAPP_GROUPFORJOBS=dockjobgroup
 export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"SimpleFileStore\", \"BaseLocation\": \"./test/TestFileStore\"}"
 export APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN="http://localhost:8080,http://localhost:8081"
-
+export APIAPP_MONITORCHECKTEMPSTATECONFIG"{\"username\":\"user\", \"password\": \"pass\"}"
 
 export APIAPP_VERSION=
 if [ -f ${APP_DIR}/../VERSION ]; then
