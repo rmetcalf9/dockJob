@@ -60,6 +60,7 @@ export const actions = {
     // init means we must load connection data
     var callback = {
       ok: function (response) {
+        console.log('Setting connection data', response.data)
         commit('SET_CONNECTIONDATA', response.data)
         params.callback.ok(response)
       },
