@@ -44,6 +44,7 @@ COPY ./VERSION /VERSION
 COPY ./app/run_app_docker.sh /run_app_docker.sh
 COPY ./nginx_default.conf /etc/nginx/conf.d/default.conf
 COPY ./uwsgi.ini /uwsgi.ini
+COPY ./healthcheck.sh /healthcheck.sh
 
 STOPSIGNAL SIGTERM
 
@@ -54,6 +55,6 @@ CMD ["/run_app_docker.sh"]
 #  and when it first starts it won't check the health until the interval so I can't have
 #  a higher value without increasing the startup time
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -f http://127.0.0.1:80/frontend/index.html?healthcheck=true || exit 1
+  CMD /healthcheck.sh
 
 ##docker run --name dockjob -p 80:80 -d metcarob/dockjob:latest
