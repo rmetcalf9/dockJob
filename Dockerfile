@@ -1,4 +1,4 @@
-FROM nginx:1.15.12-alpine
+FROM nginx:1.23.1-alpine
 
 MAINTAINER Robert Metcalf
 

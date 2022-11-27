@@ -6,7 +6,7 @@ cd ../
 export DOCKJOB_GITROOT=$(pwd)
 
 cd ${START_DIR}
-export CMD_PYTHONTEST=nosetests
+export CMD_PYTHONTEST="python3 -m pytest"
 ##TODO check rednose is installed
 export CMD_NPM=npm
 export CMD_CODECEPTJS=codeceptjs
