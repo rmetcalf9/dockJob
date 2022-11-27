@@ -4,6 +4,11 @@ if [ E${APP_DIR} = 'E' ]; then
   APP_DIR=.
 fi
 
+PYTHON_CMD=python3
+if [ E${EXTPYTHONCMD} != "E" ]; then
+  PYTHON_CMD=${EXTPYTHONCMD}
+fi
+
 START_DIR=$(pwd)
 cd ../webfrontend/dist/spa-mat
 WEBFRONTEND_DIR=$(pwd)
@@ -32,4 +37,10 @@ if [ E${APIAPP_VERSION} = 'E' ]; then
 fi
 APIAPP_VERSION=DEVELOPMENT-SERV-${APIAPP_VERSION}
 
-python3 ./src/app.py
+${PYTHON_CMD} ./src/app.py
+RES=$?
+
+if [ $RES -ne 0 ]; then
+  echo "Process Errored"
+  read -p "Press enter to continue"
+fi

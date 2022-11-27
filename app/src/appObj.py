@@ -41,7 +41,7 @@ class appObjClass(parAppObj):
       if self.jobExecutor is not None:
         #for testing we init multiple times. We need to stop the thread running in this case
         self.jobExecutor.stopThreadRunning()
-        if self.jobExecutor.isAlive():
+        if self.jobExecutor.is_alive():
           self.jobExecutor.join()
         self.jobExecutor = None
       super(appObjClass, self).init(env, serverStartTime, testingMode, serverinfoapiprefix='')
@@ -138,7 +138,7 @@ class appObjClass(parAppObj):
   def stopThread(self):
     if self.jobExecutor is None:
       return
-    if not self.jobExecutor.isAlive():
+    if not self.jobExecutor.is_alive():
       return
     self.jobExecutor.stopThreadRunning()
     self.jobExecutor.join()

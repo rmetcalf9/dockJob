@@ -281,8 +281,6 @@ class JobExecutorClass(threading.Thread):
 
     self.appObj.appData['jobsData'].loopIteration(self.appObj, curDatetime)
 
-
-
   #main loop of thread
   running = True
   def run(self):

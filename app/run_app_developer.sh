@@ -1,5 +1,10 @@
 #!/bin/bash
 
+PYTHON_CMD=python3
+if [ E${EXTPYTHONCMD} != "E" ]; then
+  PYTHON_CMD=${EXTPYTHONCMD}
+fi
+
 APP_DIR=.
 
 export APIAPP_MODE=DEVELOPER
@@ -13,6 +18,7 @@ export APIAPP_GROUPFORJOBS=dockjobgroup
 export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"SimpleFileStore\", \"BaseLocation\": \"./test/TestFileStore\"}"
 export APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN="http://localhost:8080,http://localhost:8081"
 export APIAPP_MONITORCHECKTEMPSTATECONFIG"{\"username\":\"user\", \"password\": \"pass\"}"
+export APIAPP_PORT=8098
 
 export APIAPP_VERSION=
 if [ -f ${APP_DIR}/../VERSION ]; then
@@ -28,5 +34,11 @@ fi
 
 
 #Python app reads parameters from environment variables
-python3.6 ./src/app.py
+echo "PYTHON_CMD: $PYTHON_CMD"
+${PYTHON_CMD} ./src/app.py
+RES=$?
 
+if [ $RES -ne 0 ]; then
+  echo "Process Errored"
+  read -p "Press enter to continue"
+fi

@@ -2,6 +2,11 @@
 
 APP_DIR=.
 
+PYTHON_CMD=python3
+if [ E${EXTPYTHONCMD} != "E" ]; then
+  PYTHON_CMD=${EXTPYTHONCMD}
+fi
+
 export APIAPP_MODE=DEVELOPER
 export APIAPP_FRONTEND=_
 export APIAPP_APIURL="http://localhost:80/api"
@@ -25,5 +30,11 @@ fi
 APIAPP_VERSION=DEVELOPMENT-${APIAPP_VERSION}
 
 
-python3 ./src/app.py
-exit 0
+${PYTHON_CMD} ./src/app.py
+RES=$?
+
+if [ $RES -ne 0 ]; then
+  echo "Process Errored"
+  read -p "Press enter to continue"
+fi
+

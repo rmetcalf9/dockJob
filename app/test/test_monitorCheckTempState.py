@@ -56,7 +56,6 @@ class helper(testHelperAPIClient):
     return json.loads(result.get_data(as_text=True))
 
 
-@TestHelperSuperClass.wipd
 class test_jobsData(helper):
 
   def test_nodatasent_errors(self):
