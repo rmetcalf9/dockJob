@@ -29,8 +29,8 @@ EXPOSE 80
 #    pip3 install --upgrade pip && \
 #    mkdir ${APP_DIR} && \
 #    mkdir ${APIAPP_FRONTEND} && \
-#    addgroup -S ${APIAPP_GROUPFORJOBS} && \
-#    adduser -S -G ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
+#    addgroup ${APIAPP_GROUPFORJOBS} && \
+#    adduser --quiet --disabled-password --gecos "" --ingroup ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
 #    mkdir /var/log/uwsgi && \
 #    pip3 install uwsgi && \
 #    pip3 install cffi
@@ -41,8 +41,9 @@ RUN apt-get install ca-certificates curl && \
     bash /install-nginx-debian.sh && \
     mkdir ${APP_DIR} && \
     mkdir ${APIAPP_FRONTEND} && \
-    addgroup -S ${APIAPP_GROUPFORJOBS} && \
-    adduser -S -G ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
+    addgroup ${APIAPP_GROUPFORJOBS} && \
+    adduser --quiet --disabled-password --gecos "" --ingroup ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
+    usermod -a -G ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
     mkdir /var/log/uwsgi && \
     pip3 install uwsgi && \
     wget --ca-directory=/etc/ssl/certs https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem -O /rds-combined-ca-bundle.pem
