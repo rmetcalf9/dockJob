@@ -1,8 +1,7 @@
-FROM nginx:1.23.1-alpine
+FROM python:3.8-buster
 
 MAINTAINER Robert Metcalf
 
-##https://vladikk.com/2013/09/12/serving-flask-with-nginx-on-ubuntu/
 
 ENV APP_DIR /app
 ##APIAPP_FRONTEND is also configured in nginx conf
@@ -22,19 +21,32 @@ ENV APIAPP_GROUPFORJOBS=dockjobgroup
 EXPOSE 80
 
 
-RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pcre-dev libffi-dev && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --upgrade pip setuptools && \
-    rm -r /root/.cache && \
-    pip3 install --upgrade pip && \
+# RUN apk add --no-cache bash python3 curl python3-dev build-base linux-headers pcre-dev libffi-dev && \
+#    python3 -m ensurepip && \
+#    rm -r /usr/lib/python*/ensurepip && \
+#    pip3 install --upgrade pip setuptools && \
+#    rm -r /root/.cache && \
+#    pip3 install --upgrade pip && \
+#    mkdir ${APP_DIR} && \
+#    mkdir ${APIAPP_FRONTEND} && \
+#    addgroup -S ${APIAPP_GROUPFORJOBS} && \
+#    adduser -S -G ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
+#    mkdir /var/log/uwsgi && \
+#    pip3 install uwsgi && \
+#    pip3 install cffi
+
+COPY install-nginx-debian.sh /
+
+RUN apt-get install ca-certificates curl && \
+    bash /install-nginx-debian.sh && \
     mkdir ${APP_DIR} && \
     mkdir ${APIAPP_FRONTEND} && \
     addgroup -S ${APIAPP_GROUPFORJOBS} && \
     adduser -S -G ${APIAPP_GROUPFORJOBS} ${APIAPP_USERFORJOBS} && \
     mkdir /var/log/uwsgi && \
     pip3 install uwsgi && \
-    pip3 install cffi
+    wget --ca-directory=/etc/ssl/certs https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem -O /rds-combined-ca-bundle.pem
+
 
 COPY ./app/src ${APP_DIR}
 RUN pip3 install -r ${APP_DIR}/requirments.txt
