@@ -1,3 +1,12 @@
+ARG RJM_BUILDQUASARAPP_IMAGE
+ARG RJM_VERSION
+
+FROM ${RJM_BUILDQUASARAPP_IMAGE} as quasar_build
+
+COPY ./frontend /frontend
+
+RUN build_quasar_app /frontend pwa ${RJM_VERSION}
+
 FROM python:3.8-buster
 
 MAINTAINER Robert Metcalf
@@ -5,7 +14,7 @@ MAINTAINER Robert Metcalf
 
 ENV APP_DIR /app
 ##APIAPP_FRONTEND is also configured in nginx conf
-ENV APIAPP_FRONTEND /webfrontend
+ENV APIAPP_FRONTEND /frontend
 
 
 ENV APIAPP_APIURL http://localhost:80/dockjobapi
@@ -52,7 +61,7 @@ RUN apt-get install ca-certificates curl && \
 COPY ./app/src ${APP_DIR}
 RUN pip3 install -r ${APP_DIR}/requirments.txt
 
-COPY ./webfrontend/dist/pwa ${APIAPP_FRONTEND}
+COPY --from=quasar_build ./frontend/dist/pwa ${APIAPP_FRONTEND}
 COPY ./VERSION /VERSION
 COPY ./app/run_app_docker.sh /run_app_docker.sh
 COPY ./nginx_default.conf /etc/nginx/conf.d/default.conf

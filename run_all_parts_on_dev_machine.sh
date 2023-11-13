@@ -20,11 +20,9 @@ fi
 
 tmux \
   new-session  "cd ./app ; ${TR}" \; \
-  split-window "cd ./webfrontend ; quasar dev" \; \
+  split-window "cd ./frontend ; quasar dev" \; \
   select-layout main-horizontal \; \
   select-pane -t 0 \; \
   split-window "cd ./app ; ./insert_example_jobs.sh"
 
 exit 0
-
-
