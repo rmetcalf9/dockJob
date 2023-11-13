@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 
-export const useCounterStore = defineStore('counter', {
+export const useLoginStateStore = defineStore('loginStateStore', {
   state: () => ({
-    counter: 0
+    loggedinData: false
   }),
 
   getters: {
-    doubleCount (state) {
-      return state.counter * 2
+    loggedin (state) {
+      return state.loggedinData
     }
   },
 

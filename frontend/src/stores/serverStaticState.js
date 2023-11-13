@@ -30,7 +30,11 @@ function tryToGetServerData({locationsToTry, successCallback}) {
 export const useServerStaticStateStore = defineStore('useServerStaticStateStore', {
   state: () => ({
     loaded: false,
-    serverInfoData: { 'x': 'y' }
+    serverInfoData: {
+       data: {
+         version: 'Loading...'
+       }
+    }
   }),
 
   getters: {
@@ -47,7 +51,7 @@ export const useServerStaticStateStore = defineStore('useServerStaticStateStore'
       const hostname = window.location.host.split(":")[0]
 
       //We could be
-      // in prod (Behing Kong AND nginx)
+      // in prod (Behind Kong AND nginx)
       // in docker port 8310 behind nginx
       // nativly on local machine
 
