@@ -74,8 +74,11 @@ import { useServerInfoStore } from 'stores/serverInfo'
 import { useLoginStateStore } from 'stores/loginState'
 import callDockjobBackendApi from '../callDockjobBackendApi'
 import miscFns from '../miscFns'
+import getDepaginatedQueryResults from '../depaginatedQuery.js'
+import callbackHelper from '../callbackHelper'
 
 import { Notify } from 'quasar'
+import { Loading } from 'quasar'
 
 export default {
   name: 'App-Dashboard',
@@ -127,6 +130,7 @@ export default {
     },
     refreshPage ({wait}) {
       const TTT=this
+      Loading.show()
       if (!this.serverStaticState.isLoaded) {
         if (wait>0) {
           setTimeout(function(){
@@ -137,9 +141,10 @@ export default {
       }
       const callback = {
         ok: function (response) {
-          TTT.refreshJobs()
+          TTT.refreshPinnedJobs()
         },
         error: function (error) {
+          Loading.hide()
           console.log('Refresh server info failed', error)
           Notify.create({
             color: 'negative',
@@ -153,8 +158,36 @@ export default {
       })
       this.serverInfoStore.refresh({force: true, callback, wrappedCallApiFn})
     },
-    refreshJobs () {
-      console.log('TODO REFRESH JOBS')
+    refreshPinnedJobs () {
+      Loading.show()
+      var TTT = this
+      var callback = {
+        ok: function (response) {
+          // console.log(response.data.guid)
+          Loading.hide()
+          TTT.pinnedJobs = response.data.result
+          TTT.loading = false
+          if (!response.data.dePaginatorResp.complete) {
+            Notify.create({color: 'info', message: 'Not all pinned jobs were queried back'})
+          }
+        },
+        error: function (error) {
+          Loading.hide()
+          Notify.create('Failed to query pinned jobs - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      const wrappedCallApiFn = callDockjobBackendApi.getWrappedCallApi({
+        loginStateStore: TTT.loginStateStore,
+        apiurl: this.serverStaticState.staticServerInfo.data.apiurl
+      })
+
+
+      var queryParamArray = []
+      queryParamArray['query'] = 'pinned=true'
+      getDepaginatedQueryResults.getDepaginatedQueryResults('/jobs/', queryParamArray, callback, wrappedCallApiFn)
+
+
+      Loading.hide()
     }
   },
   mounted () {
