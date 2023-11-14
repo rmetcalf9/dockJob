@@ -17,10 +17,11 @@
     <div class="row col-grow">
        <div class='q-table__title col'>{{ title }}</div>
 
-       <!-- <selectColumns
-         v-model="DataTableSettingsComputed.visibleColumns"
+       <selectColumns
+         :valuex="DataTableSettingsComputed.visibleColumns"
+         @update:valuex="newValue => DataTableSettingsComputed.visibleColumns = newValue"
          :columns="jobTableColumns"
-       /> -->
+       />
 
        <q-input
          v-model="DataTableSettingsComputed.filter"
@@ -32,6 +33,14 @@
          </template>
        </q-input>
     </div>
+  </template>
+  <template v-slot:body-cell="props">
+    <q-td :props="props">
+      <div v-if="props.col.name !== 'actions'">{{ props.value }}</div>
+      <div v-if="props.col.name === 'actions'">
+        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/executions/' + props.row.guid)" />
+      </div>
+    </q-td>
   </template>
 
   </q-table>
@@ -51,7 +60,7 @@ import { Loading } from 'quasar'
 import { Notify } from 'quasar'
 
 // import STDOutput from '../components/STDOutput.vue'
-// import selectColumns from '../components/selectColumns.vue'
+import selectColumns from '../components/selectColumns.vue'
 
 export default {
   name: 'Component-ExecutionTable',
@@ -63,7 +72,7 @@ export default {
   },
   components: {
     // STDOutput,
-    // selectColumns
+    selectColumns
   },
   props: [
     'title',

@@ -1,0 +1,8 @@
+
+
+<q-td slot:body-cell-resultSTDOUT slot-scope:props :props="props">
+ <STDOutput :val="props.value" maxLinesToShow=3 />
+</q-td>
+<q-td slot:body-cell-jobCommand slot-scope:props :props="props">
+ <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
+</q-td>

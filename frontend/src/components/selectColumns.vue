@@ -2,17 +2,13 @@
 // Get thie component recieving and emmitting properly
 <template>
   <q-select
-    multiple outlined
-    hide-selected
-    :options="columnsForEnableDropdown"
-    label="Fields:"
-    style="width: 300px"
-    v-bind:value="localTableVisibleColumns"
-    v-on:input="updateTableVisibleColumns"
-    :display-value="''"
+    ref="sel"
+    multiple
+    outlined
+    :options="localTableVisibleColumns"
+    v-model="internal_model"
+    @update:model-value="change"
   >
-    <template v-slot:selected-item>
-    </template>
   </q-select>
 </template>
 
@@ -20,61 +16,46 @@
 
 export default {
   props: [
-    'value',
+    'valuex',
     'columns'
   ],
   data () {
     return {
-      localTableVisibleColumns: []
+      localTableVisibleColumns: [],
+      internal_model: []
     }
   },
   methods: {
-    // I think this is what Emit-value does
-    updateTableVisibleColumns (event) {
-      console.log('sss')
-      this.localTableVisibleColumns = event
-      console.log('SSS', this.localTableVisibleColumns)
-      this.$emit('input', this.localTableVisibleColumns.map(function (x) {
+    change (event) {
+      this.$emit('update:valuex', this.internal_model.map(function (x) {
         return x.value
       }))
+      this.$refs.sel.hidePopup()
     }
   },
   computed: {
-    columnsForEnableDropdown () {
-      return this.columns.filter(function (x) { return !x.required }).map(function (x) {
-        return {
-          value: x.name,
-          label: x.label,
-          disable: x.required
-        }
-      })
-    }
   },
   mounted: function () {
-    var a = this.columnsForEnableDropdown
-    function findCol (name) {
-      return a.filter(function (x) {
-        return x.value === name
-      })
-    }
-    this.localTableVisibleColumns = this.value.map(function (x) {
-      var col = findCol(x)
-      if (col.length === 0) {
-        // columns are not loaded yet
-        return {
-          value: x,
-          label: x,
-          disable: false
-        }
+    const TTT=this
+    this.localTableVisibleColumns = this.columns.filter(function (x) { return !x.required }).map(function (x) {
+      return {
+        value: x.name,
+        label: x.label,
+        disable: x.required
       }
+    })
+    const init_mod = this.valuex.map(function (x) {
       return {
         value: x,
-        label: col[0].label,
-        disable: col[0].required
+        label: TTT.localTableVisibleColumns.filter(function (y) {
+          return y.value === x
+        }).map(function (z) {
+          return z.label
+        }),
+        disable: false
       }
-    }).filter(function (x) {
-      return !x.disable
     })
+    this.internal_model = init_mod
   }
 }
 </script>[
