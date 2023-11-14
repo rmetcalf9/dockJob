@@ -13,36 +13,44 @@
     @update:pagination="DataTableSettingsComputed.serverPagination = $event"
     :rows-per-page-options="rowsPerPageOptions"
   >
-  <template v-slot:top>
-    <div class="row col-grow">
-       <div class='q-table__title col'>{{ title }}</div>
+    <template v-slot:top>
+      <div class="row col-grow">
+         <div class='q-table__title col'>{{ title }}</div>
 
-       <selectColumns
-         :valuex="DataTableSettingsComputed.visibleColumns"
-         @update:valuex="newValue => DataTableSettingsComputed.visibleColumns = newValue"
-         :columns="jobTableColumns"
-       />
+         <selectColumns
+           :valuex="DataTableSettingsComputed.visibleColumns"
+           @update:valuex="newValue => DataTableSettingsComputed.visibleColumns = newValue"
+           :columns="jobTableColumns"
+         />
 
-       <q-input
-         v-model="DataTableSettingsComputed.filter"
-         debounce="500"
-         placeholder="Search" outlined
-       >
-         <template v-slot:append>
-           <q-icon name="search" />
-         </template>
-       </q-input>
-    </div>
-  </template>
-  <template v-slot:body-cell="props">
-    <q-td :props="props">
-      <div v-if="props.col.name !== 'actions'">{{ props.value }}</div>
-      <div v-if="props.col.name === 'actions'">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/executions/' + props.row.guid)" />
+         <q-input
+           v-model="DataTableSettingsComputed.filter"
+           debounce="500"
+           placeholder="Search" outlined
+         >
+           <template v-slot:append>
+             <q-icon name="search" />
+           </template>
+         </q-input>
       </div>
-    </q-td>
-  </template>
+    </template>
 
+    <template v-slot:body="props">
+      <q-tr>
+        <q-td v-for="colName in currentlyVisibleColumnNames" v-bind:key="colName">
+          <div v-if="colName === 'actions'">
+            <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/executions/' + props.row.guid)" />
+          </div>
+          <div v-if="colName === 'jobCommand'">
+            <div v-for="curVal in getLineArray(props.row[colName])" :key=curVal.p>{{ curVal.v }}</div>
+          </div>
+          <div v-if="colName === 'resultSTDOUT'">
+            <STDOutput :val="props.row[colName]" maxLinesToShow=3 />
+          </div>
+          <div v-if="!['resultSTDOUT', 'actions', 'jobCommand'].includes(colName)">{{ props.row[colName] }}</div>
+        </q-td>
+      </q-tr>
+    </template>
   </q-table>
 </div>
 </template>
@@ -59,7 +67,7 @@ import miscFns from '../miscFns'
 import { Loading } from 'quasar'
 import { Notify } from 'quasar'
 
-// import STDOutput from '../components/STDOutput.vue'
+import STDOutput from '../components/STDOutput.vue'
 import selectColumns from '../components/selectColumns.vue'
 
 export default {
@@ -71,7 +79,7 @@ export default {
     return { dataTableSettings, loginStateStore, serverStaticStateStore }
   },
   components: {
-    // STDOutput,
+    STDOutput,
     selectColumns
   },
   props: [
@@ -96,10 +104,16 @@ export default {
         { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompletedString', sortable: true, filter: true },
         { name: 'resultSTDOUT', required: false, label: 'Output', align: 'left', field: 'resultSTDOUT', sortable: true, filter: true },
         { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: true, filter: true },
-        { name: 'actions', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
+        { name: 'actions', required: true, label: 'Actions', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobExecutionData: [],
-      loading: false
+      loading: false,
+      getLineArray: function (str) {
+        if (typeof (str) === 'undefined') return undefined
+        var c = 0
+        return str.split('\n').map(function (v) { return { p: ++c, v: v } })
+      },
+
     }
   },
   methods: {
@@ -180,6 +194,19 @@ export default {
   computed: {
     DataTableSettingsComputed () {
       return this.dataTableSettings.getSettings(this.DataTableSettingsPrefix)
+    },
+    currentlyVisibleColumnNames () {
+      const TTT = this
+      return this.jobTableColumns
+        .filter(function(x) {
+          if (x.required) {
+            return true
+          }
+          return TTT.DataTableSettingsComputed.visibleColumns.includes(x.name)
+        })
+        .map(function(x) {
+          return x.name
+        })
     }
   },
   mounted () {
