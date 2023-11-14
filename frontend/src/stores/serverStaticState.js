@@ -39,7 +39,7 @@ export const useServerStaticStateStore = defineStore('useServerStaticStateStore'
   }),
 
   getters: {
-    serverInfo (state) {
+    staticServerInfo (state) {
       return state.serverInfoData
     },
     isLoaded (state) {

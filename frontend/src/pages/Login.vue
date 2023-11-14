@@ -27,7 +27,7 @@
                     </div>
                   </q-card>
                   <div>
-                    Version: {{serverInfo.data.version}}
+                    Version: {{staticServerInfo.data.version}}
                   </div>
                 </div>
               </div>
@@ -63,8 +63,8 @@ export default {
     }
   },
   computed: {
-    serverInfo () {
-      const serverInfo = this.serverStaticState.serverInfo
+    staticServerInfo () {
+      const staticServerInfo = this.serverStaticState.staticServerInfo
       if ( this.serverStaticState.isLoaded) {
         if (!this.serverStaticState.loginRequired) {
           console.log('No Security for login')
@@ -72,7 +72,7 @@ export default {
           this.$router.replace('/')
         }
       }
-      return serverInfo
+      return staticServerInfo
     },
   },
   methods: {
