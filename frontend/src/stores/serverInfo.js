@@ -36,9 +36,10 @@ export const useServerInfoStore = defineStore('serverInfoStore', {
           callback.error(error)
         }
       }
+      // Need slash because without slash is different endpoint
       wrappedCallApiFn({
         method: 'get',
-        path: '/serverinfo',
+        path: '/serverinfo/',
         postdata: undefined,
         callback: callbackInternal
       })

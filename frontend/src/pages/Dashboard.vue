@@ -24,13 +24,9 @@
         <div v-if='serverInfo.Jobs.NextJobsToExecute.length === 0'>No runs scheduled</div>
         <table v-if='serverInfo.Jobs.NextJobsToExecute.length !== 0'>
           <tr><td align="right">Name:</td><td>
-            <router-link custom :to="'/jobs/' + serverInfo.Jobs.NextJobsToExecute[0].guid" class="text-grey-8">
+            <router-link :to="'/jobs/' + serverInfo.Jobs.NextJobsToExecute[0].guid" class="text-grey-8">
               {{ serverInfo.Jobs.NextJobsToExecute[0].name }}
             </router-link>
-
-<!--            <router-link :to="'/jobs/' + serverInfo.Jobs.NextJobsToExecute[0].guid" tag="a" class="text-grey-8">
-              {{ serverInfo.Jobs.NextJobsToExecute[0].name }}
-            </router-link>-->
           </td></tr>
           <tr><td align="right">When:</td><td>{{ serverInfo.Jobs.NextJobsToExecute[0].nextScheduledRunString }}</td></tr>
         </table>
@@ -77,6 +73,7 @@ import { useServerStaticStateStore } from 'stores/serverStaticState'
 import { useServerInfoStore } from 'stores/serverInfo'
 import { useLoginStateStore } from 'stores/loginState'
 import callDockjobBackendApi from '../callDockjobBackendApi'
+import miscFns from '../miscFns'
 
 import { Notify } from 'quasar'
 
@@ -94,6 +91,13 @@ export default {
     return { serverStaticState, serverInfoStore, loginStateStore }
   },
   computed: {
+    jobs () {
+      return [
+        { k: 1, text: 'Jobs Never Run:', val: this.serverInfoStore.serverInfo.Jobs.JobsNeverRun },
+        { k: 2, text: 'Jobs Completing Sucessfully:', val: this.serverInfoStore.serverInfo.Jobs.JobsCompletingSucessfully },
+        { k: 3, text: 'Jobs where last execution failed:', val: this.serverInfoStore.serverInfo.Jobs.JobsLastExecutionFailed }
+      ]
+    },
     serverStateLoaded () {
       if (!this.serverStaticState.isLoaded) {
         return false
@@ -102,24 +106,23 @@ export default {
     },
     serverInfo () {
       var ret = this.serverInfoStore.serverInfo
-      // ret.Server.ServerStartupTimeString = userSettings.getters.userTimeStringFN(ret.Server.ServerStartupTime)
-      // ret.Server.ServerDatetimeString = userSettings.getters.userTimeStringFN(ret.Server.ServerDatetime)
-      // ret.Jobs.NextJobsToExecute.map(function (obj) {
-      //  obj.nextScheduledRunString = userSettings.getters.userTimeStringFN(obj.nextScheduledRun)
-      //  return obj
-      // })
+      ret.Server.ServerStartupTimeString = miscFns.timeString(ret.Server.ServerStartupTime)
+      ret.Server.ServerDatetimeString = miscFns.timeString(ret.Server.ServerDatetime)
+      ret.Jobs.NextJobsToExecute.map(function (obj) {
+        obj.nextScheduledRunString = miscFns.timeString(obj.nextScheduledRun)
+        return obj
+      })
       return ret
     },
   },
   methods: {
     getCardClass (jobObj) {
-      // TODO put back
-      // if (jobObj.mostRecentCompletionStatus === 'Success') {
-      //  return 'bg-positive'
-      // }
-      // if (jobObj.mostRecentCompletionStatus === 'Fail') {
-      //  return 'bg-negative'
-      // }
+      if (jobObj.mostRecentCompletionStatus === 'Success') {
+        return 'bg-positive'
+      }
+      if (jobObj.mostRecentCompletionStatus === 'Fail') {
+        return 'bg-negative'
+      }
       return 'bg-primary'
     },
     refreshPage ({wait}) {
