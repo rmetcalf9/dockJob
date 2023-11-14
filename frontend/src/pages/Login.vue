@@ -40,13 +40,18 @@
 </template>
 
 <script>
+// I am only implementing basic auth here and ignoring the JWT method
+//  if login fails I will rely on a 403 sending the user back here
 import { useServerStaticStateStore } from 'stores/serverStaticState'
+import { useLoginStateStore } from 'stores/loginState'
+import { Notify } from 'quasar'
 
 export default {
   name: 'App-Login',
   setup () {
     const serverStaticState = useServerStaticStateStore()
-    return { serverStaticState }
+    const loginStateStore = useLoginStateStore()
+    return { serverStaticState, loginStateStore }
   },
   data () {
     return {
@@ -59,12 +64,26 @@ export default {
   },
   computed: {
     serverInfo () {
-      return this.serverStaticState.serverInfo
+      const serverInfo = this.serverStaticState.serverInfo
+      if ( this.serverStaticState.isLoaded) {
+        if (!this.serverStaticState.loginRequired) {
+          console.log('No Security for login')
+          this.loginStateStore.setLoggedin({})
+          this.$router.replace('/')
+        }
+      }
+      return serverInfo
     },
   },
   methods: {
     usernamePassLogin () {
-      console.log('TODO')
+      this.loginStateStore.setLoggedin(this.usernamePass)
+      this.$router.replace('/')
+      // Notify.create({
+      //  color: 'negative',
+      //  message: 'Not Implmemented'
+      // })
+      // console.log('TODO')
     }
   },
   mounted () {

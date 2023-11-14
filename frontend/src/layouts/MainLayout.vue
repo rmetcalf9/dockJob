@@ -48,8 +48,8 @@
           </q-item-section>
           <q-item-section>Executions</q-item-section>
         </q-item>
-        <q-separator />
-        <q-item to="/logout">
+        <q-separator v-if="loginRequired" />
+        <q-item clickable @click="logout" v-if="loginRequired" >
           <q-item-section avatar>
             <q-icon color="primary" name="exit_to_app" />
           </q-item-section>
@@ -67,6 +67,7 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import { useLoginStateStore } from 'stores/loginState'
+import { useServerStaticStateStore } from 'stores/serverStaticState'
 
 export default defineComponent({
   name: 'MainLayout',
@@ -77,9 +78,11 @@ export default defineComponent({
   setup () {
     const leftDrawerOpen = ref(false)
     const loginStateStore = useLoginStateStore()
+    const serverStaticState = useServerStaticStateStore()
 
     return {
       loginStateStore,
+      serverStaticState,
       leftDrawerOpen,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
@@ -87,6 +90,15 @@ export default defineComponent({
     }
   },
   computed: {
+    loginRequired () {
+      return this.serverStaticState.loginRequired
+    }
+  },
+  methods: {
+    logout () {
+      this.loginStateStore.setLoggedout()
+      this.$router.replace('/login')
+    }
   },
   mounted () {
     if (!this.loginStateStore.loggedin) {

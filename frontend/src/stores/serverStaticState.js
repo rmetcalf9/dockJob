@@ -29,6 +29,7 @@ function tryToGetServerData({locationsToTry, successCallback}) {
 
 export const useServerStaticStateStore = defineStore('useServerStaticStateStore', {
   state: () => ({
+    loading: false,
     loaded: false,
     serverInfoData: {
        data: {
@@ -40,13 +41,27 @@ export const useServerStaticStateStore = defineStore('useServerStaticStateStore'
   getters: {
     serverInfo (state) {
       return state.serverInfoData
+    },
+    isLoaded (state) {
+      return state.loaded
+    },
+    loginRequired (state) {
+      if (!state.loaded) {
+        return true
+      }
+      // TODO Switch back
+      return true
+      // return (state.serverInfoData.data.apiaccesssecurity.length !== 0)
     }
   },
 
   actions: {
     loadState () {
       let TTT = this
-      this.loaded = true
+      if (this.loading) {
+        return
+      }
+      this.loading = true
 
       const hostname = window.location.host.split(":")[0]
 
@@ -67,6 +82,7 @@ export const useServerStaticStateStore = defineStore('useServerStaticStateStore'
       })
     },
     _loadState (newState) {
+      this.loaded = true
       this.serverInfoData = newState
     }
   }
