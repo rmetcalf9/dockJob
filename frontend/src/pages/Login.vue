@@ -68,7 +68,7 @@ export default {
       if ( this.serverStaticState.isLoaded) {
         if (!this.serverStaticState.loginRequired) {
           console.log('No Security for login')
-          this.loginStateStore.setLoggedin({})
+          this.loginStateStore.setLoggedin({loginCredentials: {}, loginType: 'None'})
           this.$router.replace('/')
         }
       }
@@ -77,7 +77,7 @@ export default {
   },
   methods: {
     usernamePassLogin () {
-      this.loginStateStore.setLoggedin(this.usernamePass)
+      this.loginStateStore.setLoggedin({loginCredentials: this.usernamePass, loginType: 'basic-auth'})
       this.$router.replace('/')
       // Notify.create({
       //  color: 'negative',

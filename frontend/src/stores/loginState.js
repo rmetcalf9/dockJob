@@ -3,7 +3,8 @@ import { defineStore } from 'pinia'
 export const useLoginStateStore = defineStore('loginStateStore', {
   state: () => ({
     loggedinData: false,
-    loginCredentials: {}
+    loginCredentials: {},
+    loginType: undefined
   }),
 
   getters: {
@@ -13,9 +14,10 @@ export const useLoginStateStore = defineStore('loginStateStore', {
   },
 
   actions: {
-    setLoggedin (loginCredentials) {
+    setLoggedin ({loginCredentials, loginType}) {
       this.loggedinData = true
       this.loginCredentials = loginCredentials
+      this.loginType = loginType
     },
     setLoggedout () {
       this.loggedinData = false
