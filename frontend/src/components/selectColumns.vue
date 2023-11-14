@@ -31,7 +31,9 @@ export default {
   methods: {
     // I think this is what Emit-value does
     updateTableVisibleColumns (event) {
+      console.log('sss')
       this.localTableVisibleColumns = event
+      console.log('SSS', this.localTableVisibleColumns)
       this.$emit('input', this.localTableVisibleColumns.map(function (x) {
         return x.value
       }))

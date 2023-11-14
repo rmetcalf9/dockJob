@@ -2,7 +2,7 @@
 <div>
   <q-table
     :title='title'
-    :data="jobExecutionData"
+    :rows="jobExecutionData"
     :columns="jobTableColumns"
     row-key="name"
     :loading="loading"
@@ -13,30 +13,27 @@
     @update:pagination="DataTableSettingsComputed.serverPagination = $event"
     :rows-per-page-options="rowsPerPageOptions"
   >
-    <template slot:top-right slot-scope:props>
-      <selectColumns
-        v-model="DataTableSettingsComputed.visibleColumns"
-        :columns="jobTableColumns"
-      />
-      <q-input
-        v-model="DataTableSettingsComputed.filter"
-        debounce="500"
-        placeholder="Search" outlined
-      >
-        <template v-slot:append>
-          <q-icon name="search" />
-        </template>
-      </q-input>
-    </template>
-    <q-td slot:body-cell-resultSTDOUT slot-scope:props :props="props">
-      <STDOutput :val="props.value" maxLinesToShow=3 />
-    </q-td>
-    <q-td slot:body-cell-jobCommand slot-scope:props :props="props">
-      <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
-    </q-td>
-    <q-td slot:body-cell-... slot-scope:props :props="props">
-      <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/executions/' + props.row.guid)" />
-    </q-td>
+  <template v-slot:top>
+    <div class="row col-grow">
+       <div class='q-table__title col'>{{ title }}</div>
+
+       <!-- <selectColumns
+         v-model="DataTableSettingsComputed.visibleColumns"
+         :columns="jobTableColumns"
+       /> -->
+
+       <q-input
+         v-model="DataTableSettingsComputed.filter"
+         debounce="500"
+         placeholder="Search" outlined
+       >
+         <template v-slot:append>
+           <q-icon name="search" />
+         </template>
+       </q-input>
+    </div>
+  </template>
+
   </q-table>
 </div>
 </template>
@@ -45,14 +42,16 @@
 import { useDataTableSettingsStore } from 'stores/dataTableSettings'
 import { useLoginStateStore } from 'stores/loginState'
 import { useServerStaticStateStore } from 'stores/serverStaticState'
-import { Loading } from 'quasar'
 import restcallutils from '../restcallutils'
 import callDockjobBackendApi from '../callDockjobBackendApi'
 import callbackHelper from '../callbackHelper'
 import miscFns from '../miscFns'
 
-import STDOutput from '../components/STDOutput.vue'
-import selectColumns from '../components/selectColumns.vue'
+import { Loading } from 'quasar'
+import { Notify } from 'quasar'
+
+// import STDOutput from '../components/STDOutput.vue'
+// import selectColumns from '../components/selectColumns.vue'
 
 export default {
   name: 'Component-ExecutionTable',
@@ -63,8 +62,8 @@ export default {
     return { dataTableSettings, loginStateStore, serverStaticStateStore }
   },
   components: {
-    STDOutput,
-    selectColumns
+    // STDOutput,
+    // selectColumns
   },
   props: [
     'title',
@@ -73,6 +72,7 @@ export default {
   ],
   data () {
     return {
+      test: [],
       rowsPerPageOptions: [5, 10, 25, 50, 100, 200],
       jobTableColumns: [
         { name: 'dateStarted', required: false, label: 'Start Date', align: 'left', field: 'dateStartedString', sortable: true, filter: true },
@@ -87,7 +87,7 @@ export default {
         { name: 'dateCompleted', required: false, label: 'Completion Date', align: 'left', field: 'dateCompletedString', sortable: true, filter: true },
         { name: 'resultSTDOUT', required: false, label: 'Output', align: 'left', field: 'resultSTDOUT', sortable: true, filter: true },
         { name: 'jobCommand', required: false, label: 'Job Command', align: 'left', field: 'jobCommand', sortable: true, filter: true },
-        { name: '...', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
+        { name: 'actions', required: true, label: '', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobExecutionData: [],
       loading: false
@@ -125,7 +125,6 @@ export default {
           })
 
           TTT.loading = false
-          console.log('TODO Debug', TTT.jobExecutionData)
         },
         error: function (error) {
           TTT.loading = false
@@ -137,6 +136,8 @@ export default {
         pagination.page = 1
       }
       var queryParams = []
+      // Filter is not currently working
+      //  but this is a BACKEND bug
       if (filter !== '') {
         queryParams['query'] = filter
       }
@@ -153,7 +154,7 @@ export default {
       }
       // Paramaterise this URL
       var queryString = restcallutils.buildQueryString(this.apiPath + '/', queryParams)
-      console.log(queryString)
+      console.log('About to get execution date', queryString)
 
       const wrappedCallApiFn = callDockjobBackendApi.getWrappedCallApi({
         loginStateStore: TTT.loginStateStore,

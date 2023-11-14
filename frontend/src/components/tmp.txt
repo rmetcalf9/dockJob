@@ -1,0 +1,23 @@
+<template v-slot:top>
+
+
+ <q-input
+   v-model="DataTableSettingsComputed.filter"
+   debounce="500"
+   placeholder="Search" outlined
+ >
+   <template v-slot:append>
+     <q-icon name="search" />
+   </template>
+ </q-input>
+</template>
+
+<q-td slot:body-cell-resultSTDOUT slot-scope:props :props="props">
+ <STDOutput :val="props.value" maxLinesToShow=3 />
+</q-td>
+<q-td slot:body-cell-jobCommand slot-scope:props :props="props">
+ <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
+</q-td>
+<q-td slot:body-cell-actions slot-scope:props :props="props">
+ <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/executions/' + props.row.guid)" />
+</q-td>
