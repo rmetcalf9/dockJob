@@ -177,7 +177,7 @@ export default {
         queryParams['sort'] = pagination.sortBy + postfix
       }
       // Paramaterise this URL
-      var queryString = restcallutils.buildQueryString(this.apiPath + '/', queryParams)
+      var queryString = restcallutils.buildQueryString(this.apiPath, queryParams)
       console.log('About to get execution date', queryString)
 
       const wrappedCallApiFn = callDockjobBackendApi.getWrappedCallApi({

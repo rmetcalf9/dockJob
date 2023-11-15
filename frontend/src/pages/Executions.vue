@@ -5,7 +5,7 @@
         ref="ExecutionTable"
         title="Executions Table"
         DataTableSettingsPrefix='Executions'
-        :apiPath="'/executions'"
+        :apiPath="'/executions/'"
       >
       </ExecutionTable>
       <q-btn
