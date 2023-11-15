@@ -69,8 +69,8 @@
 </template>
 
 <script>
-import { useServerStaticStateStore } from 'stores/serverStaticState'
 import { useServerInfoStore } from 'stores/serverInfo'
+import { useServerStaticStateStore } from 'stores/serverStaticState'
 import { useLoginStateStore } from 'stores/loginState'
 import callDockjobBackendApi from '../callDockjobBackendApi'
 import miscFns from '../miscFns'
