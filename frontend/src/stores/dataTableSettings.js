@@ -31,8 +31,8 @@ export const useDataTableSettingsStore = defineStore('dataTableSettingsStore', {
   },
 
   actions: {
-    increment () {
-      this.counter++
+    saveSettings ({name, newSettings}) {
+      this.allSettings[name] = newSettings
     }
   }
 })

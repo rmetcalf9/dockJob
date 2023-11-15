@@ -129,8 +129,6 @@ export default {
       TTT.loading = true
       var callback = {
         ok: function (response) {
-          TTT.loading = false
-
           // updating pagination to reflect in the UI
           TTT.DataTableSettingsComputed.serverPagination = pagination
 
@@ -163,7 +161,9 @@ export default {
       // Filter is not currently working
       //  but this is a BACKEND bug
       if (filter !== '') {
-        queryParams['query'] = filter
+        if (filter !== null) {
+          queryParams['query'] = filter
+        }
       }
       if (pagination.rowsPerPage !== 0) {
         queryParams['pagesize'] = pagination.rowsPerPage.toString()

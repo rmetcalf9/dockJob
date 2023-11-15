@@ -2,7 +2,7 @@
   <div>
     <q-table
       title='Jobs'
-      :data="jobData"
+      :rows="jobData"
       :columns="jobTableColumns"
       :visible-columns="DataTableSettingsComputed.visibleColumns"
       :filter="DataTableSettingsComputed.filter"
@@ -16,6 +16,27 @@
       @update:selected="selectedSecond = $event"
       :rows-per-page-options="rowsPerPageOptions"
     >
+    <template v-slot:top>
+      <div class="row col-grow">
+         <div class='q-table__title col'>Jobs</div>
+      </div>
+      <selectColumns
+        :valuex="DataTableSettingsComputed.visibleColumns"
+        @update:valuex="newValue => DataTableSettingsComputed.visibleColumns = newValue"
+        :columns="jobTableColumns"
+      />
+      <q-input
+        v-model="DataTableSettingsComputed.filter"
+        debounce="500"
+        placeholder="Search" outlined
+        clearable
+      >
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+    </template>
+
       <!--
       <template slot="top-selection" slot-scope="props">
         <q-btn flat round delete icon="delete" @click="deleteJob" />
@@ -97,15 +118,16 @@ import miscFns from '../miscFns'
 import restcallutils from '../restcallutils'
 import callDockjobBackendApi from '../callDockjobBackendApi'
 
-// import selectColumns from '../components/selectColumns'
 // import CreateJobModal from '../components/CreateJobModal'
+import selectColumns from '../components/selectColumns.vue'
 
+const dataTableSettingsName='Jobs'
 
 export default {
   name: 'App-Jobs',
   components: {
     // CreateJobModal
-    // selectColumns
+    selectColumns
   },
   setup () {
     const dataTableSettings = useDataTableSettingsStore()
@@ -143,7 +165,7 @@ export default {
         { name: 'AfterSuccessJobGUID', required: false, label: 'After Success Job', align: 'left', field: 'AfterSuccessJobGUID', sortable: true, filter: true },
         { name: 'AfterFailJobGUID', required: false, label: 'After Fail Job', align: 'left', field: 'AfterFailJobGUID', sortable: true, filter: true },
         { name: 'AfterUnknownJobGUID', required: false, label: 'After Unknown Job', align: 'left', field: 'AfterUnknownJobGUID', sortable: true, filter: true },
-        { name: '...', required: true, label: '...', align: 'left', field: 'guid', sortable: false, filter: false }
+        { name: 'action', required: true, label: '...', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobData: [],
       loading: false,
@@ -158,7 +180,6 @@ export default {
       var callback = {
         ok: function (response) {
           // console.log(response.data.guid)
-          TTT.loading = false
 
           // updating pagination to reflect in the UI
           TTT.DataTableSettingsComputed.serverPagination = pagination
@@ -167,7 +188,11 @@ export default {
           TTT.DataTableSettingsComputed.serverPagination.filter = filter
           TTT.DataTableSettingsComputed.serverPagination.rowsPerPage = response.data.pagination.pagesize
 
-          dataTableSettings.commit('JOBS', TTT.DataTableSettingsComputed)
+          //dataTableSettingsName
+          TTT.dataTableSettings.saveSettings({
+            name: dataTableSettingsName,
+            newSettings: TTT.DataTableSettingsComputed
+          })
 
           // then we update the rows with the fetched ones
           TTT.jobData = response.data.result
@@ -194,7 +219,9 @@ export default {
       var queryParams = []
 
       if (filter !== '') {
-        queryParams['query'] = filter
+        if (filter !== null) {
+          queryParams['query'] = filter
+        }
       }
       if (pagination.rowsPerPage !== 0) {
         queryParams['pagesize'] = pagination.rowsPerPage.toString()
@@ -311,7 +338,7 @@ export default {
   computed: {
     DataTableSettingsComputed () {
       return this.dataTableSettings.getSettings({
-        name: 'Jobs',
+        name: dataTableSettingsName,
         defaultVisibleColumns: ['name', 'enabled', 'lastRunReturnCode', 'nextScheduledRun'],
         defaultSortBy: null
       })
