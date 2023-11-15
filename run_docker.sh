@@ -13,6 +13,7 @@ docker run --rm -it \
   --env APIAPP_APIURL=http://localhost:8301/api \
   --env APIAPP_APIDOCSURL=http://localhost:8301/apidocs \
   --env APIAPP_FRONTENDURL=http://localhost:8301/frontend \
+  --env APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN="http://localhost:8301,http://superego:8301" \
   ${BUILD_IMAGE_NAME_AND_TAG}
 RUN_RES=$?
 if [[ ${RUN_RES} -ne 0 ]]; then
