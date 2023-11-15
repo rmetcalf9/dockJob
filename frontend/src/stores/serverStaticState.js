@@ -49,9 +49,9 @@ export const useServerStaticStateStore = defineStore('useServerStaticStateStore'
       if (!state.loaded) {
         return true
       }
-      // TODO Switch back
-      return true
-      // return (state.serverInfoData.data.apiaccesssecurity.length !== 0)
+      // Override for testing
+      // return true
+      return (state.serverInfoData.data.apiaccesssecurity.length !== 0)
     }
   },
 
