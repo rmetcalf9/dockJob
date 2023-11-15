@@ -194,7 +194,11 @@ export default {
   },
   computed: {
     DataTableSettingsComputed () {
-      return this.dataTableSettings.getSettings(this.DataTableSettingsPrefix)
+      return this.dataTableSettings.getSettings({
+        name: this.DataTableSettingsPrefix,
+        defaultVisibleColumns: ['dateStarted', 'jobName', 'executionName', 'stage', 'resultReturnCode'],
+        defaultSortBy: 'dateStarted'
+      })
     },
     currentlyVisibleColumnNames () {
       const TTT = this

@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 
-function defaultTableSettings () {
+function defaultTableSettings ({defaultVisibleColumns, defaultSortBy}) {
   return {
-    visibleColumns: ['dateStarted', 'jobName', 'executionName', 'stage', 'resultReturnCode'],
+    visibleColumns: defaultVisibleColumns,
     serverPagination: {
       page: 1,
       rowsNumber: 10, // specifying this determines pagination is server-side
-      rowsPerPage: 10,
-      sortBy: 'dateStarted',
+      rowsPerPage: 25,
+      sortBy: defaultSortBy,
       descending: true
     },
     filter: ''
@@ -21,9 +21,9 @@ export const useDataTableSettingsStore = defineStore('dataTableSettingsStore', {
 
   getters: {
     getSettings (state) {
-      return function (name) {
+      return function ({name, defaultVisibleColumns, defaultSortBy}) {
         if (typeof (state.allSettings[name]) === 'undefined') {
-          state.allSettings[name] = defaultTableSettings()
+          state.allSettings[name] = defaultTableSettings({defaultVisibleColumns, defaultSortBy})
         }
         return state.allSettings[name]
       }

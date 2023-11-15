@@ -310,7 +310,12 @@ export default {
   },
   computed: {
     DataTableSettingsComputed () {
-      return this.dataTableSettings.getSettings('Jobs')
+      return this.dataTableSettings.getSettings({
+        name: 'Jobs',
+        defaultVisibleColumns: ['name', 'enabled', 'lastRunReturnCode', 'nextScheduledRun'],
+        defaultSortBy: null
+      })
+
     }
   },
   mounted () {
