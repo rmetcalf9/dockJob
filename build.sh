@@ -12,9 +12,9 @@ fi
 echo "Building project ${PROJECT_NAME} to image ${TAG}"
 
 docker build \
-  -t ${BUILD_IMAGE_NAME_AND_TAG} \
+  -t ${TAG} \
   --build-arg RJM_BUILDQUASARAPP_IMAGE=${RJM_BUILDQUASARAPP_IMAGE} \
-  --build-arg RJM_VERSION=local \
+  --build-arg RJM_VERSION=${TAG} \
   .
 BUILD_RES=$?
 if [[ ${BUILD_RES} -ne 0 ]]; then
