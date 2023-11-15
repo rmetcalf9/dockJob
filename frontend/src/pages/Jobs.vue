@@ -40,7 +40,7 @@
     <template v-slot:body="props">
       <q-tr>
         <q-td>
-          X
+          <q-checkbox v-model="props.selected" />
         </q-td>
         <q-td v-for="colName in currentlyVisibleColumnNames" v-bind:key="colName">
           <div v-if="colName === 'actions'">
