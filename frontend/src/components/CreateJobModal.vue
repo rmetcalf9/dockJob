@@ -135,12 +135,13 @@ import callbackHelper from '../callbackHelper'
 import globalUtils from '../globalUtils'
 import { useLoginStateStore } from 'stores/loginState'
 import { useServerStaticStateStore } from 'stores/serverStaticState'
+import { useServerInfoStore } from 'stores/serverInfo'
 import miscFns from '../miscFns'
 import callDockjobBackendApi from '../callDockjobBackendApi'
 
 import JobAutocomplete from '../components/JobAutocomplete.vue'
 
-function initShowCreateJobDialogData () {
+function initShowCreateJobDialogData ({defaultUserTimezone}) {
   return {
     jobname: '',
     command: '',
@@ -226,7 +227,7 @@ function initShowCreateJobDialogData () {
           value: 6
         }
       ],
-      timezone: miscFns.defaultUserTimezone,
+      timezone: defaultUserTimezone,
       dayofmonth: '1,15'
     }
   }
@@ -309,7 +310,8 @@ export default {
   setup () {
     const loginStateStore = useLoginStateStore()
     const serverStaticStateStore = useServerStaticStateStore()
-    return { loginStateStore, serverStaticStateStore }
+    const serverInfoStore = useServerInfoStore()
+    return { loginStateStore, serverStaticStateStore, serverInfoStore }
   },
   data () {
     return {
@@ -321,15 +323,14 @@ export default {
       },
       origJobObject: null,
       showCreateJobDialog: false,
-      showCreateJobDialogData: initShowCreateJobDialogData(),
+      showCreateJobDialogData: initShowCreateJobDialogData({defaultUserTimezone: 'Europe/London'}),
       repititionIntervalString: '',
       createdOKCallback: undefined // Function called if a new job is created
     }
   },
   methods: {
     openCreateJobDialog (confirmFunction, origJobObject = undefined) {
-      // console.log('openCreateJobDialog')
-      this.showCreateJobDialogData = initShowCreateJobDialogData()
+      this.showCreateJobDialogData = initShowCreateJobDialogData({defaultUserTimezone: this.serverInfoStore.serverInfo.Server.DefaultUserTimezone})
       this.createdOKCallback = confirmFunction
       this.origJobObject = origJobObject
       if (typeof (this.origJobObject) !== 'undefined') {

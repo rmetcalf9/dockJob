@@ -240,7 +240,10 @@ export default {
       child.openCreateJobDialog(function (newJob) {
         var newJobName = newJob.name
         TTTT.DataTableSettingsComputed.filter = newJobName
-        dataTableSettings.commit('JOBS', TTTT.DataTableSettingsComputed)
+        TTTT.dataTableSettings.saveSettings({
+          name: dataTableSettingsName,
+          newSettings: TTT.DataTableSettingsComputed
+        })
         TTTT.request({
           pagination: TTTT.DataTableSettingsComputed.serverPagination, // Rows number will be overwritten when query returns
           filter: TTTT.DataTableSettingsComputed.filter

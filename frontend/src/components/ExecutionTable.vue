@@ -137,6 +137,12 @@ export default {
           TTT.DataTableSettingsComputed.serverPagination.filter = filter
           TTT.DataTableSettingsComputed.serverPagination.rowsPerPage = response.data.pagination.pagesize
 
+          TTT.dataTableSettings.saveSettings({
+            name: TTT.DataTableSettingsPrefix,
+            newSettings: TTT.DataTableSettingsComputed
+          })
+
+
           // then we update the rows with the fetched ones
           TTT.jobExecutionData = response.data.result
           TTT.jobExecutionData.map(function (obj) {
