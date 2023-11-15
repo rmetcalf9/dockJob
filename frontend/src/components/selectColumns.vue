@@ -9,6 +9,9 @@
     v-model="internal_model"
     @update:model-value="change"
   >
+    <template v-slot:selected>
+      Show {{ internal_model.length }} fields
+    </template>
   </q-select>
 </template>
 
