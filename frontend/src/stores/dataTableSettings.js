@@ -6,7 +6,7 @@ function defaultTableSettings ({defaultVisibleColumns, defaultSortBy}) {
     serverPagination: {
       page: 1,
       rowsNumber: 10, // specifying this determines pagination is server-side
-      rowsPerPage: 25,
+      rowsPerPage: 10,
       sortBy: defaultSortBy,
       descending: true
     },

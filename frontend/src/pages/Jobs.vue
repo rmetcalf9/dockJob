@@ -37,6 +37,45 @@
       </q-input>
     </template>
 
+    <template v-slot:body="props">
+      <q-tr>
+        <q-td>
+          X
+        </q-td>
+        <q-td v-for="colName in currentlyVisibleColumnNames" v-bind:key="colName">
+          <div v-if="colName === 'actions'">
+            <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/jobs/' + props.row.guid)" />
+          </div>
+          <div v-if="colName === 'command'">
+            <div v-for="curVal in getLineArray(props.row[colName])" :key=curVal.p>{{ curVal.v }}</div>
+          </div>
+          <div v-if="colName === 'name'">
+            <q-btn v-if="props.row.mostRecentCompletionStatus === 'Success'" flat color="positive" :label="props.row[colName]" @click="$router.push('/jobs/' + props.row.guid)" width="100%"/>
+            <q-btn v-if="props.row.mostRecentCompletionStatus === 'Fail'" flat color="negative" :label="props.row[colName]" @click="$router.push('/jobs/' + props.row.guid)" width="100%"/>
+            <q-btn v-if="props.row.mostRecentCompletionStatus === 'Unknown'" flat color="primary" :label="props.row[colName]" @click="$router.push('/jobs/' + props.row.guid)" width="100%"/>
+          </div>
+          <div v-if="colName === 'lastRunExecutionGUID'">
+            <router-link :to="'/executions/' + props.row[colName]" class="text-grey-8">
+              {{ props.row[colName] }}
+            </router-link>
+          </div>
+
+          <div v-if="!['lastRunExecutionGUID', 'name', 'actions', 'command'].includes(colName)">
+            <div v-if="props.colsMap[colName].linkToOtherJob">
+              <div v-if="props.row[colName] && props.row[colName].length > 0">
+                <router-link :to="'/jobs/' + props.row[colName]" class="text-grey-8">
+                  {{ props.row[colName.substring(0, colName.length-4) + 'NAME'] }}
+                </router-link>
+              </div>
+            </div>
+            <div v-if="!props.colsMap[colName].linkToOtherJob">
+              {{ props.row[colName] }}
+            </div>
+          </div>
+        </q-td>
+      </q-tr>
+    </template>
+
       <!--
       <template slot="top-selection" slot-scope="props">
         <q-btn flat round delete icon="delete" @click="deleteJob" />
@@ -51,53 +90,8 @@
       </template>
       <template slot="top-right" slot-scope="props">
         <q-btn flat round delete icon="refresh" @click="refresh" />
-        <selectColumns
-          v-model="DataTableSettingsComputed.visibleColumns"
-          :columns="jobTableColumns"
-        />
-        <q-input
-          v-model="DataTableSettingsComputed.filter"
-          debounce="500"
-          placeholder="Search" outlined
-          clearable
-        >
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-input>
       </template>
 
-      <q-td  slot="body-cell-name" slot-scope="props" :props="props">
-        <q-btn v-if="props.row.mostRecentCompletionStatus === 'Success'" flat color="positive" :label="props.value" @click="$router.push('/jobs/' + props.row.guid)" width="100%"/>
-        <q-btn v-if="props.row.mostRecentCompletionStatus === 'Fail'" flat color="negative" :label="props.value" @click="$router.push('/jobs/' + props.row.guid)" width="100%"/>
-        <q-btn v-if="props.row.mostRecentCompletionStatus === 'Unknown'" flat color="primary" :label="props.value" @click="$router.push('/jobs/' + props.row.guid)" width="100%"/>
-      </q-td>
-      <q-td slot="body-cell-..." slot-scope="props" :props="props">
-        <q-btn flat color="primary" icon="keyboard_arrow_right" label="" @click="$router.push('/jobs/' + props.row.guid)" />
-      </q-td>
-      <q-td slot="body-cell-command" slot-scope="props" :props="props">
-        <div v-for="curVal in getLineArray(props.value)" :key=curVal.p>{{ curVal.v }}</div>
-      </q-td>
-      <q-td slot="body-cell-lastRunExecutionGUID" slot-scope="props" :props="props">
-        <router-link :to="'/executions/' + props.value" class="text-grey-8">
-          {{ props.value }}
-        </router-link>
-      </q-td>
-      <q-td slot="body-cell-StateChangeSuccessJobGUID" slot-scope="props" :props="props">
-        <router-link :to="'/jobs/' + props.value" class="text-grey-8">
-          {{ props.row.StateChangeSuccessJobNAME }}
-        </router-link>
-      </q-td>
-      <q-td slot="body-cell-StateChangeFailJobGUID" slot-scope="props" :props="props">
-        <router-link :to="'/jobs/' + props.value" class="text-grey-8">
-          {{ props.row.StateChangeFailJobNAME }}
-        </router-link>
-      </q-td>
-      <q-td slot="body-cell-StateChangeUnknownJobGUID" slot-scope="props" :props="props">
-        <router-link :to="'/jobs/' + props.value" class="text-grey-8">
-          {{ props.row.StateChangeUnknownJobNAME }}
-        </router-link>
-      </q-td>
       -->
     </q-table>
     <!--<CreateJobModal
@@ -159,13 +153,13 @@ export default {
         { name: 'mostRecentCompletionStatus', required: false, label: 'Completion Status', align: 'left', field: 'mostRecentCompletionStatus', sortable: true, filter: true },
         { name: 'pinned', required: false, label: 'Pinned', align: 'left', field: 'pinned', sortable: true, filter: true },
         { name: 'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown', required: false, label: 'Unknown Timeout', align: 'left', field: 'overrideMinutesBeforeMostRecentCompletionStatusBecomesUnknown', sortable: true, filter: true },
-        { name: 'StateChangeSuccessJobGUID', required: false, label: 'State Change Success Job', align: 'left', field: 'StateChangeSuccessJobGUID', sortable: true, filter: true },
-        { name: 'StateChangeFailJobGUID', required: false, label: 'State Change Fail Job', align: 'left', field: 'StateChangeFailJobGUID', sortable: true, filter: true },
-        { name: 'StateChangeUnknownJobGUID', required: false, label: 'State Change Unknown Job', align: 'left', field: 'StateChangeUnknownJobGUID', sortable: true, filter: true },
-        { name: 'AfterSuccessJobGUID', required: false, label: 'After Success Job', align: 'left', field: 'AfterSuccessJobGUID', sortable: true, filter: true },
-        { name: 'AfterFailJobGUID', required: false, label: 'After Fail Job', align: 'left', field: 'AfterFailJobGUID', sortable: true, filter: true },
-        { name: 'AfterUnknownJobGUID', required: false, label: 'After Unknown Job', align: 'left', field: 'AfterUnknownJobGUID', sortable: true, filter: true },
-        { name: 'action', required: true, label: '...', align: 'left', field: 'guid', sortable: false, filter: false }
+        { name: 'StateChangeSuccessJobGUID', required: false, label: 'State Change Success Job', align: 'left', field: 'StateChangeSuccessJobGUID', sortable: true, filter: true, linkToOtherJob: true },
+        { name: 'StateChangeFailJobGUID', required: false, label: 'State Change Fail Job', align: 'left', field: 'StateChangeFailJobGUID', sortable: true, filter: true, linkToOtherJob: true },
+        { name: 'StateChangeUnknownJobGUID', required: false, label: 'State Change Unknown Job', align: 'left', field: 'StateChangeUnknownJobGUID', sortable: true, filter: true, linkToOtherJob: true },
+        { name: 'AfterSuccessJobGUID', required: false, label: 'After Success Job', align: 'left', field: 'AfterSuccessJobGUID', sortable: true, filter: true, linkToOtherJob: true },
+        { name: 'AfterFailJobGUID', required: false, label: 'After Fail Job', align: 'left', field: 'AfterFailJobGUID', sortable: true, filter: true, linkToOtherJob: true },
+        { name: 'AfterUnknownJobGUID', required: false, label: 'After Unknown Job', align: 'left', field: 'AfterUnknownJobGUID', sortable: true, filter: true, linkToOtherJob: true },
+        { name: 'actions', required: true, label: '...', align: 'left', field: 'guid', sortable: false, filter: false }
       ],
       jobData: [],
       loading: false,
@@ -342,7 +336,19 @@ export default {
         defaultVisibleColumns: ['name', 'enabled', 'lastRunReturnCode', 'nextScheduledRun'],
         defaultSortBy: null
       })
-
+    },
+    currentlyVisibleColumnNames () {
+      const TTT = this
+      return this.jobTableColumns
+        .filter(function(x) {
+          if (x.required) {
+            return true
+          }
+          return TTT.DataTableSettingsComputed.visibleColumns.includes(x.name)
+        })
+        .map(function(x) {
+          return x.name
+        })
     }
   },
   mounted () {
