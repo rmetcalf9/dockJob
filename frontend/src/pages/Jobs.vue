@@ -17,6 +17,16 @@
       :rows-per-page-options="rowsPerPageOptions"
     >
     <template v-slot:top>
+      <div v-if="selectedSecond.length !== 0">
+        <q-btn flat round delete icon="delete" @click="deleteJob" />
+      </div>
+      <div v-if="selectedSecond.length === 0">
+          <q-btn
+            color="primary"
+            push
+            @click="openCreateJobModalDialog"
+          >Create Job</q-btn>
+      </div>
       <div class="row col-grow">
          <div class='q-table__title col'>Jobs</div>
       </div>
@@ -75,29 +85,10 @@
         </q-td>
       </q-tr>
     </template>
-
-      <!--
-      <template slot="top-selection" slot-scope="props">
-        <q-btn flat round delete icon="delete" @click="deleteJob" />
-      </template>
-
-      <template slot="top-left" slot-scope="props">
-        <q-btn
-          color="primary"
-          push
-          @click="openCreateJobModalDialog"
-        >Create Job</q-btn>
-      </template>
-      <template slot="top-right" slot-scope="props">
-        <q-btn flat round delete icon="refresh" @click="refresh" />
-      </template>
-
-      -->
     </q-table>
-    <!--<CreateJobModal
+    <CreateJobModal
       ref="createJobModalDialog"
-      v-model="createJobModalDialog"
-    />-->
+    />
   </div>
 
 </template>
@@ -112,7 +103,7 @@ import miscFns from '../miscFns'
 import restcallutils from '../restcallutils'
 import callDockjobBackendApi from '../callDockjobBackendApi'
 
-// import CreateJobModal from '../components/CreateJobModal'
+import CreateJobModal from '../components/CreateJobModal.vue'
 import selectColumns from '../components/selectColumns.vue'
 
 const dataTableSettingsName='Jobs'
@@ -120,7 +111,7 @@ const dataTableSettingsName='Jobs'
 export default {
   name: 'App-Jobs',
   components: {
-    // CreateJobModal
+    CreateJobModal,
     selectColumns
   },
   setup () {
