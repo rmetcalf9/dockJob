@@ -119,6 +119,39 @@ export default {
     },
   },
   methods: {
+    runnow (jobGUID, jobName) {
+      const wrappedCallApiFn = callDockjobBackendApi.getWrappedCallApi({
+        loginStateStore: this.loginStateStore,
+        apiurl: this.serverStaticState.staticServerInfo.data.apiurl
+      })
+      var callback = {
+        ok: function (response) {
+          Notify.create({color: 'positive', message: 'Job Execution Request Sent'})
+          // this.refreshJobData() No point doing this immediately
+        },
+        error: function (error) {
+          Notify.create('Request for execution failed - ' + callbackHelper.getErrorFromResponse(error))
+        }
+      }
+      this.$q.dialog({
+        title: 'Submit request to run ' + jobName,
+        message: 'Name for execution',
+        prompt: {
+          model: '',
+          type: 'text' // optional
+        },
+        cancel: true,
+        color: 'secondary'
+      }).onOk(data => {
+        var params = {name: data}
+        wrappedCallApiFn({
+          method: 'POST',
+          path:  '/jobs/' + jobGUID + '/execution',
+          postdata: params,
+          callback: callback
+        })
+      })
+    },
     getCardClass (jobObj) {
       if (jobObj.mostRecentCompletionStatus === 'Success') {
         return 'bg-positive'
