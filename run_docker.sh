@@ -10,6 +10,9 @@ echo " - You can get to the frontend with: curl superego:8301/frontend/"
 docker run --rm -it \
   -p 8301:80 \
   --name ${PROJECT_NAME} \
+  --env APIAPP_APIURL=http://localhost:8301/api \
+  --env APIAPP_APIDOCSURL=http://localhost:8301/apidocs \
+  --env APIAPP_FRONTENDURL=http://localhost:8301/frontend \
   ${BUILD_IMAGE_NAME_AND_TAG}
 RUN_RES=$?
 if [[ ${RUN_RES} -ne 0 ]]; then

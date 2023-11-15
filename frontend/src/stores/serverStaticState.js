@@ -8,7 +8,7 @@ function tryToGetServerData({locationsToTry, successCallback}) {
   }
   const toTry = locationsToTry.pop()
 
-  console.log('Trying to get server info from:', toTry)
+  console.log('Trying to get server static state info from:', toTry)
 
   var config = {
     method: 'GET',

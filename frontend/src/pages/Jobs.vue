@@ -242,7 +242,7 @@ export default {
         TTTT.DataTableSettingsComputed.filter = newJobName
         TTTT.dataTableSettings.saveSettings({
           name: dataTableSettingsName,
-          newSettings: TTT.DataTableSettingsComputed
+          newSettings: TTTT.DataTableSettingsComputed
         })
         TTTT.request({
           pagination: TTTT.DataTableSettingsComputed.serverPagination, // Rows number will be overwritten when query returns
