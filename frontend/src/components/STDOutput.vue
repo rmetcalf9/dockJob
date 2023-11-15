@@ -58,7 +58,7 @@ function fallbackCopyTextToClipboard (text) {
     var msg = successful ? 'successful' : 'unsuccessful'
     console.log('Fallback: Copying text command was ' + msg)
   } catch (err) {
-    Notify.create('Fallback: Oops, unable to copy' + err)
+    Notify.create('Fallback: :( Oops, unable to copy' + err)
   }
 
   document.body.removeChild(textArea)
