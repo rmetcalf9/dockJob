@@ -57,3 +57,16 @@ class TestHelperWithAPIOperationsClass(TestHelperSuperClass.testHelperAPIClient)
     self.assertEqual(result.status_code, 200, str(msg) + " - " + result.get_data(as_text=True))
     return json.loads(result.get_data(as_text=True))
 
+  def activateTriggerOnJob(self, jobGuid, triggerType, triggerOptions, msg="", check_and_parse_response=True):
+    post_data={
+        "triggerType": triggerType,
+        "triggerOptions": triggerOptions
+    }
+    apiResultTMP = self.testClient.post(
+        '/api/jobs/' + jobGuid + "/activateTrigger", data=json.dumps(post_data), content_type='application/json'
+    )
+
+    if not check_and_parse_response:
+        return apiResultTMP
+    self.assertEqual(apiResultTMP.status_code, 201, msg=msg + " " + apiResultTMP.get_data(as_text=True))
+    return json.loads(apiResultTMP.get_data(as_text=True))

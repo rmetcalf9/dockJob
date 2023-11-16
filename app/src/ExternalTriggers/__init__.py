@@ -52,10 +52,16 @@ class ExternalTriggerManager():
         for jobGuid in possible_jobs_that_could_match.keys():
             jobData = self.appObj.appData['jobsData'].getJobRaw(jobGuid)
             if jobData is not None:
-                for triggerType in possible_jobs_that_could_match[jobGuid]:
-                    if triggerType.requestMatches(jobData, urlid, request_headers, request_data):
-                        print("DD", jobData, triggerType)
-                        return {"result": "Fail"}, 200
+                PrivateExternalTrigger = jobData.__dict__["PrivateExternalTrigger"]
+                if PrivateExternalTrigger["triggerActive"]:
+                    print("PrivateExternalTrigger", PrivateExternalTrigger)
+                    rawurlpasscode = decryptPassword(self.appObj.bcrypt, PrivateExternalTrigger["urlpasscode"], PrivateExternalTrigger["salt"], self.safePasswordString)
+                    rawnonurlpasscode = decryptPassword(self.appObj.bcrypt, PrivateExternalTrigger["nonurlpasscode"], PrivateExternalTrigger["salt"], self.safePasswordString)
+
+                    for triggerType in possible_jobs_that_could_match[jobGuid]:
+                        if triggerType.requestMatches(jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
+                            # TODO Actually launch the job!
+                            return {"result": "Success"}, 200
 
         return {"result": "Fail"}, 406
 

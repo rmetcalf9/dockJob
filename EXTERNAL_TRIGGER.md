@@ -60,9 +60,9 @@ Add secrets into the mix for google credentials
 
 ## googleDriveRawClass type info
 All encrypted using global password
-url param = url password in Job (ENC - salt stored in job)
-channel id = second password in job (ENC - salt stored in job)
-token = job guid (ENC - hardcoded salt)
+url param = url password in Job (ENC - salt stored in job, plain in msg)
+channel id = second password in job (ENC - salt stored in job, plain in msg)
+token = job guid (ENC - hardcoded salt, ENC in message)
 
 
 TODO - Google drive may need auto notification reneawal. see https://developers.google.com/drive/api/guides/push Renewing notification channels

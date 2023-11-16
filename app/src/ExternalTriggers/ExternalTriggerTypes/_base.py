@@ -6,7 +6,7 @@ class externalTriggerBaseClass():
     def getEncodedJobGuidFromMessage(self, urlid, request_headers, request_data):
         return None
 
-    def requestMatches(self, jobData, urlid, request_headers, request_data):
+    def requestMatches(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
         return False
 
     def activate(self, jobguid, triggerType, jobObj, triggerOptions, salt, urlpasscode, nonurlpasscode):

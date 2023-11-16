@@ -6,29 +6,15 @@ from commonJSONStrings import data_simpleJobCreateParams, data_simpleJobCreateEx
 import pytest
 from appObj import appObj
 import copy
+from TestHelperWithAPIOperations import TestHelperWithAPIOperationsClass
 
-class helper(testHelperAPIClient):
+class helper(TestHelperWithAPIOperationsClass):
     def setup(self):
         result = self.testClient.post('/api/jobs/', data=json.dumps(data_simpleJobCreateParams), content_type='application/json')
         self.assertResponseCodeEqual(result, 200)
         return {
             "setupJob": json.loads(result.text)
         }
-
-    def activateTriggerOnJob(self, jobGuid, triggerType, triggerOptions, msg="", check_and_parse_response=True):
-        post_data={
-            "triggerType": triggerType,
-            "triggerOptions": triggerOptions
-        }
-        apiResultTMP = self.testClient.post(
-            '/api/jobs/' + jobGuid + "/activateTrigger", data=json.dumps(post_data), content_type='application/json'
-        )
-
-        if not check_and_parse_response:
-            return apiResultTMP
-        self.assertEqual(apiResultTMP.status_code, 201, msg=msg + " " + apiResultTMP.get_data(as_text=True))
-        return json.loads(apiResultTMP.get_data(as_text=True))
-
     def deactivateTriggerOnJob(self, jobGuid, msg="", check_and_parse_response=True):
         post_data={}
         apiResultTMP = self.testClient.post(
