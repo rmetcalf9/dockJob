@@ -29,14 +29,18 @@ function callApi({method, path, postdata, callback, loginStateStore, apiurl}) {
   config = addAccessCredentials(config, loginStateStore)
   axios(config).then(
     (response) => {
-      callback.ok(response)
+      if (typeof (callback) !== 'undefined') {
+        callback.ok(response)
+      }
     },
     (response) => {
       if (response.response.status === 401) {
         // User needs to login again
         loginStateStore.setLoggedout()
       }
-      callback.error(response)
+      if (typeof (callback) !== 'undefined') {
+        callback.error(response)
+      }
     }
   )
 }

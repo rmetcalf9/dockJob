@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-list >
+    <q-list v-if="dataLoaded" >
       <q-item clickable v-ripple highlight @click="openEditJobModalDialog">
         <q-item-section >
           <q-item-label>Job {{ jobData.name }}</q-item-label>
@@ -21,6 +21,16 @@
           <q-item-label>Repetition Interval</q-item-label>
           <q-item-label caption v-if="jobData.enabled">{{ jobData.repetitionInterval }}</q-item-label>
           <q-item-label caption v-if="!jobData.enabled">Automatic running disabled</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item clickable v-ripple highlight @click="clickTriggering">
+        <q-item-section >
+          <q-item-label>External Triggering</q-item-label>
+          <q-item-label caption v-if="jobData.ExternalTrigger.triggerActive">TODO</q-item-label>
+          <q-item-label caption v-if="!jobData.ExternalTrigger.triggerActive">No external triggering</q-item-label>
+        </q-item-section>
+        <q-item-section avatar>
+          <q-icon color="primary" name="label" />
         </q-item-section>
       </q-item>
       <q-item v-if="jobData.enabled"><q-item-section >
@@ -102,19 +112,25 @@
     <CreateJobModal
       ref="createJobModalDialog"
     />
+    <CreateJobTriggerDialog
+      ref="createJobTriggerDialog"
+    />
   </div>
 </template>
 
 <script>
 import { Notify } from 'quasar'
 import callbackHelper from '../callbackHelper'
-import ExecutionTable from '../components/ExecutionTable.vue'
-import CreateJobModal from '../components/CreateJobModal.vue'
 import globalUtils from '../globalUtils'
 import callDockjobBackendApi from '../callDockjobBackendApi'
+import miscFns from '../miscFns'
+
 import { useLoginStateStore } from 'stores/loginState'
 import { useServerStaticStateStore } from 'stores/serverStaticState'
-import miscFns from '../miscFns'
+
+import ExecutionTable from '../components/ExecutionTable.vue'
+import CreateJobModal from '../components/CreateJobModal.vue'
+import CreateJobTriggerDialog from '../components/CreateJobTriggerDialog.vue'
 
 
 function addDateStringsToJobData (obj) {
@@ -129,7 +145,8 @@ export default {
   name: 'App-Job',
   components: {
     CreateJobModal,
-    ExecutionTable
+    ExecutionTable,
+    CreateJobTriggerDialog
   },
   setup () {
     const loginStateStore = useLoginStateStore()
@@ -138,6 +155,7 @@ export default {
   },
   data () {
     return {
+      dataLoaded: false,
       rowsPerPageOptions: [5, 10, 25, 50, 100, 200],
       everRun: function (item) {
         if (typeof (item.lastRunDate) === 'undefined') {
@@ -157,6 +175,14 @@ export default {
     }
   },
   methods: {
+    clickTriggering () {
+      if (this.jobData.ExternalTrigger.triggerActive) {
+        console.log('TODO disable triggering propmt')
+      } else {
+        var dlg = this.$refs.createJobTriggerDialog
+        dlg.openCreateJobTriggerDialog()
+      }
+    },
     openEditJobModalDialog () {
       var child = this.$refs.createJobModalDialog
       var TTTT = this
@@ -211,6 +237,7 @@ export default {
       var callback = {
         ok: function (response) {
           TTT.jobData = addDateStringsToJobData(response.data)
+          TTT.dataLoaded = true
         },
         error: function (error) {
           Notify.create('Job query failed - ' + callbackHelper.getErrorFromResponse(error))
