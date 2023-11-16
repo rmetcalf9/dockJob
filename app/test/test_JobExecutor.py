@@ -41,6 +41,7 @@ class test_appObjClass(testHelperAPIClient):
       'APIAPP_APIACCESSSECURITY': '[]',
       'APIAPP_USERFORJOBS': 'dockjobuser',
       'APIAPP_GROUPFORJOBS': 'dockjobgroup',
+      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_password'
     }
     appObj.init(env, self.standardStartupTime)
     testClient = appObj.flaskAppObject.test_client()

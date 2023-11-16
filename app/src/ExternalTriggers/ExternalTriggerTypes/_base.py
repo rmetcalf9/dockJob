@@ -1,4 +1,4 @@
 
 class externalTriggerBaseClass():
-    pass
-
+    def getStaticServerInfoData(self):
+        return {}

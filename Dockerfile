@@ -1,6 +1,8 @@
 ARG RJM_BUILDQUASARAPP_IMAGE
 ARG RJM_VERSION
 
+# TODO it would be nice if the build process run the python tests
+
 FROM ${RJM_BUILDQUASARAPP_IMAGE} as quasar_build
 
 COPY ./frontend /frontend

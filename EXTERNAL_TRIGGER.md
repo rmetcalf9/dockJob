@@ -2,16 +2,20 @@
 
 There are a number of types of External triggers I plan to support:
 
- - Google_Drive_Raw
- - Google_Drive_New_File_Watch
+ - googleDriveRawClass
+ - googleDriveNewFileWatchClass
 
 I will add others in future.
 
 Each job will have the following fields:
  - Accept external triggers True/False
- - Trigger password generated when trigger setup
+ - Trigger passwords generated when trigger setup
+   - There are TWO passwords. one in the URI and one not.
  - External Trigger Type - String of the type (above)
  - External Trigger Variables - Dictionary of trigger variables
+
+Notificaitons are received at https://host:port/triggerapi/${URISTRING}
+URISTRING can be anything depending on the trigger type. It is not used to select the type
 
 There will be a system passwoerd "DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD".
 When a trigger is received the engine asks each type 'is this yours'. The type will take the message and if it is return

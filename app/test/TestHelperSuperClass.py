@@ -18,11 +18,13 @@ env = {
   'APIAPP_FRONTEND': '../app',
   'APIAPP_APIURL': 'http://apiurlxxx',
   'APIAPP_FRONTENDURL': 'http://frontenddummytestxxx',
+  'APIAPP_APIDOCSURL': 'something',
   'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]',
   'APIAPP_USERFORJOBS': 'root',
   'APIAPP_GROUPFORJOBS': 'root',
   'APIAPP_SKIPUSERCHECK': True,
-  'APIAPP_MONITORCHECKTEMPSTATECONFIG': '{ "username": "abc", "password": "123" }'
+  'APIAPP_MONITORCHECKTEMPSTATECONFIG': '{ "username": "abc", "password": "123" }',
+  'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'dummy_test_password'
 }
 
 class testHelperSuperClass(unittest.TestCase):

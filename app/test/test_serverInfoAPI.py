@@ -2,9 +2,11 @@ from TestHelperSuperClass import testHelperAPIClient
 import unittest
 import json
 from commonJSONStrings import data_simpleJobCreateParams, data_simpleJobCreateExpRes, data_simpleManualJobCreateParams
+import pytest
 
+
+@pytest.mark.serverInfo
 class test_api(testHelperAPIClient):
-
   def test_getServerInfo(self):
     expRes = {
       'Jobs': {

@@ -13,12 +13,15 @@ from jobExecutionsDataAPI import registerAPI as registerJobExecutionsApi
 import APIs
 import Logic
 
-from flask_restx import fields
+from flask_restx import fields, Api as flaskApi
+from flask import Blueprint
 from JobExecutor import JobExecutorClass
 import time
 import datetime
 import json
 from object_store_abstraction import createObjectStoreInstance
+
+from ExternalTriggers import ExternalTriggerManager, register_api as registerTriggerApi
 
 InvalidObjectStoreConfigInvalidJSONException = Exception('APIAPP_OBJECTSTORECONFIG value is not valid JSON')
 InvalidMonitorCheckTempStateConfigInvalidJSONException = Exception('APIAPP_MONITORCHECKTEMPSTATECONFIG value is not valid JSON')
@@ -32,6 +35,7 @@ class appObjClass(parAppObj):
   minutesBeforeMostRecentCompletionStatusBecomesUnknown = None
   objectStore = None
   monitorCheckTempState = None
+  externalTriggerManager = None
 
   def init(self, env, serverStartTime, testingMode = False, objectStoreTestingPopulationHookFn = None):
     try:
@@ -44,6 +48,12 @@ class appObjClass(parAppObj):
         if self.jobExecutor.is_alive():
           self.jobExecutor.join()
         self.jobExecutor = None
+
+      DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD = readFromEnviroment(env, 'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD', None, None)
+      self.externalTriggerManager = ExternalTriggerManager(
+        DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD=DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD
+      )
+
       super(appObjClass, self).init(env, serverStartTime, testingMode, serverinfoapiprefix='')
       resetJobsData(self)
 
@@ -91,6 +101,7 @@ class appObjClass(parAppObj):
       self.monitorCheckTempState = Logic.MonitorCheckTempState(monitorCheckTempStateConfigDict, fns)
 
       appObj.appData['jobsData'].loadFromObjectStore()
+
     except Exception as a:
       self.stopThread()
       raise a
@@ -102,6 +113,19 @@ class appObjClass(parAppObj):
     registerJobsApi(self)
     registerJobExecutionsApi(self)
     APIs.registerAPIs(self)
+
+    trigger_api_prefix='/triggerapi'
+
+    # External Trigger APIs not served from /api, using /triggerapi instead
+    triggerapi_blueprint = Blueprint('triggerapi', __name__)
+    self.flastRestPlusExternalTriggerAPIObject = flaskApi(triggerapi_blueprint)
+    self.flaskAppObject.register_blueprint(triggerapi_blueprint, url_prefix=trigger_api_prefix)
+    registerTriggerApi(
+      flaskObj=self.flastRestPlusExternalTriggerAPIObject,
+      appObj=self
+    )
+
+    # print("URL MAP", self.flaskAppObject.url_map)
 
   def setTestingDateTime(self, val):
     self.curDateTimeOverrideForTesting = val
@@ -151,5 +175,11 @@ class appObjClass(parAppObj):
   def resetData(self):
     resetJobsData(self)
     self.monitorCheckTempState.resetData()
+
+  def getDerivedServerInfoData(self):
+      return {
+        "ExternalTriggers": self.externalTriggerManager.getStaticServerInfoData()
+      }
+
 
 appObj = appObjClass()
