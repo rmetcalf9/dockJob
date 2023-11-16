@@ -8,6 +8,9 @@ class googleDriveRawClass(externalTriggerBaseClass):
         return request_headers["X-Goog-Channel-Token"]
 
     def requestMatches(self, jobData, urlid, request_headers, request_data):
+        if not jobData.__dict__["PrivateExternalTrigger"]["triggerActive"]:
+            return False
+
         # TODO I need to add all my data items to the Job object
-        print(jobData)
+
         return True

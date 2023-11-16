@@ -11,20 +11,21 @@ Each job will have the following fields:
 (All under PrivateExternalTrigger)
 {
     PrivateExternalTrigger: {
-        "active": true/false (default faled)
-        dd
+        "active": true/false (default false)
+        "type": googleDriveRawClass/googleDriveNewFileWatchClass (Not present if above is false)
+        "urlpasscode": String set to a guid
+        "nonurlpasscode": String set to a guid
+        "salt" base64 string,
+        "typeprivatevars": JSON defined by type
+        "typepublicvars": JSON defined by type
     }
 }
  -> Public info in job is caculated and comes out as ExternalTrigger
+External fields are active, salt, typepublicvars
 
- - External triggers can be an empty object - means no triggers
- - Trigger passwords generated when trigger setup
-   - There are TWO passwords. one in the URI and one not.
-   - Salt is saved here too
- - External Trigger Type - String of the type (above)
- - External Trigger Variables - Dictionary of trigger variables
 These values are not controlled by the normal job save and load processes. Instead they are updated by the ExternalTrigger Manager
 in a sub object that is not passed to the frontend.
+activateTrigger, deactivateTrigger
 
 Notificaitons are received at https://host:port/triggerapi/trigger/${URISTRING}
 URISTRING can be anything depending on the trigger type. It is not used to select the type

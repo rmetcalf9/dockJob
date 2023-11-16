@@ -21,7 +21,7 @@ import datetime
 import json
 from object_store_abstraction import createObjectStoreInstance
 
-from ExternalTriggers import ExternalTriggerManager, register_api as registerTriggerApi
+from ExternalTriggers import ExternalTriggerManager, register_api as registerTriggerApi, register_private_api as registerTriggerPrivateApi
 
 InvalidObjectStoreConfigInvalidJSONException = Exception('APIAPP_OBJECTSTORECONFIG value is not valid JSON')
 InvalidMonitorCheckTempStateConfigInvalidJSONException = Exception('APIAPP_MONITORCHECKTEMPSTATECONFIG value is not valid JSON')
@@ -123,6 +123,10 @@ class appObjClass(parAppObj):
     self.flaskAppObject.register_blueprint(triggerapi_blueprint, url_prefix=trigger_api_prefix)
     registerTriggerApi(
       flaskObj=self.flastRestPlusExternalTriggerAPIObject,
+      externalTriggerManager=self.externalTriggerManager
+    )
+    registerTriggerPrivateApi(
+      flaskObj=self.flastRestPlusAPIObject,  #flastRestPlusAPIObject is the normal one everything else uses '/api'
       externalTriggerManager=self.externalTriggerManager
     )
 

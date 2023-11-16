@@ -19,7 +19,7 @@ if [ $# -eq 0 ]; then
 else
   if [ $# -eq 1 ]; then
     echo "Testing ${1}"
-    until ack -f --python  ./src ./test | entr -d python3 -m pytest -m ${1}; do sleep 1; done
+    until ack -f --python  ./src ./test | entr -d python3 -m pytest -m ${1} --exitfirst; do sleep 1; done
   else
     echo "Testing ${1} with verbose option (Single Run)"
     python3 -m pytest -v -a ${1}

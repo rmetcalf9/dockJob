@@ -1,5 +1,6 @@
 from .ExternalTriggerTypes import getAllTriggerTypeInstances
 from .api import register_api
+from .privateApi import register_private_api
 from encryption import getSafePasswordString, decryptPassword, encryptPassword
 from flask_restx import fields
 
@@ -58,14 +59,34 @@ class ExternalTriggerManager():
 
         return {"result": "Fail"}, 406
 
-
-    def getJobModel(self):
-        return self.appObj.flastRestPlusAPIObject.model('triggerActive', {
-            'triggerActive': fields.Boolean(default=False, description='Is auto triggeing enabled'),
-        })
-
     def getJobDictData(self, jobObj):
         if not jobObj.PrivateExternalTrigger["triggerActive"]:
             return { "triggerActive": False }
 
         raise Exception("Not implemented")
+
+    def activateTrigger(self, jobguid, triggerType, triggerOptions):
+        if triggerType not in self.TriggerTypes.keys():
+            return {"result": "Fail", "message": "Invalid trigger type"}, 400
+        def dbfn(store_connection):
+            return self.activateTriggerWithStoreConnection(
+                store_connection=store_connection,
+                jobguid=jobguid,
+                triggerTypeObj=self.TriggerTypes[triggerType],
+                triggerOptions=triggerOptions
+            )
+        return self.appObj.objectStore.executeInsideTransaction(dbfn)
+
+    def activateTriggerWithStoreConnection(self, store_connection, jobguid, triggerTypeObj, triggerOptions):
+        jobObj = self.appObj.appData['jobsData'].getJobRaw(jobguid)
+        if jobObj is None:
+            return {"result": "Fail", "message": "Job not found"}, 404
+        if jobObj.PrivateExternalTrigger["triggerActive"]:
+            raise Exception("NI - first deactiavate the trigger than reactivate")
+
+        triggerTypeObj.activate(
+            jobObj=jobObj,
+            triggerOptions=triggerOptions
+        )
+
+        return jobObj._caculatedDict(self.appObj), 201

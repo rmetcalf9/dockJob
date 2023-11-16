@@ -76,41 +76,63 @@ class test_externalTriggerEndpoints(helper):
     )
     self.assertEqual(result.status_code, 406)
 
-  # def test_trigger_endpoint_valid_job_wrong_passcodes_returns_403(self):
-  #     jobData = self.createJob()
-  #
-  #     encoded_job_guid = appObj.externalTriggerManager.encodeJobGuid(jobData["guid"])
-  #     decoded_job_guid = appObj.externalTriggerManager.decodeJobGuid(encoded_job_guid)
-  #     self.assertEqual(jobData["guid"], decoded_job_guid)
-  #
-  #     #Add job ID to message
-  #     resource_message = copy.deepcopy(example_changes_recource_message)
-  #     resource_message["headers"]["X-Goog-Channel-Token"] = encoded_job_guid
-  #
-  #     result = self.testClient.post(
-  #         external_trigger_api_prefix + '/trigger/anything',
-  #         data=resource_message["data"],
-  #         headers=resource_message["headers"]
-  #     )
-  #     self.assertEqual(result.status_code, 406)
-
-  def test_trigger_endpoint_valid_job_right_passcodes_returns_200(self):
+  def test_trigger_endpoint_valid_job_with_no_trigger_active(self):
       jobData = self.createJob()
 
       encoded_job_guid = appObj.externalTriggerManager.encodeJobGuid(jobData["guid"])
+      decoded_job_guid = appObj.externalTriggerManager.decodeJobGuid(encoded_job_guid)
+      self.assertEqual(jobData["guid"], decoded_job_guid)
 
       #Add job ID to message
       resource_message = copy.deepcopy(example_changes_recource_message)
       resource_message["headers"]["X-Goog-Channel-Token"] = encoded_job_guid
-
-      #TODO Add passcodes to message
-
-      print("resource_message", resource_message)
 
       result = self.testClient.post(
           external_trigger_api_prefix + '/trigger/anything',
           data=resource_message["data"],
           headers=resource_message["headers"]
       )
-      self.assertEqual(result.status_code, 200)
+      self.assertEqual(result.status_code, 406)
+
+  def test_trigger_endpoint_valid_job_wrong_passcodes_returns_403(self):
+      jobData = self.createJob()
+
+      encoded_job_guid = appObj.externalTriggerManager.encodeJobGuid(jobData["guid"])
+      decoded_job_guid = appObj.externalTriggerManager.decodeJobGuid(encoded_job_guid)
+      self.assertEqual(jobData["guid"], decoded_job_guid)
+
+      #Add job ID to message
+      resource_message = copy.deepcopy(example_changes_recource_message)
+      resource_message["headers"]["X-Goog-Channel-Token"] = encoded_job_guid
+
+      result = self.testClient.post(
+          external_trigger_api_prefix + '/trigger/anything',
+          data=resource_message["data"],
+          headers=resource_message["headers"]
+      )
+      self.assertEqual(result.status_code, 406)
+
+  # def test_trigger_endpoint_valid_job_right_passcodes_returns_200(self):
+  #     jobData = self.createJob()
+  #     self.activateJobTrigger(
+  #         jobGuid=jobData["guid"],
+  #         triggerType="googleDriveRawClass"
+  #     )
+  #
+  #     encoded_job_guid = appObj.externalTriggerManager.encodeJobGuid(jobData["guid"])
+  #
+  #     #Add job ID to message
+  #     resource_message = copy.deepcopy(example_changes_recource_message)
+  #     resource_message["headers"]["X-Goog-Channel-Token"] = encoded_job_guid
+  #
+  #     #TODO Add passcodes to message
+  #
+  #     print("resource_message", resource_message)
+  #
+  #     result = self.testClient.post(
+  #         external_trigger_api_prefix + '/trigger/anything',
+  #         data=resource_message["data"],
+  #         headers=resource_message["headers"]
+  #     )
+  #     self.assertEqual(result.status_code, 200)
 
