@@ -1,0 +1,4 @@
+
+class externalTriggerBaseClass():
+    pass
+
