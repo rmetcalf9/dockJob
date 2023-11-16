@@ -29,12 +29,23 @@ class helper(testHelperAPIClient):
         self.assertEqual(apiResultTMP.status_code, 201, msg=msg + " " + apiResultTMP.get_data(as_text=True))
         return json.loads(apiResultTMP.get_data(as_text=True))
 
+    def deactivateTriggerOnJob(self, jobGuid, msg="", check_and_parse_response=True):
+        post_data={}
+        apiResultTMP = self.testClient.post(
+            '/api/jobs/' + jobGuid + "/deactivateTrigger", data=json.dumps(post_data), content_type='application/json'
+        )
+
+        if not check_and_parse_response:
+            return apiResultTMP
+        self.assertEqual(apiResultTMP.status_code, 201, msg=msg + " " + apiResultTMP.get_data(as_text=True))
+        return json.loads(apiResultTMP.get_data(as_text=True))
+
     def getJob(self, jobguid, msg="", check_and_parse_response=True):
         apiResultTMP = self.testClient.get('/api/jobs/' +jobguid)
         if not check_and_parse_response:
             return apiResultTMP
         self.assertEqual(apiResultTMP.status_code, 200, msg=msg)
-        return json.loads(apiResultTMP)
+        return json.loads(apiResultTMP.text)
 
 @pytest.mark.externalTriggerSystemTest
 class test_externalTrigger_private_api(helper):
@@ -60,40 +71,64 @@ class test_externalTrigger_private_api(helper):
           triggerOptions={},
           check_and_parse_response=False
       )
-      print("DDD", activate_response.text)
       self.assertEqual(activate_response.status_code, 404)
       response_json = json.loads(activate_response.text)
       self.assertEqual(response_json["result"], "Fail")
       self.assertEqual(response_json["message"], "Job not found")
 
-  # def test_activateapionjob(self):
-  #     setup = self.setup()
-  #
-  #     activate_response = self.activateTriggerOnJob(
-  #         jobGuid = setup["setupJob"]["guid"],
-  #         triggerType="googleDriveRawClass",
-  #         triggerOptions={}
-  #     )
-  #
-  #     # expectedTriggerTypeJson = {
-  #     #   "active": True,
-  #     #   "type": "googleDriveRawClass"
-  #     #   "urlpasscode": String set to a guid
-  #     #   "nonurlpasscode": String set to a guid
-  #     #   "salt" base64 string,
-  #     #   "typeprivatevars": JSON defined by type
-  #     #   "typepublicvars": JSON defined by type
-  #     # }
-  #
-  #     def checkTriggerTypeIsOk(recieved):
-  #         self.assertEqual(recieved["active"], True)
-  #         self.assertEqual(recieved["type"], "googleDriveRawClass")
-  #         #TODO check keys salt and vars
-  #     checkTriggerTypeIsOk(activate_response)
-  #
-  #     #Get job
-  #     get_job_response = self.getJob(jobguid=setup["setupJob"]["guid"])
-  #     checkTriggerTypeIsOk(get_job_response)
+  def test_activateapionjob(self):
+      setup = self.setup()
+
+      activate_response = self.activateTriggerOnJob(
+          jobGuid = setup["setupJob"]["guid"],
+          triggerType="googleDriveRawClass",
+          triggerOptions={}
+      )
+      def checkTriggerTypeIsOk(recieved):
+          self.assertEqual(recieved["triggerActive"], True)
+          self.assertEqual(recieved["type"], "googleDriveRawClass")
+          self.assertTrue(len(recieved["type"])> 0)
+          def valid_passcode(passcode):
+              a = passcode.split(":")
+              self.assertEqual(len(a),2)
+              self.assertTrue(len(a[0])>0)
+              self.assertTrue(len(a[1])>0)
+
+          valid_passcode(recieved["urlpasscode"])
+          valid_passcode(recieved["nonurlpasscode"])
+          #self.assertEqual(recieved["typepublicvars"], {}) won't be there at all due to skip_none
+      checkTriggerTypeIsOk(activate_response["ExternalTrigger"])
+
+      #Get job
+      get_job_response = self.getJob(jobguid=setup["setupJob"]["guid"])
+      checkTriggerTypeIsOk(get_job_response["ExternalTrigger"])
+
+  def test_deactivateapionjob_that_was_not_active(self):
+      setup = self.setup()
+
+      deactivate_response = self.deactivateTriggerOnJob(
+          jobGuid=setup["setupJob"]["guid"],
+          check_and_parse_response=False
+      )
+      self.assertEqual(deactivate_response.status_code, 400)
+      response_json = json.loads(deactivate_response.text)
+      self.assertEqual(response_json["result"], "Warning")
+      self.assertEqual(response_json["message"], "Trigger was not active")
+
+  def test_deactivateapionjob(self):
+      setup = self.setup()
+
+      activate_response = self.activateTriggerOnJob(
+          jobGuid = setup["setupJob"]["guid"],
+          triggerType="googleDriveRawClass",
+          triggerOptions={}
+      )
+      deactivate_response = self.deactivateTriggerOnJob(
+          jobGuid=setup["setupJob"]["guid"]
+      )
+      self.assertEqual(deactivate_response["ExternalTrigger"], {"triggerActive": False})
+      get_job_response = self.getJob(jobguid=setup["setupJob"]["guid"])
+      self.assertEqual(get_job_response["ExternalTrigger"], {"triggerActive": False})
 
 #TODO Test activateing when trigger is already active
 # Keys must have changed

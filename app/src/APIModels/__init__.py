@@ -1,9 +1,13 @@
 from flask_restx import fields
 
-
 def getExternalTriggerJobModel(flastRestPlusAPIObject):
     return flastRestPlusAPIObject.model('triggerActive', {
         'triggerActive': fields.Boolean(default=False, description='Is auto triggeing enabled'),
+        'type': fields.String(description='Is auto triggeing enabled', required=False),
+        'salt': fields.String(description='Is auto triggeing enabled', required=False),
+        'urlpasscode': fields.String(description='Is auto triggeing enabled', required=False),
+        'nonurlpasscode': fields.String(description='Is auto triggeing enabled', required=False),
+        'typepublicvars': fields.Raw(description='Is auto triggeing enabled', required=False),
     })
 
 
@@ -35,7 +39,7 @@ def getJobModel(flastRestPlusAPIObject):
       'AfterSuccessJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this completes and is still in the success state'),
       'AfterFailJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this completes and is still in the fail state'),
       'AfterUnknownJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this completes and is still in the unknown state'),
-      'ExternalTrigger': fields.Nested(getExternalTriggerJobModel(flastRestPlusAPIObject)),
+      'ExternalTrigger': fields.Nested(getExternalTriggerJobModel(flastRestPlusAPIObject), skip_none=True),
     })
   return jobModel
 

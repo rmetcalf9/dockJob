@@ -27,7 +27,7 @@ def register_private_api(flaskObj, externalTriggerManager):
             (resp, status) =  externalTriggerManager.activateTrigger(jobguid, reuqestJson["triggerType"], reuqestJson["triggerOptions"])
             if status > 199:
                 if status < 300:
-                    return marshal(resp, getJobModel(flaskObj)), status
+                    return marshal(resp, getJobModel(flaskObj), skip_none=True), status
             return marshal(resp, getErrorModel(flaskObj)), status
 
     @ns.route('/<string:jobguid>/deactivateTrigger')
@@ -36,10 +36,9 @@ def register_private_api(flaskObj, externalTriggerManager):
 
         @ns.doc('deactivate_trigger_on_job')
         def post(self, jobguid):
-            '''Acrivate Trigger'''
-            raise Exception("NI")
-            # (resp, status) =  externalTriggerManager.deactivateTrigger(jobguid, reuqestJson["triggerType"], reuqestJson["triggerOptions"])
-            # if status > 199:
-            #     if status < 300:
-            #         return marshal(resp, getJobModel(flaskObj)), status
-            # return marshal(resp, getErrorModel(flaskObj)), status
+            '''Deactivate Trigger'''
+            (resp, status) = externalTriggerManager.deactivateTrigger(jobguid)
+            if status > 199:
+                if status < 300:
+                    return marshal(resp, getJobModel(flaskObj), skip_none=True), status
+            return marshal(resp, getErrorModel(flaskObj)), status

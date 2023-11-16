@@ -1,8 +1,8 @@
 from .ExternalTriggerTypes import getAllTriggerTypeInstances
 from .api import register_api
 from .privateApi import register_private_api
-from encryption import getSafePasswordString, decryptPassword, encryptPassword
-from flask_restx import fields
+from encryption import getSafePasswordString, decryptPassword, encryptPassword, getSafeSaltString
+import uuid
 
 saltForJobIdPasswordEncryption="JDJiJDEyJFRGQmZ1RzhjY3IzVTVxTzVTeERXbnU="
 
@@ -63,7 +63,14 @@ class ExternalTriggerManager():
         if not jobObj.PrivateExternalTrigger["triggerActive"]:
             return { "triggerActive": False }
 
-        raise Exception("Not implemented")
+        return {
+            "triggerActive": True,
+            "type": jobObj.PrivateExternalTrigger["type"],
+            "salt": jobObj.PrivateExternalTrigger["salt"],
+            "urlpasscode": jobObj.PrivateExternalTrigger["urlpasscode"],
+            "nonurlpasscode": jobObj.PrivateExternalTrigger["nonurlpasscode"],
+            "typepublicvars": jobObj.PrivateExternalTrigger["typepublicvars"]
+        }
 
     def activateTrigger(self, jobguid, triggerType, triggerOptions):
         if triggerType not in self.TriggerTypes.keys():
@@ -72,21 +79,79 @@ class ExternalTriggerManager():
             return self.activateTriggerWithStoreConnection(
                 store_connection=store_connection,
                 jobguid=jobguid,
+                triggerType=triggerType,
                 triggerTypeObj=self.TriggerTypes[triggerType],
                 triggerOptions=triggerOptions
             )
         return self.appObj.objectStore.executeInsideTransaction(dbfn)
 
-    def activateTriggerWithStoreConnection(self, store_connection, jobguid, triggerTypeObj, triggerOptions):
+    def activateTriggerWithStoreConnection(self, store_connection, jobguid, triggerType, triggerTypeObj, triggerOptions):
         jobObj = self.appObj.appData['jobsData'].getJobRaw(jobguid)
         if jobObj is None:
             return {"result": "Fail", "message": "Job not found"}, 404
         if jobObj.PrivateExternalTrigger["triggerActive"]:
             raise Exception("NI - first deactiavate the trigger than reactivate")
 
-        triggerTypeObj.activate(
+        salt = getSafeSaltString(self.appObj.bcrypt)
+        urlpasscode = encryptPassword(self.appObj.bcrypt, str(uuid.uuid4()), salt, self.safePasswordString)
+        nonurlpasscode = encryptPassword(self.appObj.bcrypt, str(uuid.uuid4()), salt, self.safePasswordString)
+
+        (failmessage, typeprivatevars, typepublicvars) = triggerTypeObj.activate(
+            jobguid=jobguid,
+            triggerType=triggerType,
             jobObj=jobObj,
-            triggerOptions=triggerOptions
+            triggerOptions=triggerOptions,
+            salt=salt,
+            urlpasscode=urlpasscode,
+            nonurlpasscode=nonurlpasscode
         )
+        if failmessage is not None:
+            return {"result": "Fail", "message": failmessage}, 404
+
+        privateTriggerData = {
+            "triggerActive": True,
+            "type": triggerType,
+            "salt": salt,
+            "urlpasscode": urlpasscode,
+            "nonurlpasscode": nonurlpasscode,
+            "typeprivatevars": typeprivatevars,
+            "typepublicvars": typepublicvars
+        }
+
+        jobObj.setNewPrivateTriggerData(privateTriggerData)
+        self.appObj.appData['jobsData']._saveJobToObjectStore(str(jobObj.guid), store_connection)
+
+        return jobObj._caculatedDict(self.appObj), 201
+
+    def deactivateTrigger(self, jobguid):
+        def dbfn(store_connection):
+            return self.deactivateTriggerWithStoreConnection(
+                store_connection=store_connection,
+                jobguid=jobguid
+            )
+        return self.appObj.objectStore.executeInsideTransaction(dbfn)
+
+    def deactivateTriggerWithStoreConnection(self, store_connection, jobguid):
+        jobObj = self.appObj.appData['jobsData'].getJobRaw(jobguid)
+        if jobObj is None:
+            return {"result": "Fail", "message": "Job not found"}, 404
+        if not jobObj.PrivateExternalTrigger["triggerActive"]:
+            return {"result": "Warning", "message": "Trigger was not active"}, 400
+
+        triggerType = jobObj.__dict__["PrivateExternalTrigger"]["type"]
+        if triggerType not in self.TriggerTypes:
+            print("ERROR!!! - type in data not found when deactivating job" + jobObj.__dict__["PrivateExternalTrigger"]["type"] + " Trying to continue")
+        else:
+            self.TriggerTypes[triggerType].deactivate(
+                jobguid=jobguid,
+                privateTriggerData=jobObj.PrivateExternalTrigger
+            )
+
+        privateTriggerData = {
+            "triggerActive": False
+        }
+
+        jobObj.setNewPrivateTriggerData(privateTriggerData)
+        self.appObj.appData['jobsData']._saveJobToObjectStore(str(jobObj.guid), store_connection)
 
         return jobObj._caculatedDict(self.appObj), 201

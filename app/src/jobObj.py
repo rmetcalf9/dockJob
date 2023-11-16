@@ -270,6 +270,9 @@ class jobClass():
     self.AfterFailJobGUID = self.verifyJobGUID(appObj, AfterFailJobGUID, self.guid)
     self.AfterUnknownJobGUID = self.verifyJobGUID(appObj, AfterUnknownJobGUID, self.guid)
 
+  def setNewPrivateTriggerData(self, newValue):
+    self.PrivateExternalTrigger = newValue
+
   def removeRemoveRelianceOnOtherJob(self, guid):
     # return True if a change is made
     changed = False

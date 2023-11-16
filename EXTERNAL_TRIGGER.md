@@ -11,17 +11,17 @@ Each job will have the following fields:
 (All under PrivateExternalTrigger)
 {
     PrivateExternalTrigger: {
-        "active": true/false (default false)
+        "triggerActive": true/false (default false)
         "type": googleDriveRawClass/googleDriveNewFileWatchClass (Not present if above is false)
+        "salt": base64 string,
         "urlpasscode": String set to a guid
         "nonurlpasscode": String set to a guid
-        "salt" base64 string,
         "typeprivatevars": JSON defined by type
         "typepublicvars": JSON defined by type
     }
 }
  -> Public info in job is caculated and comes out as ExternalTrigger
-External fields are active, salt, typepublicvars
+External fields are active, type, salt, urlpasscode, nonurlpasscode. typepublicvars
 
 These values are not controlled by the normal job save and load processes. Instead they are updated by the ExternalTrigger Manager
 in a sub object that is not passed to the frontend.
