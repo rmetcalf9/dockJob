@@ -16,6 +16,11 @@ class jobFactoryClass():
       if fieldToDefault not in jobFromDB:
         jobFromDB[fieldToDefault] = None
 
+    if "PrivateExternalTrigger" not in jobFromDB:
+      jobFromDB["PrivateExternalTrigger"] = {
+        "triggerActive": False
+      }
+
     return jobClass(
       appObj = appObj,
       name = jobFromDB["name"],
@@ -31,7 +36,9 @@ class jobFactoryClass():
       AfterFailJobGUID = jobFromDB["AfterFailJobGUID"],
       AfterUnknownJobGUID = jobFromDB["AfterUnknownJobGUID"],
       guid = jobFromDB["guid"],
-      loadingObjectVersion = jobFromDBTuple[1]
+      loadingObjectVersion = jobFromDBTuple[1],
+      PrivateExternalTrigger = jobFromDB["PrivateExternalTrigger"],
+      verifyDependentJobGuids = True
   )
 
 jobFactory = jobFactoryClass()
@@ -60,6 +67,7 @@ class jobClass():
   AfterSuccessJobGUID =None
   AfterFailJobGUID = None
   AfterUnknownJobGUID = None
+  PrivateExternalTrigger = None
 
   CompletionstatusLock = None
   objectVersion = None
@@ -124,9 +132,10 @@ class jobClass():
       AfterSuccessJobGUID,
       AfterFailJobGUID,
       AfterUnknownJobGUID,
-      guid=None, #used when loading from DB
-      verifyDependentJobGuids=True, #False when testing
-      loadingObjectVersion=None #used when loading from DB
+      guid, #used when loading from DB
+      verifyDependentJobGuids, #False when testing
+      loadingObjectVersion, #used when loading from DB
+      PrivateExternalTrigger
   ):
     jobClass.assertValidName(name)
     jobClass.assertValidRepetitionInterval(repetitionInterval, enabled)
@@ -169,7 +178,9 @@ class jobClass():
     #fields excluded from JSON output
     self.resetCompletionStatusToUnknownTime = None
     self.CompletionstatusLock = Lock()
-    
+
+    self.PrivateExternalTrigger = PrivateExternalTrigger
+
     self.objectVersion = loadingObjectVersion
 
   def _getMinutesBeforeMostRecentCompletionStatusBecomesUnknown(self, appObj):
@@ -190,6 +201,7 @@ class jobClass():
 
   def _caculatedDictWithoutAppObjDependancy(self):
     ret = dict(self.__dict__)
+    del ret['PrivateExternalTrigger']
     del ret['CompletionstatusLock']
     del ret['resetCompletionStatusToUnknownTime']
     if self.lastRunDate is not None:

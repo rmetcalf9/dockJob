@@ -134,7 +134,11 @@ def registerAPI(appObj):
         content.get('StateChangeUnknownJobGUID',None),
         content.get('AfterSuccessJobGUID', None),
         content.get('AfterFailJobGUID', None),
-        content.get('AfterUnknownJobGUID', None)
+        content.get('AfterUnknownJobGUID', None),
+        guid=None,
+        verifyDependentJobGuids=True,
+        loadingObjectVersion=None,
+        PrivateExternalTrigger={"triggerActive": False}
       )
 
       storeConnection = appObj.objectStore._getConnectionContext()

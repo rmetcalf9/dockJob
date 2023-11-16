@@ -44,7 +44,7 @@ class jobsDataClass():
           print("There are " + str(len(jobsToLoad)) + " jobs that could not be loaded")
           print("Detail:", jobsToLoad)
           print("Last exception on loading job:", lastException)
-          raise Exception("ERROR - there must be a circular job dependancy in datastore")
+          raise Exception("ERROR - there must be a circular job dependency in datastore")
         lastLen = len(jobsToLoad)
 
         jobsThatFailedToLoad = []
@@ -106,13 +106,17 @@ class jobsDataClass():
       'JobsLastExecutionFailed': JobsLastExecutionFailed
     }
 
+  def getJobRaw(self, guid):
+    if str(guid) not in self.jobs:
+      return None
+    return self.jobs[str(guid)]
+
   def getJob(self, guid):
-    r = None
-    try:
-      r = self.jobs[str(guid)]
-    except KeyError:
+    jobRaw = self.getJobRaw(guid)
+    if jobRaw is None:
       raise BadRequest('getJob - Invalid Job GUID - ' + str(guid))
-    return r
+    return jobRaw
+
   def getJobByName(self, name):
     r = None
     try:

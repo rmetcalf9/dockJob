@@ -1,6 +1,7 @@
 from flask_restx import Resource
+from flask import request
 
-def register_api(flaskObj, appObj):
+def register_api(flaskObj, externalTriggerManager):
     ns = flaskObj.namespace('', description='External Trigger')
 
     @ns.route('/up')
@@ -11,3 +12,10 @@ def register_api(flaskObj, appObj):
             '''Simple check'''
             return { "result": "Success" }
 
+    @ns.route('/trigger/<string:urlid>')
+    class trigger(Resource):
+        '''Trigger the notification'''
+
+        def post(self, urlid):
+            '''Simple check'''
+            return externalTriggerManager.processTrigger(urlid, request.headers, request.data)

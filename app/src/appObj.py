@@ -51,7 +51,8 @@ class appObjClass(parAppObj):
 
       DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD = readFromEnviroment(env, 'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD', None, None)
       self.externalTriggerManager = ExternalTriggerManager(
-        DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD=DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD
+        DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD=DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD,
+        appObj=self
       )
 
       super(appObjClass, self).init(env, serverStartTime, testingMode, serverinfoapiprefix='')
@@ -122,7 +123,7 @@ class appObjClass(parAppObj):
     self.flaskAppObject.register_blueprint(triggerapi_blueprint, url_prefix=trigger_api_prefix)
     registerTriggerApi(
       flaskObj=self.flastRestPlusExternalTriggerAPIObject,
-      appObj=self
+      externalTriggerManager=self.externalTriggerManager
     )
 
     # print("URL MAP", self.flaskAppObject.url_map)

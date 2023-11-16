@@ -8,16 +8,27 @@ There are a number of types of External triggers I plan to support:
 I will add others in future.
 
 Each job will have the following fields:
- - Accept external triggers True/False
+(All under PrivateExternalTrigger)
+{
+    PrivateExternalTrigger: {
+        "active": true/false (default faled)
+        dd
+    }
+}
+ - External triggers can be an empty object - means no triggers
  - Trigger passwords generated when trigger setup
    - There are TWO passwords. one in the URI and one not.
+   - Salt is saved here too
  - External Trigger Type - String of the type (above)
  - External Trigger Variables - Dictionary of trigger variables
+These values are not controlled by the normal job save and load processes. Instead they are updated by the ExternalTrigger Manager
+in a sub object that is not passed to the frontend.
 
-Notificaitons are received at https://host:port/triggerapi/${URISTRING}
+Notificaitons are received at https://host:port/triggerapi/trigger/${URISTRING}
 URISTRING can be anything depending on the trigger type. It is not used to select the type
 
-There will be a system passwoerd "DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD".
+There will be a system passwoerd "DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD". (This is NOT base64 encoded)
+
 When a trigger is received the engine asks each type 'is this yours'. The type will take the message and if it is return
 the Job GUID that the trigger corrosponds to. The system checks that that Job is accepting external triggers and the type
 matches. 
@@ -43,3 +54,14 @@ Implement a notification handler that starts a process with the input being the 
 
 Add secrets into the mix for google credentials
 
+
+## googleDriveRawClass type info
+All encrypted using global password
+url param = url password in Job (ENC - salt stored in job)
+channel id = second password in job (ENC - salt stored in job)
+token = job guid (ENC - hardcoded salt)
+
+
+TODO - Google drive may need auto notification reneawal. see https://developers.google.com/drive/api/guides/push Renewing notification channels
+notifications may expire and I need a way to run a process and renew
+it can't be on reciept of message because I might not get any for a long time

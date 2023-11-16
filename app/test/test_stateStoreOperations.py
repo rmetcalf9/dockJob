@@ -19,7 +19,11 @@ sampleJob = jobObj.jobClass(
   StateChangeUnknownJobGUID=None,
   AfterSuccessJobGUID=None,
   AfterFailJobGUID=None,
-  AfterUnknownJobGUID=None
+  AfterUnknownJobGUID=None,
+  guid=None,
+  loadingObjectVersion=None,
+  verifyDependentJobGuids=False,
+  PrivateExternalTrigger={"triggerActive": False}
 )
 sampleJobDependingOnLastJob = jobObj.jobClass(
   appObj=appObj,
@@ -35,7 +39,10 @@ sampleJobDependingOnLastJob = jobObj.jobClass(
   AfterSuccessJobGUID=None,
   AfterFailJobGUID=None,
   AfterUnknownJobGUID=None,
-  verifyDependentJobGuids=False
+  verifyDependentJobGuids=False,
+  guid=None,
+  loadingObjectVersion=None,
+  PrivateExternalTrigger={"triggerActive": False}
 )
 
 class helperClass(TestHelperSuperClass.testHelperAPIClient):

@@ -21,7 +21,13 @@ class test_JobExecution(testHelperAPIClient):
     )
 
   def createJobObj(self, command='echo "This is a test"'):
-    return jobClass(appObj, 'TestJob123', command, False, '', False, None, None, None, None, None, None, None)
+    return jobClass(
+      appObj, 'TestJob123', command, False, '', False, None, None, None, None, None, None, None,
+      guid= None,
+      verifyDependentJobGuids=True,
+      loadingObjectVersion=None,
+      PrivateExternalTrigger = {"triggerActive": False}
+    )
 
   def aquireJobExecutionLock(self):
     if not self.JobExecutionLock.acquire(blocking=True, timeout=0.5): #timeout value is in seconds
