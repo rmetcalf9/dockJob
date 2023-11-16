@@ -15,7 +15,7 @@ echo 'To test only a type of test add that type to the call'
 echo 'e.g. sudo ./continous_test.sh externalTriggerSystemTest'
 
 if [ $# -eq 0 ]; then
-  until ack -f --python  ./src ./test | entr -d python3 -m pytest; do sleep 1; done
+  until ack -f --python  ./src ./test | entr -d python3 -m pytest --exitfirst; do sleep 1; done
 else
   if [ $# -eq 1 ]; then
     echo "Testing ${1}"

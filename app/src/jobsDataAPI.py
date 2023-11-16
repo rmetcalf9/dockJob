@@ -41,6 +41,7 @@ def getJobModel(appObj):
       'AfterSuccessJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this completes and is still in the success state'),
       'AfterFailJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this completes and is still in the fail state'),
       'AfterUnknownJobNAME': fields.String(default=None,description='READONLY - Name of job to call when this completes and is still in the unknown state'),
+      'ExternalTrigger': fields.Nested(appObj.externalTriggerManager.getJobModel()),
     })
   return jobModel
 

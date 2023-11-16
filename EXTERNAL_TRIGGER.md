@@ -15,6 +15,8 @@ Each job will have the following fields:
         dd
     }
 }
+ -> Public info in job is caculated and comes out as ExternalTrigger
+
  - External triggers can be an empty object - means no triggers
  - Trigger passwords generated when trigger setup
    - There are TWO passwords. one in the URI and one not.

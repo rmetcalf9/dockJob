@@ -234,6 +234,9 @@ class jobClass():
     if self.AfterUnknownJobGUID is not None:
       ret['AfterUnknownJobNAME'] = appObj.appData['jobsData'].getJob(self.AfterUnknownJobGUID).name
 
+    print("DDD", appObj)
+    ret["ExternalTrigger"] = appObj.externalTriggerManager.getJobDictData(self)
+
     return ret
 
   def setNewValues(

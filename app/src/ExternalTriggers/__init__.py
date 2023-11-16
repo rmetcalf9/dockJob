@@ -1,6 +1,7 @@
 from .ExternalTriggerTypes import getAllTriggerTypeInstances
 from .api import register_api
 from encryption import getSafePasswordString, decryptPassword, encryptPassword
+from flask_restx import fields
 
 saltForJobIdPasswordEncryption="JDJiJDEyJFRGQmZ1RzhjY3IzVTVxTzVTeERXbnU="
 
@@ -56,3 +57,15 @@ class ExternalTriggerManager():
                         return {"result": "Fail"}, 200
 
         return {"result": "Fail"}, 406
+
+
+    def getJobModel(self):
+        return self.appObj.flastRestPlusAPIObject.model('triggerActive', {
+            'triggerActive': fields.Boolean(default=False, description='Is auto triggeing enabled'),
+        })
+
+    def getJobDictData(self, jobObj):
+        if not jobObj.PrivateExternalTrigger["triggerActive"]:
+            return { "triggerActive": False }
+
+        raise Exception("Not implemented")

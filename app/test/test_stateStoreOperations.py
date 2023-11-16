@@ -73,6 +73,6 @@ class test_stateStoreOperations(helperClass):
     result2JSON = json.loads(result2.get_data(as_text=True))
     if result2JSON["repetitionInterval"] == "":
       result2JSON["repetitionInterval"] = None
-    self.assertJSONJobStringsEqual(result2JSON, sampleJob._caculatedDict(self.testClient));
+    self.assertJSONJobStringsEqual(result2JSON, sampleJob._caculatedDict(appObj));
 
 
