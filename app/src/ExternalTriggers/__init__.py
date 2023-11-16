@@ -60,7 +60,11 @@ class ExternalTriggerManager():
 
                     for triggerType in possible_jobs_that_could_match[jobGuid]:
                         if triggerType.requestMatches(jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
-                            # TODO Actually launch the job!
+                            self.appObj.jobExecutor.submitJobForExecution(
+                                jobGUID=jobData.__dict__["guid"],
+                                executionName="Triggered by " + PrivateExternalTrigger["type"],
+                                manual=False
+                            )
                             return {"result": "Success"}, 200
 
         return {"result": "Fail"}, 406
