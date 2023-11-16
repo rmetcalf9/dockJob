@@ -130,5 +130,30 @@ class test_externalTrigger_private_api(helper):
       get_job_response = self.getJob(jobguid=setup["setupJob"]["guid"])
       self.assertEqual(get_job_response["ExternalTrigger"], {"triggerActive": False})
 
-#TODO Test activateing when trigger is already active
-# Keys must have changed
+  def test_activate_when_already_active(self):
+      setup = self.setup()
+
+      #The test bycypt uses a constant salt for speed. This puts that back for this test
+      import bcrypt
+      oldbcrypt = appObj.bcrypt
+      appObj.bcrypt = bcrypt
+
+      activate_response = self.activateTriggerOnJob(
+          jobGuid = setup["setupJob"]["guid"],
+          triggerType="googleDriveRawClass",
+          triggerOptions={}
+      )
+      activate_response2 = self.activateTriggerOnJob(
+          jobGuid = setup["setupJob"]["guid"],
+          triggerType="googleDriveRawClass",
+          triggerOptions={}
+      )
+      # Not 'salt' will not change because the same salt is returned every time by my test salt function
+      for keys_that_should_change in ['urlpasscode', 'nonurlpasscode']:
+        self.assertNotEqual(
+            activate_response["ExternalTrigger"][keys_that_should_change],
+            activate_response2["ExternalTrigger"][keys_that_should_change],
+            msg="key didn't change " + keys_that_should_change
+        )
+
+      appObj.bcrypt = oldbcrypt

@@ -90,9 +90,13 @@ class ExternalTriggerManager():
         if jobObj is None:
             return {"result": "Fail", "message": "Job not found"}, 404
         if jobObj.PrivateExternalTrigger["triggerActive"]:
-            raise Exception("NI - first deactiavate the trigger than reactivate")
+            self.TriggerTypes[triggerType].deactivate(
+                jobguid=jobguid,
+                privateTriggerData=jobObj.PrivateExternalTrigger
+            )
 
         salt = getSafeSaltString(self.appObj.bcrypt)
+
         urlpasscode = encryptPassword(self.appObj.bcrypt, str(uuid.uuid4()), salt, self.safePasswordString)
         nonurlpasscode = encryptPassword(self.appObj.bcrypt, str(uuid.uuid4()), salt, self.safePasswordString)
 
@@ -119,6 +123,7 @@ class ExternalTriggerManager():
         }
 
         jobObj.setNewPrivateTriggerData(privateTriggerData)
+
         self.appObj.appData['jobsData']._saveJobToObjectStore(str(jobObj.guid), store_connection)
 
         return jobObj._caculatedDict(self.appObj), 201
