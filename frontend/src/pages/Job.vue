@@ -26,7 +26,7 @@
       <q-item clickable v-ripple highlight @click="clickTriggering">
         <q-item-section >
           <q-item-label>External Triggering</q-item-label>
-          <q-item-label caption v-if="jobData.ExternalTrigger.triggerActive">TODO</q-item-label>
+          <q-item-label caption v-if="jobData.ExternalTrigger.triggerActive">{{ jobData.ExternalTrigger.type}} Triggering setup</q-item-label>
           <q-item-label caption v-if="!jobData.ExternalTrigger.triggerActive">No external triggering</q-item-label>
         </q-item-section>
         <q-item-section avatar>
@@ -117,6 +117,11 @@
       @triggercreated="refreshJobData"
       ref="createJobTriggerDialog"
     />
+    <ViewTriggerDialog
+      :jobData="jobData"
+      @triggerupdated="refreshJobData"
+      ref="viewJobTriggerDialog"
+    />
   </div>
 </template>
 
@@ -132,7 +137,8 @@ import { useServerStaticStateStore } from 'stores/serverStaticState'
 
 import ExecutionTable from '../components/ExecutionTable.vue'
 import CreateJobModal from '../components/CreateJobModal.vue'
-import CreateJobTriggerDialog from '../components/CreateJobTriggerDialog.vue'
+import CreateJobTriggerDialog from '../components/externalTrigger/CreateJobTriggerDialog.vue'
+import ViewTriggerDialog from '../components/externalTrigger/ViewTriggerDialog.vue'
 
 
 function addDateStringsToJobData (obj) {
@@ -148,7 +154,8 @@ export default {
   components: {
     CreateJobModal,
     ExecutionTable,
-    CreateJobTriggerDialog
+    CreateJobTriggerDialog,
+    ViewTriggerDialog
   },
   setup () {
     const loginStateStore = useLoginStateStore()
@@ -179,10 +186,9 @@ export default {
   methods: {
     clickTriggering () {
       if (this.jobData.ExternalTrigger.triggerActive) {
-        console.log('TODO disable triggering propmt')
+        this.$refs.viewJobTriggerDialog.openViewJobTriggerDialog()
       } else {
-        var dlg = this.$refs.createJobTriggerDialog
-        dlg.openCreateJobTriggerDialog()
+        this.$refs.createJobTriggerDialog.openCreateJobTriggerDialog()
       }
     },
     openEditJobModalDialog () {

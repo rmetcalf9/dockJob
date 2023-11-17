@@ -52,14 +52,14 @@
 </template>
 
 <script>
-import callDockjobBackendApi from '../callDockjobBackendApi'
+import callDockjobBackendApi from '../../callDockjobBackendApi'
 
 import { useServerInfoWithDerivedStore } from 'stores/serverInfoWithDerived'
 import { useLoginStateStore } from 'stores/loginState'
 import { useServerStaticStateStore } from 'stores/serverStaticState'
 
-import ExternalTriggerGoogleDriveRawClass from '../components/externalTrigger/googleDriveRawClass/create.vue'
-import ExternalTriggerGoogleDriveNewFileWatchClass from '../components/externalTrigger/googleDriveNewFileWatchClass/create.vue'
+import ExternalTriggerGoogleDriveRawClass from '../../components/externalTrigger/googleDriveRawClass/create.vue'
+import ExternalTriggerGoogleDriveNewFileWatchClass from '../../components/externalTrigger/googleDriveNewFileWatchClass/create.vue'
 
 
 
