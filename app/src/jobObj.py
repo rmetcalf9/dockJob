@@ -5,6 +5,7 @@ import uuid
 from threading import Lock
 from dateutil.relativedelta import relativedelta
 from RepetitionInterval import RepetitionIntervalClass
+import copy
 
 class jobFactoryClass():
   def loadFromDB(self, jobFromDBTuple, appObj):
@@ -198,6 +199,14 @@ class jobClass():
       return "Success"
     else:
       return "Fail"
+
+  def dictToStoreInDatastore(self):
+    # Added function so it is cear what is stored in datastore
+    #  the dict object is currently a mix of data and objects
+    ret = copy.deepcopy(self._caculatedDictWithoutAppObjDependancy())
+    ret["PrivateExternalTrigger"] = self.__dict__["PrivateExternalTrigger"]
+
+    return ret
 
   def _caculatedDictWithoutAppObjDependancy(self):
     ret = dict(self.__dict__)

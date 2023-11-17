@@ -3,7 +3,7 @@
     <q-header class="bg-primary">
       <q-toolbar>
         <q-toolbar-title>
-          View Trigger TODO
+          Google Dirve Raw Trigger
         </q-toolbar-title>
         <q-btn flat v-close-popup round dense icon="close" />
       </q-toolbar>
@@ -11,7 +11,8 @@
 
     <q-page-container>
       <q-page padding>
-        TEST VIEW
+        <div>This process can be triggered by the google notification API.</div>
+        <div>{{ curlCommand }}</div>
       </q-page>
     </q-page-container>
 
@@ -27,10 +28,18 @@
 </template>
 
 <script>
+
 export default {
   name: 'Comp-ExternalTrigger-GoogleDriveRawClass-View',
   props: [
     'jobData'
-  ]
+  ],
+  components: {
+  },
+  computed: {
+    curlCommand () {
+      return 'curl -X POST http://superego:8098/triggerapi/trigger/' + this.jobData.ExternalTrigger.urlpasscode + ' -H "X-Goog-Channel-ID: ' + this.jobData.ExternalTrigger.nonurlpasscode + '" -H "X-Goog-Channel-Token: ' + this.jobData.ExternalTrigger.encodedjobguid + '"'
+    }
+  }
 }
 </script>

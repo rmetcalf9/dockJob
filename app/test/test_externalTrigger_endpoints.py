@@ -125,16 +125,8 @@ class test_externalTriggerEndpoints(helper):
       resource_message["headers"]["X-Goog-Channel-Token"] = encoded_job_guid
 
       ExternalTrigger = activate_response["ExternalTrigger"]
-      rawurlpasscode = decryptPassword(
-          appObj.bcrypt, ExternalTrigger["urlpasscode"],
-          ExternalTrigger["salt"],
-          appObj.externalTriggerManager.safePasswordString
-      )
-      rawnonurlpasscode = decryptPassword(
-          appObj.bcrypt, ExternalTrigger["nonurlpasscode"],
-          ExternalTrigger["salt"],
-          appObj.externalTriggerManager.safePasswordString
-      )
+      rawurlpasscode = ExternalTrigger["urlpasscode"]
+      rawnonurlpasscode = ExternalTrigger["nonurlpasscode"]
       resource_message["headers"]["X-Goog-Channel-ID"]=rawnonurlpasscode
 
       result = self.testClient.post(
@@ -158,11 +150,7 @@ class test_externalTriggerEndpoints(helper):
       resource_message["headers"]["X-Goog-Channel-Token"] = encoded_job_guid
 
       ExternalTrigger = activate_response["ExternalTrigger"]
-      rawurlpasscode = decryptPassword(
-          appObj.bcrypt, ExternalTrigger["urlpasscode"],
-          ExternalTrigger["salt"],
-          appObj.externalTriggerManager.safePasswordString
-      )
+      rawurlpasscode = ExternalTrigger["urlpasscode"]
 
       result = self.testClient.post(
           external_trigger_api_prefix + '/trigger/' + rawurlpasscode,
@@ -185,12 +173,7 @@ class test_externalTriggerEndpoints(helper):
       resource_message["headers"]["X-Goog-Channel-Token"] = encoded_job_guid
 
       ExternalTrigger = activate_response["ExternalTrigger"]
-      rawnonurlpasscode = decryptPassword(
-          appObj.bcrypt, ExternalTrigger["nonurlpasscode"],
-          ExternalTrigger["salt"],
-          appObj.externalTriggerManager.safePasswordString
-      )
-      resource_message["headers"]["X-Goog-Channel-ID"]=rawnonurlpasscode
+      resource_message["headers"]["X-Goog-Channel-ID"]=ExternalTrigger["nonurlpasscode"]
 
       result = self.testClient.post(
           external_trigger_api_prefix + '/trigger/wrongvalue',

@@ -73,12 +73,16 @@ class ExternalTriggerManager():
         if not jobObj.PrivateExternalTrigger["triggerActive"]:
             return { "triggerActive": False }
 
+        rawurlpasscode = decryptPassword(self.appObj.bcrypt, jobObj.PrivateExternalTrigger["urlpasscode"], jobObj.PrivateExternalTrigger["salt"], self.safePasswordString)
+        rawnonurlpasscode = decryptPassword(self.appObj.bcrypt, jobObj.PrivateExternalTrigger["nonurlpasscode"], jobObj.PrivateExternalTrigger["salt"], self.safePasswordString)
+
         return {
             "triggerActive": True,
             "type": jobObj.PrivateExternalTrigger["type"],
             "salt": jobObj.PrivateExternalTrigger["salt"],
-            "urlpasscode": jobObj.PrivateExternalTrigger["urlpasscode"],
-            "nonurlpasscode": jobObj.PrivateExternalTrigger["nonurlpasscode"],
+            "urlpasscode": rawurlpasscode,
+            "nonurlpasscode": rawnonurlpasscode,
+            "encodedjobguid": self.encodeJobGuid(jobObj.__dict__["guid"]),
             "typepublicvars": jobObj.PrivateExternalTrigger["typepublicvars"]
         }
 

@@ -64,8 +64,7 @@ class jobsDataClass():
   def _saveJobToObjectStore(self, jobGUID, connectionContext):
     storeConnection = self.appObj.objectStore._getConnectionContext()
     def someFn(connectionContext):
-      #print(self.jobs[jobGUID]._caculatedDict(self.appObj))
-      newObjectVersion = connectionContext.saveJSONObject(objectType, jobGUID, self.jobs[jobGUID]._caculatedDict(self.appObj), objectVersion = self.jobs[jobGUID].objectVersion)
+      newObjectVersion = connectionContext.saveJSONObject(objectType, jobGUID, self.jobs[jobGUID].dictToStoreInDatastore(), objectVersion = self.jobs[jobGUID].objectVersion)
       self.jobs[jobGUID].objectVersion = newObjectVersion
     storeConnection.executeInsideTransaction(someFn)
 

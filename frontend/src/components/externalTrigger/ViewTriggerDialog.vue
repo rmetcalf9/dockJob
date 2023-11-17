@@ -3,10 +3,12 @@
 <q-dialog v-model="dialogVisible">
   <ExternalTriggerGoogleDriveRawClass
     v-if="jobData.ExternalTrigger.type === 'googleDriveRawClass'"
+    :jobData="jobData"
     @triggerupdated="triggerupdated"
   />
   <ExternalTriggerGoogleDriveNewFileWatchClass
     v-if="jobData.ExternalTrigger.type === 'googleDriveNewFileWatchClass'"
+    :jobData="jobData"
     @triggerupdated="triggerupdated"
   />
 </q-dialog>

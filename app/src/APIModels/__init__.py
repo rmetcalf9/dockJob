@@ -7,6 +7,7 @@ def getExternalTriggerJobModel(flastRestPlusAPIObject):
         'salt': fields.String(description='Is auto triggeing enabled', required=False),
         'urlpasscode': fields.String(description='Is auto triggeing enabled', required=False),
         'nonurlpasscode': fields.String(description='Is auto triggeing enabled', required=False),
+        'encodedjobguid': fields.String(description='identifier of the job to be triggered', required=False),
         'typepublicvars': fields.Raw(description='Is auto triggeing enabled', required=False),
     })
 
