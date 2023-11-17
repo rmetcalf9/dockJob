@@ -10,9 +10,14 @@
     </q-header>
 
     <q-page-container>
-      <q-page padding>
+      <q-page padding class="column wrap justify-center items-center content-center q-gutter-lg">
         <div>This process can be triggered by the google notification API.</div>
         <div>{{ curlCommand }}</div>
+        <q-btn
+          color="secondary"
+          :label="'Copy to Clipboard'"
+          @click="copyToClipboard"
+        />
         <div>
           <q-btn
             color="primary"
@@ -35,6 +40,39 @@
 </template>
 
 <script>
+import { Notify } from 'quasar'
+
+import { useServerStaticStateStore } from 'stores/serverStaticState'
+
+// from https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+function fallbackCopyTextToClipboard (text) {
+  var textArea = document.createElement('textarea')
+  textArea.value = text
+  document.body.appendChild(textArea)
+  textArea.focus()
+  textArea.select()
+
+  try {
+    var successful = document.execCommand('copy')
+    var msg = successful ? 'successful' : 'unsuccessful'
+    console.log('Fallback: Copying text command was ' + msg)
+  } catch (err) {
+    Notify.create('Fallback: :( Oops, unable to copy' + err)
+  }
+
+  document.body.removeChild(textArea)
+}
+function copyTextToClipboard (text) {
+  if (!navigator.clipboard) {
+    fallbackCopyTextToClipboard(text)
+    return
+  }
+  navigator.clipboard.writeText(text).then(function () {
+    Notify.create({color: 'positive', message: 'Async: Copying to clipboard was successful!'})
+  }, function (err) {
+    Notify.create('Async: Could not copy text: ' + err)
+  })
+}
 
 export default {
   name: 'Comp-ExternalTrigger-GoogleDriveRawClass-View',
@@ -43,11 +81,21 @@ export default {
   ],
   components: {
   },
+  setup () {
+    const serverStaticStateStore = useServerStaticStateStore()
+    return { serverStaticStateStore }
+  },
   methods: {
+    copyToClipboard () {
+      copyTextToClipboard(this.curlCommand)
+      Notify.create({color: 'positive', message: 'Curl command coppied to clipboard'})
+    }
   },
   computed: {
     curlCommand () {
-      return 'curl -X POST http://superego:8098/triggerapi/trigger/' + this.jobData.ExternalTrigger.urlpasscode + ' -H "X-Goog-Channel-ID: ' + this.jobData.ExternalTrigger.nonurlpasscode + '" -H "X-Goog-Channel-Token: ' + this.jobData.ExternalTrigger.encodedjobguid + '"'
+      const host = this.serverStaticStateStore.staticServerInfo.data.apiurl.replace('/api','/triggerapi')
+      // http://superego:8098/triggerapi/trigger/
+      return 'curl -X POST ' + host + '/trigger/' + this.jobData.ExternalTrigger.urlpasscode + ' -H "X-Goog-Channel-ID: ' + this.jobData.ExternalTrigger.nonurlpasscode + '" -H "X-Goog-Channel-Token: ' + this.jobData.ExternalTrigger.encodedjobguid + '"'
     }
   }
 }

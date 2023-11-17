@@ -60,7 +60,7 @@ export default {
         ok: function (response) {
           Notify.create({color: 'positive', message: 'Trigger removed'})
           TTT.$emit('triggerupdated')
-          dialog.visible = false
+          TTT.dialogVisible = false
         },
         error: function (error) {
           Notify.create({color: 'negative', message: 'Failed to remove trigger endpoint - ' + callbackHelper.getErrorFromResponse(error)})
