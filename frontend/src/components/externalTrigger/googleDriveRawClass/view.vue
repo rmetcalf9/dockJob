@@ -42,7 +42,7 @@
 <script>
 import { Notify } from 'quasar'
 
-import { useServerStaticStateStore } from 'stores/serverStaticState'
+import { useServerInfoWithDerivedStore } from 'stores/serverInfoWithDerived'
 
 // from https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 function fallbackCopyTextToClipboard (text) {
@@ -82,8 +82,8 @@ export default {
   components: {
   },
   setup () {
-    const serverStaticStateStore = useServerStaticStateStore()
-    return { serverStaticStateStore }
+    const serverInfoWithDerivedStore = useServerInfoWithDerivedStore()
+    return { serverInfoWithDerivedStore }
   },
   methods: {
     copyToClipboard () {
@@ -93,9 +93,9 @@ export default {
   },
   computed: {
     curlCommand () {
-      const host = this.serverStaticStateStore.staticServerInfo.data.apiurl.replace('/api','/triggerapi')
+      const triggerapibase = this.serverInfoWithDerivedStore.serverInfoWithDerived.Derived.APIAPP_TRIGGERAPIURL
       // http://superego:8098/triggerapi/trigger/
-      return 'curl -X POST ' + host + '/trigger/' + this.jobData.ExternalTrigger.urlpasscode + ' -H "X-Goog-Channel-ID: ' + this.jobData.ExternalTrigger.nonurlpasscode + '" -H "X-Goog-Channel-Token: ' + this.jobData.ExternalTrigger.encodedjobguid + '"'
+      return 'curl -X POST ' + triggerapibase + '/trigger/' + this.jobData.ExternalTrigger.urlpasscode + ' -H "X-Goog-Channel-ID: ' + this.jobData.ExternalTrigger.nonurlpasscode + '" -H "X-Goog-Channel-Token: ' + this.jobData.ExternalTrigger.encodedjobguid + '"'
     }
   }
 }

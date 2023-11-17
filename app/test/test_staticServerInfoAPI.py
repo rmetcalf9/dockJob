@@ -19,6 +19,7 @@ class test_static_server_info_api(testHelperAPIClient):
               'Version': env["APIAPP_VERSION"]
           },
           'Derived': {
+              "APIAPP_TRIGGERAPIURL": env["APIAPP_TRIGGERAPIURL"],
               'ExternalTriggers': {
                   'types': {
                       'googleDriveRawClass': {},

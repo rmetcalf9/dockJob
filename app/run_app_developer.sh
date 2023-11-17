@@ -10,6 +10,7 @@ APP_DIR=.
 export APIAPP_MODE=DEVELOPER
 export APIAPP_FRONTEND=_
 export APIAPP_APIURL=http://localhost:8098/api
+export APIAPP_TRIGGERAPIURL=http://localhost:8098/triggerapi
 export APIAPP_APIDOCSURL=http://localhost:8098/apidocs
 export APIAPP_FRONTENDURL=http://localhost:8098/frontend
 export APIAPP_APIACCESSSECURITY=[]

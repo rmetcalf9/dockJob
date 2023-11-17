@@ -36,6 +36,7 @@ class appObjClass(parAppObj):
   objectStore = None
   monitorCheckTempState = None
   externalTriggerManager = None
+  APIAPP_TRIGGERAPIURL = None
 
   def init(self, env, serverStartTime, testingMode = False, objectStoreTestingPopulationHookFn = None):
     try:
@@ -49,6 +50,7 @@ class appObjClass(parAppObj):
           self.jobExecutor.join()
         self.jobExecutor = None
 
+      self.APIAPP_TRIGGERAPIURL = readFromEnviroment(env, 'APIAPP_TRIGGERAPIURL', None, None)
       DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD = readFromEnviroment(env, 'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD', None, None)
       self.externalTriggerManager = ExternalTriggerManager(
         DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD=DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD,
@@ -183,7 +185,8 @@ class appObjClass(parAppObj):
 
   def getDerivedServerInfoData(self):
       return {
-        "ExternalTriggers": self.externalTriggerManager.getStaticServerInfoData()
+        "ExternalTriggers": self.externalTriggerManager.getStaticServerInfoData(),
+        "APIAPP_TRIGGERAPIURL": self.APIAPP_TRIGGERAPIURL
       }
 
 

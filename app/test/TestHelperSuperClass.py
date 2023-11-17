@@ -17,6 +17,7 @@ env = {
   'APIAPP_VERSION': 'TEST-3.3.3',
   'APIAPP_FRONTEND': '../app',
   'APIAPP_APIURL': 'http://apiurlxxx',
+  'APIAPP_TRIGGERAPIURL': 'http://triggerapiurlxxx',
   'APIAPP_FRONTENDURL': 'http://frontenddummytestxxx',
   'APIAPP_APIDOCSURL': 'something',
   'APIAPP_APIACCESSSECURITY': '[{ "type": "basic-auth" }]',

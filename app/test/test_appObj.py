@@ -51,7 +51,8 @@ class test_appObjClass(testHelperAPIClient):
       'APIAPP_APIURL': 'http://apiurlxxx:45/aa/bb/cc',
       'APIAPP_APIACCESSSECURITY': '[]',
       'APIAPP_GROUPFORJOBS': 'root',
-      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_pass'
+      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_pass',
+      'APIAPP_TRIGGERAPIURL': 'http://triggerapiurlxxx'
     }
     with self.assertRaises(Exception) as context:
       appObj.init(env, self.standardStartupTime)
@@ -65,7 +66,8 @@ class test_appObjClass(testHelperAPIClient):
       'APIAPP_APIURL': 'http://apiurlxxx:45/aa/bb/cc',
       'APIAPP_APIACCESSSECURITY': '[]',
       'APIAPP_USERFORJOBS': 'root',
-      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_pass'
+      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_pass',
+      'APIAPP_TRIGGERAPIURL': 'http://triggerapiurlxxx'
     }
     with self.assertRaises(Exception) as context:
       appObj.init(env, self.standardStartupTime)
@@ -81,7 +83,8 @@ class test_appObjClass(testHelperAPIClient):
       'APIAPP_USERFORJOBS': 'root',
       'APIAPP_GROUPFORJOBS': 'root',
       'APIAPP_SKIPUSERCHECK': 'INVALIDVALUE',
-      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_pass'
+      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_pass',
+      'APIAPP_TRIGGERAPIURL': 'http://triggerapiurlxxx'
     }
     with self.assertRaises(Exception) as context:
       appObj.init(env, self.standardStartupTime)
@@ -97,7 +100,8 @@ class test_appObjClass(testHelperAPIClient):
       'APIAPP_USERFORJOBS': 'root',
       'APIAPP_GROUPFORJOBS': 'root',
       'APIAPP_SKIPUSERCHECK': 'True',
-      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_pass'
+      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_pass',
+      'APIAPP_TRIGGERAPIURL': 'http://triggerapiurlxxx'
     }
     with self.assertRaises(Exception) as context:
       appObj.init(env, self.standardStartupTime)
@@ -113,7 +117,8 @@ class test_appObjClass(testHelperAPIClient):
       'APIAPP_USERFORJOBS': 'root',
       'APIAPP_GROUPFORJOBS': 'root',
       'APIAPP_SKIPUSERCHECK': 'False',
-      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_pass'
+      'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'some_pass',
+      'APIAPP_TRIGGERAPIURL': 'http://triggerapiurlxxx'
     }
     with self.assertRaises(Exception) as context:
       appObj.init(env, self.standardStartupTime)
