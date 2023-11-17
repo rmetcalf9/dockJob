@@ -7,3 +7,4 @@ baseapp_for_restapi_backend_with_swagger==0.5.28
 object_store_abstraction==0.3.47
 
 requests==2.28.1
+pycryptodome==3.9.7
