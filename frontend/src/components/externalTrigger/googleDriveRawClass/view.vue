@@ -13,6 +13,13 @@
       <q-page padding>
         <div>This process can be triggered by the google notification API.</div>
         <div>{{ curlCommand }}</div>
+        <div>
+          <q-btn
+            color="primary"
+            label="Deactivate endpoint"
+            @click="$emit('deactivateendpoint')"
+          />
+        </div>
       </q-page>
     </q-page-container>
 
@@ -35,6 +42,8 @@ export default {
     'jobData'
   ],
   components: {
+  },
+  methods: {
   },
   computed: {
     curlCommand () {
