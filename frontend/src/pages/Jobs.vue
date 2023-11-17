@@ -278,7 +278,7 @@ export default {
             })
           },
           error: function (error) {
-            Notify.create({color: 'negetive', message: 'Job delete failed - ' + callbackHelper.getErrorFromResponse(error)})
+            Notify.create({color: 'negative', message: 'Job delete failed - ' + callbackHelper.getErrorFromResponse(error)})
           }
         }
         const wrappedCallApiFn = callDockjobBackendApi.getWrappedCallApi({

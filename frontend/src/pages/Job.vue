@@ -113,6 +113,8 @@
       ref="createJobModalDialog"
     />
     <CreateJobTriggerDialog
+      :jobData="jobData"
+      @triggercreated="refreshJobData"
       ref="createJobTriggerDialog"
     />
   </div>

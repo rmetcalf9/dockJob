@@ -12,17 +12,35 @@
 
         <q-page-container>
           <q-page padding>
-            {{ serverInfoWithDerived }}
+            <div v-if="selectedType === ''">
+              <div class="column wrap justify-center items-center content-center q-gutter-lg">
+                <div>Select type of trigger</div>
+                <div v-for="type in Object.keys(serverInfoWithDerived.Derived.ExternalTriggers.types)" v-bind:key="type">
+                  <q-btn
+                    color="primary"
+                    :label="type"
+                    @click="selectTriggerType(type)"
+                  />
+                </div>
+              </div>
+            </div>
+            <div v-if="selectedType === 'googleDriveRawClass'">
+              <ExternalTriggerGoogleDriveRawClass
+                :jobData="jobData"
+                @triggercreated="triggercreated"
+              />
+            </div>
+            <div v-if="selectedType === 'googleDriveNewFileWatchClass'">
+              <ExternalTriggerGoogleDriveNewFileWatchClass
+                :jobData="jobData"
+                @triggercreated="triggercreated"
+              />
+            </div>
           </q-page>
         </q-page-container>
 
         <q-footer class="bg-black text-white">
           <q-toolbar inset>
-            <q-btn
-              color="primary"
-              label="ok"
-              @click="createTriggerMethod"
-            />
             <q-btn
               v-close-popup
               label="Cancel"
@@ -40,10 +58,19 @@ import { useServerInfoWithDerivedStore } from 'stores/serverInfoWithDerived'
 import { useLoginStateStore } from 'stores/loginState'
 import { useServerStaticStateStore } from 'stores/serverStaticState'
 
+import ExternalTriggerGoogleDriveRawClass from '../components/externalTrigger/googleDriveRawClass/create.vue'
+import ExternalTriggerGoogleDriveNewFileWatchClass from '../components/externalTrigger/googleDriveNewFileWatchClass/create.vue'
+
+
 
 export default {
   name: 'Modal-CreateJob',
+  props: [
+    'jobData'
+  ],
   components: {
+    ExternalTriggerGoogleDriveRawClass,
+    ExternalTriggerGoogleDriveNewFileWatchClass
   },
   setup () {
     const serverInfoWithDerivedStore = useServerInfoWithDerivedStore()
@@ -54,15 +81,21 @@ export default {
   },
   data () {
     return {
-      dialogVisible: false
+      dialogVisible: false,
+      selectedType: ''
     }
   },
   methods: {
-    openCreateJobTriggerDialog () {
-      this.dialogVisible = true
-    },
-    createTriggerMethod () {
+    triggercreated () {
+      this.$emit('triggercreated')
       this.dialogVisible = false
+    },
+    selectTriggerType (type) {
+      this.selectedType = type
+    },
+    openCreateJobTriggerDialog () {
+      this.selectedType = ''
+      this.dialogVisible = true
     }
   },
   computed: {

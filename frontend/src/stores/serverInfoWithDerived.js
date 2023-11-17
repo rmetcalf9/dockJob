@@ -27,10 +27,14 @@ export const useServerInfoWithDerivedStore = defineStore('serverInfoWithDerivedS
       var callbackInternal = {
         ok: function (response) {
           TTT.saveServerInfoWithDerived({serverInfo: response.data})
-          callback.ok(response)
+          if (typeof (callback) !== 'undefined') {
+            callback.ok(response)
+          }
         },
         error: function (error) {
-          callback.error(error)
+          if (typeof (callback) !== 'undefined') {
+            callback.error(error)
+          }
         }
       }
       // Need slash because without slash is different endpoint
