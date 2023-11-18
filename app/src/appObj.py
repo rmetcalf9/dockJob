@@ -16,7 +16,6 @@ import Logic
 from flask_restx import fields, Api as flaskApi
 from flask import Blueprint
 from JobExecutor import JobExecutorClass
-import time
 import datetime
 import json
 from object_store_abstraction import createObjectStoreInstance
@@ -37,6 +36,7 @@ class appObjClass(parAppObj):
   monitorCheckTempState = None
   externalTriggerManager = None
   APIAPP_TRIGGERAPIURL = None
+  DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE = None
 
   def init(self, env, serverStartTime, testingMode = False, objectStoreTestingPopulationHookFn = None):
     try:
@@ -49,6 +49,9 @@ class appObjClass(parAppObj):
         if self.jobExecutor.is_alive():
           self.jobExecutor.join()
         self.jobExecutor = None
+
+      self.google_client = None
+      self.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE = readFromEnviroment(env, 'DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE', "notactive", None)
 
       self.APIAPP_TRIGGERAPIURL = readFromEnviroment(env, 'APIAPP_TRIGGERAPIURL', None, None)
       DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD = readFromEnviroment(env, 'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD', None, None)

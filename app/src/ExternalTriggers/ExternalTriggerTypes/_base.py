@@ -1,5 +1,8 @@
 
 class externalTriggerBaseClass():
+    externalTriggerManager = None
+    def __init__(self, externalTriggerManager):
+        self.externalTriggerManager = externalTriggerManager
     def getStaticServerInfoData(self):
         return {}
 
@@ -17,6 +20,7 @@ class externalTriggerBaseClass():
         )
         return (False, None, None)
 
+    #return vars = (failmessage, typeprivatevars, typepublicvars)
     def activate(self, jobguid, triggerType, jobObj, triggerOptions, salt, urlpasscode, nonurlpasscode):
         # Only ever called when the job has no trigger activated
         # by default nothing to do

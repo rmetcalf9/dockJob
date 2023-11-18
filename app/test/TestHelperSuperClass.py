@@ -25,7 +25,8 @@ env = {
   'APIAPP_GROUPFORJOBS': 'root',
   'APIAPP_SKIPUSERCHECK': True,
   'APIAPP_MONITORCHECKTEMPSTATECONFIG': '{ "username": "abc", "password": "123" }',
-  'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'dummy_test_password'
+  'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD': 'dummy_test_password',
+  'DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE': './test/dummy_client_secret.json'
 }
 
 class testHelperSuperClass(unittest.TestCase):

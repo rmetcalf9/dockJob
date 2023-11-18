@@ -10,12 +10,8 @@ class googleDriveRawClass(externalTriggerBaseClass):
     def requestMatches(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
         if urlid != rawurlpasscode:
             return False
-
         if request_headers["X-Goog-Channel-ID"] != rawnonurlpasscode:
             return False
-
-        # TODO I need to add all my data items to the Job object
-
         return True
 
     # Return value (updateJobNeeded, typeprivatevars, typepublicvars)

@@ -6,5 +6,5 @@ from ExternalTriggers import getAllTriggerTypeInstances
 class test_jobExecutionsData(unittest.TestCase):
 
   def test_all_types_setup(self):
-    instances = getAllTriggerTypeInstances()
+    instances = getAllTriggerTypeInstances(None)
     self.assertEqual(list(instances.keys()), ["googleDriveRawClass", "googleDriveNewFileWatchClass"])

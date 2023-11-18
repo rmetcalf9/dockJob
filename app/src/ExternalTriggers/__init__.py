@@ -14,7 +14,7 @@ class ExternalTriggerManager():
     def __init__(self, DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD, appObj):
         self.safePasswordString = getSafePasswordString(DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD)
         self.appObj = appObj
-        self.TriggerTypes = getAllTriggerTypeInstances()
+        self.TriggerTypes = getAllTriggerTypeInstances(self)
 
     def getStaticServerInfoData(self):
         types = {}
@@ -151,7 +151,7 @@ class ExternalTriggerManager():
             nonurlpasscode=nonurlpasscode
         )
         if failmessage is not None:
-            return {"result": "Fail", "message": failmessage}, 404
+            return {"result": "Fail", "message": failmessage}, 400
 
         privateTriggerData = {
             "triggerActive": True,

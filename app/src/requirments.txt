@@ -8,3 +8,7 @@ object_store_abstraction==0.3.47
 
 requests==2.28.1
 pycryptodome==3.9.7
+
+google-api-python-client==2.100.0
+google-auth-httplib2==0.1.1
+google-auth-oauthlib==1.1.0

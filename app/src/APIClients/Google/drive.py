@@ -1,4 +1,6 @@
 
+class NotFoundException(Exception):
+    pass
 
 class DriveApiHelpers():
     drive_service = None
@@ -71,7 +73,7 @@ class DriveApiHelpers():
                         return file
                     return self.find_folder_from_path(path="/".join(path_elements[1:]), start_folder_id=file["id"])
             request = files.list_next(request, result)
-        raise Exception("Not found")
+        raise NotFoundException("Not found")
 
     def setup_watch_on_files(self, file_id, trigger_url, channel_id, token):
         # https://googleapis.github.io/google-api-python-client/docs/dyn/drive_v3.files.html#watch
