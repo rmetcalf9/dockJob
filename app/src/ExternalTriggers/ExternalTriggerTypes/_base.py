@@ -9,9 +9,13 @@ class externalTriggerBaseClass():
     def requestMatches(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
         return False
 
-    # Return value (callNeeded, stdinData, updateJobNeeded, typeprivatevars, typepublicvars)
-    def fireTrigger(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
-        return (True, None, False, None, None)
+    # Return value (updateJobNeeded, typeprivatevars, typepublicvars)
+    def fireTrigger(self, submitJobFunction, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
+        submitJobFunction(
+            stdinData=None,
+            executionName="Triggered by " + jobData.__dict__["PrivateExternalTrigger"]["type"]
+        )
+        return (False, None, None)
 
     def activate(self, jobguid, triggerType, jobObj, triggerOptions, salt, urlpasscode, nonurlpasscode):
         # Only ever called when the job has no trigger activated

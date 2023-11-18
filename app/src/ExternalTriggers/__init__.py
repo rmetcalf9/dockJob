@@ -76,16 +76,17 @@ class ExternalTriggerManager():
         return {"result": "Fail"}, 406
 
     def processMatchedTrigger(self, store_connection, PrivateExternalTrigger, triggerType, jobData, urlid, request_headers, request_data, rawurlpasscode,rawnonurlpasscode ):
-        (callNeeded, stdinData, updateJobNeeded, typeprivatevars, typepublicvars) = triggerType.fireTrigger(
-            jobData, urlid, request_headers, request_data, rawurlpasscode,rawnonurlpasscode
-        )
-        if callNeeded:
+        def submitJobFunction(stdinData, executionName="Triggered by " + PrivateExternalTrigger["type"]):
             self.appObj.jobExecutor.submitJobForExecution(
                 jobGUID=jobData.__dict__["guid"],
-                executionName="Triggered by " + PrivateExternalTrigger["type"],
+                executionName=executionName,
                 manual=False,
                 stdinData=stdinData
             )
+
+        (updateJobNeeded, typeprivatevars, typepublicvars) = triggerType.fireTrigger(
+            submitJobFunction, jobData, urlid, request_headers, request_data, rawurlpasscode,rawnonurlpasscode
+        )
         if updateJobNeeded:
             # This code is going to look something like
             # PrivateExternalTrigger["typeprivatevars"] = typeprivatevars

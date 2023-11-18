@@ -18,8 +18,8 @@ class googleDriveRawClass(externalTriggerBaseClass):
 
         return True
 
-    # Return value (callNeeded, stdinData, updateJobNeeded, typeprivatevars, typepublicvars)
-    def fireTrigger(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
+    # Return value (updateJobNeeded, typeprivatevars, typepublicvars)
+    def fireTrigger(self, submitJobFunction, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
         # Not public and private VARS are in jobData
         ## print("typeprivatevars", jobData.__dict__["PrivateExternalTrigger"]["typeprivatevars"])
         ## print("typepublicvars", jobData.__dict__["PrivateExternalTrigger"]["typepublicvars"])
@@ -28,9 +28,13 @@ class googleDriveRawClass(externalTriggerBaseClass):
             "headers": {**request_headers},
             "request_data": request_data.decode("utf-8")
         }
+
+        submitJobFunction(
+            stdinData=json.dumps(dataForStdin).encode("utf-8"),
+            executionName="Triggered by " + jobData.__dict__["PrivateExternalTrigger"]["type"]
+        )
+
         return (
-            True, # callNeeded
-            json.dumps(dataForStdin).encode("utf-8"), # stdinData
             False, # updateJobNeeded
             None, # typeprivatevars
             None # typepublicvars
