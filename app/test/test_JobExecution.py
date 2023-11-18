@@ -10,14 +10,15 @@ import threading
 class test_JobExecution(testHelperAPIClient):
   JobExecutionLock = threading.Lock()
 
-  def _getJobExecutionObj(self, jobObj):
+  def _getJobExecutionObj(self, jobObj, stdinData=None):
     return JobExecutionClass(
       jobObj=jobObj,
       executionName='TestExecutionName',
       manual=False,
       curDatetime=appObj.getCurDateTime(),
       triggerJobObj=None,
-      triggerExecutionObj=None
+      triggerExecutionObj=None,
+      stdinData=stdinData
     )
 
   def createJobObj(self, command='echo "This is a test"'):
@@ -95,7 +96,8 @@ class test_JobExecution(testHelperAPIClient):
       'resultReturnCode': None,
       'resultSTDOUT': None,
       'executionName': 'TestExecutionName',
-      'manual': False
+      'manual': False,
+      'stdinData': None
     }
     expCompleted = dict(expPending)
     expCompleted['resultSTDOUT'] = 'This is a test'
@@ -144,4 +146,16 @@ class test_JobExecution(testHelperAPIClient):
     self.assertTimeCloseToCurrent(a.dateCompleted)
     self.assertEqual(a.resultSTDOUT, 'ERROR - failed to decode output probally because it wasn\'t in utf-8 format')
 
+  def test_withSomestdin(self):
+    jobObj = self.createJobObj(command='cat -')
+    exmapleStdin = "Test".encode("utf-8")
+    expectedStdout = "Test"
+    a = self._getJobExecutionObj(jobObj, stdinData=exmapleStdin)
+    a.execute(appObj.jobExecutor, self.aquireJobExecutionLock, self.releaseJobExecutionLock, self.registerRunDetails, appObj)
+    self.assertEqual(a.stage, 'Completed')
+    self.assertEqual(a.resultReturnCode, 0)
+    self.assertTimeCloseToCurrent(a.dateCreated)
+    self.assertTimeCloseToCurrent(a.dateStarted)
+    self.assertTimeCloseToCurrent(a.dateCompleted)
+    self.assertEqual(a.resultSTDOUT, expectedStdout)
 

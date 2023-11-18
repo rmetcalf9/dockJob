@@ -53,6 +53,7 @@ class SimpleJobExecutionClass():
   dateCompleted = None
   resultReturnCode = None
   resultSTDOUT = None
+  stdinData = None
 
   #Items not in JSON output
   jobObj = None
@@ -60,7 +61,7 @@ class SimpleJobExecutionClass():
   triggerExecutionObj = None
 
 
-  def __init__(self, command):
+  def __init__(self, command, stdinData=None):
     self.guid = str(uuid.uuid4())
     self.jobCommand = command
     self.jobObj = SimpleJobObj()
@@ -68,6 +69,10 @@ class SimpleJobExecutionClass():
     self.triggerJobObj = None
     self.triggerExecutionObj = None
     self.executionName = 'SimpleJobExecutionConstantName'
+    if stdinData is not None:
+      if not isinstance(stdinData, bytes):
+        raise Exception("STDN must be bytes")
+    self.stdinData = stdinData
 
   def getJobExecutionMethod(self):
     return 'Manual'
@@ -80,7 +85,11 @@ class SimpleJobExecutionClass():
     del ret['triggerExecutionObj']
     return ret
 
+  def hasStdn(self):
+    return self.stdinData is not None
 
+  def getStdnBytes(self):
+    return self.stdinData
 
 class JobExecutionClass():
   guid = None
@@ -92,6 +101,7 @@ class JobExecutionClass():
   dateCreated = None
   dateStarted = None
   dateCompleted = None
+  stdinData = None
   resultReturnCode = None
   resultSTDOUT = None
 
@@ -111,13 +121,14 @@ class JobExecutionClass():
     ret += 'dateCreated:' + self.dateCreated + ' '
     ret += 'dateStarted:' + str(self.dateStarted) + ' '
     ret += 'dateCompleted:' + str(self.dateCompleted) + ' '
+    ret += 'stdinData:' + str(self.stdinData) + ' '
     ret += 'resultReturnCode:' + str(self.resultReturnCode) + ' '
     ret += 'resultSTDOUT:' + str(self.resultSTDOUT)
     ret += ')'
     return ret
 
 
-  def __init__(self, jobObj, executionName, manual, curDatetime, triggerJobObj, triggerExecutionObj):
+  def __init__(self, jobObj, executionName, manual, curDatetime, triggerJobObj, triggerExecutionObj, stdinData):
     self.guid = str(uuid.uuid4())
     self.stage = 'Pending'
     self.jobGUID = jobObj.guid
@@ -132,6 +143,10 @@ class JobExecutionClass():
     self.jobObj = jobObj
     self.triggerJobObj = triggerJobObj
     self.triggerExecutionObj = triggerExecutionObj
+    if stdinData is not None:
+      if not isinstance(stdinData, bytes):
+        raise Exception("STDN must be bytes")
+    self.stdinData = stdinData
 
   def _caculatedDict(self):
     ret = dict(self.__dict__)
@@ -181,4 +196,10 @@ class JobExecutionClass():
     if self.triggerJobObj is None:
       return 'Scheduled'
     return 'StateChangeTo' + self.triggerJobObj.mostRecentCompletionStatus
+
+  def hasStdn(self):
+    return self.stdinData is not None
+
+  def getStdnBytes(self):
+    return self.stdinData
 

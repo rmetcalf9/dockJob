@@ -1,5 +1,5 @@
 from ._base import externalTriggerBaseClass
-
+import json
 
 class googleDriveRawClass(externalTriggerBaseClass):
     def getEncodedJobGuidFromMessage(self, urlid, request_headers, request_data):
@@ -21,3 +21,10 @@ class googleDriveRawClass(externalTriggerBaseClass):
         # TODO I need to add all my data items to the Job object
 
         return True
+
+    def getStdinData(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
+        dataForStdin = {
+            "headers": {**request_headers},
+            "request_data": request_data.decode("utf-8")
+        }
+        return json.dumps(dataForStdin).encode("utf-8")

@@ -9,6 +9,9 @@ class externalTriggerBaseClass():
     def requestMatches(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
         return False
 
+    def getStdinData(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
+        return None
+
     def activate(self, jobguid, triggerType, jobObj, triggerOptions, salt, urlpasscode, nonurlpasscode):
         # Only ever called when the job has no trigger activated
         # by default nothing to do

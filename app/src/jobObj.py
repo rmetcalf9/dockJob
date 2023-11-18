@@ -332,7 +332,8 @@ class jobClass():
       triggerJobObj=self,
       triggerEvent=eventName,
       callerHasJobExecutionLock=True,
-      triggerExecutionObj=triggerExecutionObj
+      triggerExecutionObj=triggerExecutionObj,
+      stdinData=None
     )
 
   #Called from job execution thread and request processing threads

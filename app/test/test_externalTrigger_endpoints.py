@@ -11,6 +11,7 @@ from appObj import appObj
 import copy
 from TestHelperWithAPIOperations import TestHelperWithAPIOperationsClass
 from encryption import decryptPassword
+import time
 
 normal_api_prefix = "/api"
 external_trigger_api_prefix = "triggerapi"
@@ -34,7 +35,12 @@ example_changes_recource_message = {
 }
 
 class helper(TestHelperWithAPIOperationsClass):
-    pass
+    def get_executions_for_job(self, job_guid):
+        reqURL = '/api/jobs/' + job_guid + '/execution'
+        queryJobExecutionsResult = self.testClient.get(reqURL)
+        self.assertEqual(queryJobExecutionsResult.status_code, 200, msg='Request to ' + reqURL + ' failed')
+        resDict = json.loads(queryJobExecutionsResult.text)
+        return resDict
 
 @pytest.mark.externalTriggerSystemTest
 class test_externalTriggerEndpoints(helper):
@@ -111,31 +117,6 @@ class test_externalTriggerEndpoints(helper):
       )
       self.assertEqual(result.status_code, 406)
 
-  def test_trigger_endpoint_valid_job_right_passcodes_returns_200(self):
-      jobData = self.createJob()
-      activate_response = self.activateTriggerOnJob(
-          jobGuid = jobData["guid"],
-          triggerType="googleDriveRawClass",
-          triggerOptions={}
-      )
-      encoded_job_guid = appObj.externalTriggerManager.encodeJobGuid(jobData["guid"])
-
-      #Add job ID to message
-      resource_message = copy.deepcopy(example_changes_recource_message)
-      resource_message["headers"]["X-Goog-Channel-Token"] = encoded_job_guid
-
-      ExternalTrigger = activate_response["ExternalTrigger"]
-      rawurlpasscode = ExternalTrigger["urlpasscode"]
-      rawnonurlpasscode = ExternalTrigger["nonurlpasscode"]
-      resource_message["headers"]["X-Goog-Channel-ID"]=rawnonurlpasscode
-
-      result = self.testClient.post(
-          external_trigger_api_prefix + '/trigger/' + rawurlpasscode,
-          data=resource_message["data"],
-          headers=resource_message["headers"]
-      )
-      self.assertEqual(result.status_code, 200)
-
   def test_trigger_endpoint_valid_job_only_url_passcode_right_fails(self):
       jobData = self.createJob()
       activate_response = self.activateTriggerOnJob(
@@ -182,3 +163,39 @@ class test_externalTriggerEndpoints(helper):
       )
       self.assertEqual(result.status_code, 406)
 
+  def test_trigger_endpoint_valid_job_right_passcodes_returns_200(self):
+      jobData = self.createJob(command="cat -")
+      activate_response = self.activateTriggerOnJob(
+          jobGuid = jobData["guid"],
+          triggerType="googleDriveRawClass",
+          triggerOptions={}
+      )
+      encoded_job_guid = appObj.externalTriggerManager.encodeJobGuid(jobData["guid"])
+
+      #Add job ID to message
+      resource_message = copy.deepcopy(example_changes_recource_message)
+      resource_message["headers"]["X-Goog-Channel-Token"] = encoded_job_guid
+
+      ExternalTrigger = activate_response["ExternalTrigger"]
+      rawurlpasscode = ExternalTrigger["urlpasscode"]
+      rawnonurlpasscode = ExternalTrigger["nonurlpasscode"]
+      resource_message["headers"]["X-Goog-Channel-ID"]=rawnonurlpasscode
+
+      result = self.testClient.post(
+          external_trigger_api_prefix + '/trigger/' + rawurlpasscode,
+          data=resource_message["data"],
+          headers=resource_message["headers"]
+      )
+      self.assertEqual(result.status_code, 200)
+
+      #Find executed job and check stdout
+      ## first give the app the chance to complete the job
+      appObj.jobExecutor.loopIteration(appObj.getCurDateTime())
+
+      executions_for_job = self.get_executions_for_job(
+          job_guid = jobData["guid"]
+      )
+      self.assertEqual(len(executions_for_job["result"]) ,1, msg="Execution not found")
+      stdout_dict = json.loads(executions_for_job["result"][0]["resultSTDOUT"])
+      self.assertEqual(stdout_dict["headers"]["X-Goog-Channel-Id"], rawnonurlpasscode)
+      self.assertEqual(stdout_dict["headers"]["X-Goog-Channel-Token"], encoded_job_guid)

@@ -105,8 +105,14 @@ class JobExecutorClass(threading.Thread):
       job_env["DOCKJOB_TRIGGEREXECUTION_NAME"] = jobExecutionObj.triggerExecutionObj.executionName
       job_env["DOCKJOB_TRIGGEREXECUTION_STDOUT"] = jobExecutionObj.triggerExecutionObj.resultSTDOUT
 
+    stdinPipe = None
+    stdinSendRequired = False
+    if jobExecutionObj.hasStdn():
+      stdinPipe = subprocess.PIPE
+      stdinSendRequired = True
+
     start_time = time.time()
-    proc = subprocess.Popen(jobExecutionObj.jobCommand, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=None, preexec_fn=self.getDemoteFunction(), env=job_env)
+    proc = subprocess.Popen(jobExecutionObj.jobCommand, stdin=stdinPipe, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=None, preexec_fn=self.getDemoteFunction(), env=job_env)
     returncode = None
     while (returncode == None):
       returncode = proc.poll()
@@ -115,6 +121,9 @@ class JobExecutorClass(threading.Thread):
         #valid return codes are between 0-255. I have hijacked -1 for timeout
         returncode = -1
       time.sleep(0.2)
+      if stdinSendRequired:
+        proc.communicate(jobExecutionObj.getStdnBytes())
+        stdinSendRequired = False
     stdout, stderr = proc.communicate()
     completed = subprocess.CompletedProcess(
       args=jobExecutionObj.jobCommand,
@@ -149,6 +158,7 @@ class JobExecutorClass(threading.Thread):
     jobGUID,
     executionName,
     manual,
+    stdinData,
     triggerJobObj = None,
     triggerEvent = None,
     callerHasJobExecutionLock = False,
@@ -165,7 +175,8 @@ class JobExecutorClass(threading.Thread):
       manual, 
       curDatetime=self.appObj.getCurDateTime(),
       triggerJobObj=triggerJobObj,
-      triggerExecutionObj=triggerExecutionObj
+      triggerExecutionObj=triggerExecutionObj,
+      stdinData=stdinData
     )
     #lock shouldn't be needed but it is a cheap operation
     lockAquired = False
@@ -250,7 +261,7 @@ class JobExecutorClass(threading.Thread):
     if nextJob is not None:
       if curDatetime.isoformat() > nextJob.nextScheduledRun:
         # print('Submitting job ' + nextJob.name + ' for scheduled execution')
-        self.submitJobForExecution(nextJob.guid, '', False)
+        self.submitJobForExecution(nextJob.guid, '', False, stdinData=None)
         nextJob.setNextScheduledRun(curDatetime)
         self.appObj.appData['jobsData'].nextJobToExecuteCalcRequired = True
 

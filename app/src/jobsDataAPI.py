@@ -192,7 +192,10 @@ def registerAPI(appObj):
     def post(self, guid):
       '''Create Job Execution'''
       content = request.get_json()
-      return appObj.jobExecutor.submitJobForExecution(guid, content['name'], True)._caculatedDict()
+      stdinData = None
+      if "stdinData" in content:
+        stdinData = content["stdinData"].encode("utf-8")
+      return appObj.jobExecutor.submitJobForExecution(guid, content['name'], True, stdinData=stdinData)._caculatedDict()
 
     @nsJobs.doc('getjobexecutions')
     @nsJobs.marshal_with(appObj.getResultModel(getJobExecutionModel(appObj)))
