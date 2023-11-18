@@ -127,8 +127,8 @@ class test_appObjClass(testHelperAPIClient):
 
     example_stdin = 'aa\nbb\ncc\n£R$TGFFTY:::SAAS{}SDs'
 
-    cmdToExecute = 'echo "I have stdin but I am not going to read it'
-    expResSTDOUT = "START\n" + example_stdin + "END\n"
+    cmdToExecute = 'echo "I have stdin but I am not going to read it"'
+    expResSTDOUT = "I have stdin but I am not going to read it\n"
     res = appObj.jobExecutor.executeCommand(SimpleJobExecutionClass(cmdToExecute, stdinData=example_stdin.encode('utf-8')))
     self.assertEqual(res.stdout.decode(), expResSTDOUT)
 
