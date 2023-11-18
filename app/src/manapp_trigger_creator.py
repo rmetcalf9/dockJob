@@ -51,6 +51,7 @@ google_client.setup_auth(
 options = []
 options.append(("List files in folder", Manapp.list_files_in_folder))
 options.append(("Add watch notification", Manapp.add_watch_notification))
+options.append(("Manually watch for new files", Manapp.monitor_folder_for_new_files))
 options.append(("Quit", None))
 questions = [
     inquirer.List('action',

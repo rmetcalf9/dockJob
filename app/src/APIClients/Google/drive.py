@@ -96,3 +96,22 @@ class DriveApiHelpers():
         )
         result = request.execute()
         return result
+
+    # REturns ([new files], current_list_of_ids)
+    def get_list_of_new_files(self, folder_id, previous_list_of_files_ids):
+        if previous_list_of_files_ids is None:
+            previous_list_of_files_ids = []
+        (files, request) = self.get_all_items_in_folder(folder_id=folder_id)
+
+        new_files = []
+        seen_file_ids = []
+        while request is not None:
+            result = request.execute()
+            for file in result["files"]:
+                seen_file_ids.append(file["id"])
+                if file["id"] not in previous_list_of_files_ids:
+                    new_files.append(file)
+            request = files.list_next(request, result)
+
+        return (new_files, seen_file_ids)
+

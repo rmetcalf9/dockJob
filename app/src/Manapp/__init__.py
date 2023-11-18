@@ -1,5 +1,5 @@
 # Manual utility app
-
+import time
 
 def list_files_in_folder(google_client):
     project_folder = google_client.drive().find_folder_from_path(path="/Projects/Property/Business Cards")
@@ -25,3 +25,16 @@ def add_watch_notification(google_client):
     )
 
     print("Watch response", watch_response)
+
+def monitor_folder_for_new_files(google_client):
+    folder_id_to_watch = "1LhOLAK3AC3XYGm3mr2MpZ1uM0BJPcDwJ"
+
+    (_, file_id_list) = google_client.drive().get_list_of_new_files(folder_id_to_watch, None)
+
+    while True:
+        time.sleep(1)
+        (new_files, file_id_list) = google_client.drive().get_list_of_new_files(folder_id_to_watch, file_id_list)
+        for file in new_files:
+            print("Saw new file", file)
+
+
