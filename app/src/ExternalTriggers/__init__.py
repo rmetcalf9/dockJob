@@ -59,16 +59,41 @@ class ExternalTriggerManager():
 
                     for triggerType in possible_jobs_that_could_match[jobGuid]:
                         if triggerType.requestMatches(jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
-                            stdinData = triggerType.getStdinData(jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode)
-                            self.appObj.jobExecutor.submitJobForExecution(
-                                jobGUID=jobData.__dict__["guid"],
-                                executionName="Triggered by " + PrivateExternalTrigger["type"],
-                                manual=False,
-                                stdinData=stdinData
-                            )
-                            return {"result": "Success"}, 200
+                            if jobData.__dict__["PrivateExternalTrigger"]["triggerActive"]:
+                                self.processMatchedTrigger(
+                                    store_connection=store_connection,
+                                    PrivateExternalTrigger=PrivateExternalTrigger,
+                                    triggerType=triggerType,
+                                    jobData=jobData,
+                                    urlid=urlid,
+                                    request_headers=request_headers,
+                                    request_data=request_data,
+                                    rawurlpasscode=rawurlpasscode,
+                                    rawnonurlpasscode=rawnonurlpasscode
+                                )
+                                return {"result": "Success"}, 200
 
         return {"result": "Fail"}, 406
+
+    def processMatchedTrigger(self, store_connection, PrivateExternalTrigger, triggerType, jobData, urlid, request_headers, request_data, rawurlpasscode,rawnonurlpasscode ):
+        (callNeeded, stdinData, updateJobNeeded, typeprivatevars, typepublicvars) = triggerType.fireTrigger(
+            jobData, urlid, request_headers, request_data, rawurlpasscode,rawnonurlpasscode
+        )
+        if callNeeded:
+            self.appObj.jobExecutor.submitJobForExecution(
+                jobGUID=jobData.__dict__["guid"],
+                executionName="Triggered by " + PrivateExternalTrigger["type"],
+                manual=False,
+                stdinData=stdinData
+            )
+        if updateJobNeeded:
+            # This code is going to look something like
+            # PrivateExternalTrigger["typeprivatevars"] = typeprivatevars
+            # PrivateExternalTrigger["typepublicvars"] = typepublicvars
+            # jobObj.setNewPrivateTriggerData(privateTriggerData)
+            # self.appObj.appData['jobsData']._saveJobToObjectStore(str(jobObj.guid), store_connection)
+
+            raise Exception("NI Update job with new private public vars")
 
     def getJobDictData(self, jobObj):
         if not jobObj.PrivateExternalTrigger["triggerActive"]:

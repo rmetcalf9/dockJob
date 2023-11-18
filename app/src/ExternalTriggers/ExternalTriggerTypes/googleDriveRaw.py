@@ -8,10 +8,6 @@ class googleDriveRawClass(externalTriggerBaseClass):
         return request_headers["X-Goog-Channel-Token"]
 
     def requestMatches(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
-        PrivateExternalTrigger = jobData.__dict__["PrivateExternalTrigger"]
-        if not PrivateExternalTrigger["triggerActive"]:
-            return False
-
         if urlid != rawurlpasscode:
             return False
 
@@ -22,9 +18,20 @@ class googleDriveRawClass(externalTriggerBaseClass):
 
         return True
 
-    def getStdinData(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
+    # Return value (callNeeded, stdinData, updateJobNeeded, typeprivatevars, typepublicvars)
+    def fireTrigger(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
+        # Not public and private VARS are in jobData
+        ## print("typeprivatevars", jobData.__dict__["PrivateExternalTrigger"]["typeprivatevars"])
+        ## print("typepublicvars", jobData.__dict__["PrivateExternalTrigger"]["typepublicvars"])
+
         dataForStdin = {
             "headers": {**request_headers},
             "request_data": request_data.decode("utf-8")
         }
-        return json.dumps(dataForStdin).encode("utf-8")
+        return (
+            True, # callNeeded
+            json.dumps(dataForStdin).encode("utf-8"), # stdinData
+            False, # updateJobNeeded
+            None, # typeprivatevars
+            None # typepublicvars
+        )
