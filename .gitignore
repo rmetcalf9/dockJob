@@ -2,3 +2,6 @@ __pycache__
 integrationtests/output
 
 composeExamples/buildTest.yml
+/client_secret.json
+/private_login_file.json
+/trigger_creator_secret_env.sh
