@@ -29,6 +29,13 @@
 import { Loading } from 'quasar'
 import { Notify } from 'quasar'
 
+import callDockjobBackendApi from '../../../callDockjobBackendApi'
+import callbackHelper from '../../../callbackHelper'
+
+import { useLoginStateStore } from 'stores/loginState'
+import { useServerStaticStateStore } from 'stores/serverStaticState'
+
+
 export default {
   name: 'Comp-ExternalTrigger-GoogleDriveFileWatchClass-Create',
   props: [
@@ -37,6 +44,9 @@ export default {
   components: {
   },
   setup () {
+    const loginStateStore = useLoginStateStore()
+    const serverStaticStateStore = useServerStaticStateStore()
+    return { loginStateStore, serverStaticStateStore }
   },
   data () {
     return {
@@ -76,11 +86,12 @@ export default {
         loginStateStore: TTT.loginStateStore,
         apiurl: TTT.serverStaticStateStore.staticServerInfo.data.apiurl
       })
+      console.log('GGG', access_token)
       const postdata = {
         triggerType: 'googleDriveNewFileWatchClass',
         triggerOptions: {
           access_token,
-          TTT.folder_path
+          folder_path: TTT.folder_path
         }
       }
       console.log('postdata', postdata)

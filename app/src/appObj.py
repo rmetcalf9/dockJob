@@ -19,6 +19,7 @@ from JobExecutor import JobExecutorClass
 import datetime
 import json
 from object_store_abstraction import createObjectStoreInstance
+from APIClients import GoogleClient
 
 from ExternalTriggers import ExternalTriggerManager, register_api as registerTriggerApi, register_private_api as registerTriggerPrivateApi
 
@@ -50,8 +51,10 @@ class appObjClass(parAppObj):
           self.jobExecutor.join()
         self.jobExecutor = None
 
-      self.google_client = None
       self.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE = readFromEnviroment(env, 'DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE', "notactive", None)
+      # Test client on start up. Make sure credentials file is there and working
+      if self.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE != "notactive":
+        GoogleClient(client_Secret_file=self.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE)
 
       self.APIAPP_TRIGGERAPIURL = readFromEnviroment(env, 'APIAPP_TRIGGERAPIURL', None, None)
       DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD = readFromEnviroment(env, 'DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD', None, None)

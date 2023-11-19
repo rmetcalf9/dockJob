@@ -20,6 +20,7 @@ export APIAPP_OBJECTSTORECONFIG="{\"Type\":\"SimpleFileStore\", \"BaseLocation\"
 export APIAPP_COMMON_ACCESSCONTROLALLOWORIGIN="http://localhost:8080,http://localhost:8081,http://superego:9000,http://localhost:9000"
 export APIAPP_MONITORCHECKTEMPSTATECONFIG"{\"username\":\"user\", \"password\": \"pass\"}"
 export DOCKJOB_EXTERNAL_TRIGGER_SYS_PASSWORD="local_pass"
+export DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE="../client_secret.json"
 export APIAPP_PORT=8098
 
 export APIAPP_VERSION=

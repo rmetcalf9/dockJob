@@ -1,6 +1,8 @@
 
 class NotFoundException(Exception):
     pass
+class UnauthorizedExceptoin(Exception):
+    pass
 
 class DriveApiHelpers():
     drive_service = None

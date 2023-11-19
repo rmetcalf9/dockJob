@@ -1,6 +1,6 @@
 from google.oauth2.credentials import Credentials
 import json
-from .drive import DriveApiHelpers, NotFoundException
+from .drive import DriveApiHelpers, NotFoundException, UnauthorizedExceptoin
 from googleapiclient.discovery import build
 
 class GoogleClient():
@@ -15,8 +15,8 @@ class GoogleClient():
         self.client_Secret_file = client_Secret_file
         with open(self.client_Secret_file, 'r') as secret_file:
             secrets = json.load(secret_file)
-        self.client_id = secrets["installed"]["client_id"]
-        self.client_secret = secrets["installed"]["client_secret"]
+        self.client_id = secrets["web"]["client_id"]
+        self.client_secret = secrets["web"]["client_secret"]
         self.drive_service = None
 
     def get_current_refresh_token(self):

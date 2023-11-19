@@ -1,5 +1,5 @@
 from ._base import externalTriggerBaseClass
-from APIClients import GoogleClient, GoogleNotFoundException
+from APIClients import GoogleClient, GoogleNotFoundException, GoogleUnauthorizedExceptoin
 import json
 
 class googleDriveNewFileWatchClass(externalTriggerBaseClass):
@@ -8,20 +8,25 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         if self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE == "notactive":
             return ("Google client not activated", {}, {})
 
-        if "refresh_token" not in triggerOptions:
-            return ("Missing refresh_token", {}, {})
+        if "access_token" not in triggerOptions:
+            return ("Missing access_token", {}, {})
         if "folder_path" not in triggerOptions:
             return ("Missing folder", {}, {})
 
+        # I thought I needed to exchange access_token for refresh_token - but I think client may do this automatically
+        refresh_token = triggerOptions["access_token"]
+
         google_client = GoogleClient(self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE)
         google_client.setup_auth(
-            refresh_token=triggerOptions["refresh_token"]
+            refresh_token=refresh_token
         )
 
         try:
             folder_id = google_client.drive().find_folder_from_path(path="/Projects/Property/Business Cards")["id"]
         except GoogleNotFoundException:
             return ("Invalid Folder", {}, {})
+        except GoogleUnauthorizedExceptoin:
+            return ("Google Unauthorized", {}, {})
 
         #Set the notification up with google
         watch_response = google_client.drive().setup_watch_on_files(

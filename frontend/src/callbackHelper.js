@@ -51,12 +51,20 @@ function getDoNothingCallback () {
 
 // function to get human error message from error
 function getErrorFromResponse (respError) {
+  console.log('ss', respError)
   if (typeof (respError.orig) !== 'undefined') {
     if (typeof (respError.orig.response) !== 'undefined') {
       if (typeof (respError.orig.response.data) !== 'undefined') {
         if (typeof (respError.orig.response.data.message) !== 'undefined') {
           return respError.orig.response.data.message
         }
+      }
+    }
+  }
+  if (typeof (respError.response) !== 'undefined') {
+    if (typeof (respError.response.data) !== 'undefined') {
+      if (typeof (respError.response.data.message) !== 'undefined') {
+        return respError.response.data.message
       }
     }
   }
