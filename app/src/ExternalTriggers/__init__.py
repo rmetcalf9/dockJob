@@ -138,8 +138,10 @@ class ExternalTriggerManager():
 
         salt = getSafeSaltString(self.appObj.bcrypt)
 
-        urlpasscode = encryptPassword(self.appObj.bcrypt, str(uuid.uuid4()), salt, self.safePasswordString)
-        nonurlpasscode = encryptPassword(self.appObj.bcrypt, str(uuid.uuid4()), salt, self.safePasswordString)
+        rawurlpasscode = str(uuid.uuid4())
+        rawnonurlpasscode = str(uuid.uuid4())
+        urlpasscode = encryptPassword(self.appObj.bcrypt, rawurlpasscode, salt, self.safePasswordString)
+        nonurlpasscode = encryptPassword(self.appObj.bcrypt, rawnonurlpasscode, salt, self.safePasswordString)
 
         (failmessage, typeprivatevars, typepublicvars) = triggerTypeObj.activate(
             jobguid=jobguid,
@@ -147,8 +149,8 @@ class ExternalTriggerManager():
             jobObj=jobObj,
             triggerOptions=triggerOptions,
             salt=salt,
-            urlpasscode=urlpasscode,
-            nonurlpasscode=nonurlpasscode
+            rawurlpasscode=rawurlpasscode,
+            rawnonurlpasscode=rawnonurlpasscode
         )
         if failmessage is not None:
             return {"result": "Fail", "message": failmessage}, 400

@@ -4,7 +4,7 @@ import json
 
 class googleDriveNewFileWatchClass(externalTriggerBaseClass):
     #return vars = (failmessage, typeprivatevars, typepublicvars)
-    def activate(self, jobguid, triggerType, jobObj, triggerOptions, salt, urlpasscode, nonurlpasscode):
+    def activate(self, jobguid, triggerType, jobObj, triggerOptions, salt, rawurlpasscode, rawnonurlpasscode):
         if self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE == "notactive":
             return ("Google client not activated", {}, {})
 
@@ -31,8 +31,8 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         #Set the notification up with google
         watch_response = google_client.drive().setup_watch_on_files(
             file_id=folder_id,
-            trigger_url=self.externalTriggerManager.appObj.APIAPP_TRIGGERAPIURL + "/trigger/" + urlpasscode,
-            channel_id=nonurlpasscode,
+            trigger_url=self.externalTriggerManager.appObj.APIAPP_TRIGGERAPIURL + "/trigger/" + rawurlpasscode,
+            channel_id=rawnonurlpasscode,
             token=self.externalTriggerManager.encodeJobGuid(jobObj.__dict__["guid"])
         )
 

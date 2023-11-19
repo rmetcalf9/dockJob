@@ -53,7 +53,10 @@ class appObjClass(parAppObj):
 
       self.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE = readFromEnviroment(env, 'DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE', "notactive", None)
       # Test client on start up. Make sure credentials file is there and working
-      if self.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE != "notactive":
+      if self.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE == "notactive":
+        print("No google client setup")
+      else:
+        print("Checking google client")
         GoogleClient(client_Secret_file=self.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE)
 
       self.APIAPP_TRIGGERAPIURL = readFromEnviroment(env, 'APIAPP_TRIGGERAPIURL', None, None)
