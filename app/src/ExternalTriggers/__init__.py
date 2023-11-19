@@ -58,20 +58,21 @@ class ExternalTriggerManager():
                     rawnonurlpasscode = decryptPassword(self.appObj.bcrypt, PrivateExternalTrigger["nonurlpasscode"], PrivateExternalTrigger["salt"], self.safePasswordString)
 
                     for triggerType in possible_jobs_that_could_match[jobGuid]:
-                        if triggerType.requestMatches(jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
-                            if jobData.__dict__["PrivateExternalTrigger"]["triggerActive"]:
-                                self.processMatchedTrigger(
-                                    store_connection=store_connection,
-                                    PrivateExternalTrigger=PrivateExternalTrigger,
-                                    triggerType=triggerType,
-                                    jobData=jobData,
-                                    urlid=urlid,
-                                    request_headers=request_headers,
-                                    request_data=request_data,
-                                    rawurlpasscode=rawurlpasscode,
-                                    rawnonurlpasscode=rawnonurlpasscode
-                                )
-                                return {"result": "Success"}, 200
+                        if jobData.__dict__["PrivateExternalTrigger"]["type"]==triggerType.__class__.__name__:
+                            if triggerType.requestMatches(jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
+                                if jobData.__dict__["PrivateExternalTrigger"]["triggerActive"]:
+                                    self.processMatchedTrigger(
+                                        store_connection=store_connection,
+                                        PrivateExternalTrigger=PrivateExternalTrigger,
+                                        triggerType=triggerType,
+                                        jobData=jobData,
+                                        urlid=urlid,
+                                        request_headers=request_headers,
+                                        request_data=request_data,
+                                        rawurlpasscode=rawurlpasscode,
+                                        rawnonurlpasscode=rawnonurlpasscode
+                                    )
+                                    return {"result": "Success"}, 200
 
         return {"result": "Fail"}, 406
 

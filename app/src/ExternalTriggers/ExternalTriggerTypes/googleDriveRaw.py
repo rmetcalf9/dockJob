@@ -27,7 +27,7 @@ class googleDriveRawClass(externalTriggerBaseClass):
 
         submitJobFunction(
             stdinData=json.dumps(dataForStdin).encode("utf-8"),
-            executionName="Triggered by " + jobData.__dict__["PrivateExternalTrigger"]["type"]
+            executionName="Triggered by googleDriveRawClass"
         )
 
         return (

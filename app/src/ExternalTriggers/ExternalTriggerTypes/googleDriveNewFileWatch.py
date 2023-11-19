@@ -86,7 +86,7 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
             }
             submitJobFunction(
                 stdinData=json.dumps(dataForStdin).encode("utf-8"),
-                executionName="Triggered by " + jobData.__dict__["PrivateExternalTrigger"]["type"] + " - New file " + new_file["name"]
+                executionName="Triggered by Triggered by googleDriveNewFileWatchClass - New file " + new_file["name"]
             )
 
         typeprivatevars["refresh_token"] = google_client.get_current_refresh_token()
