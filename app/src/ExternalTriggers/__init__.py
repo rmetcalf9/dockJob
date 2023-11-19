@@ -79,7 +79,7 @@ class ExternalTriggerManager():
     def processMatchedTrigger(self, store_connection, PrivateExternalTrigger, triggerType, jobData, urlid, request_headers, request_data, rawurlpasscode,rawnonurlpasscode ):
         def submitJobFunction(stdinData, executionName="Triggered by " + PrivateExternalTrigger["type"]):
             self.appObj.jobExecutor.submitJobForExecution(
-                jobGUID=jobData.__dict__["guid"],
+                jobGUID=jobData.guid,
                 executionName=executionName,
                 manual=False,
                 stdinData=stdinData
@@ -90,12 +90,10 @@ class ExternalTriggerManager():
         )
         if updateJobNeeded:
             # This code is going to look something like
-            # PrivateExternalTrigger["typeprivatevars"] = typeprivatevars
-            # PrivateExternalTrigger["typepublicvars"] = typepublicvars
-            # jobObj.setNewPrivateTriggerData(privateTriggerData)
-            # self.appObj.appData['jobsData']._saveJobToObjectStore(str(jobObj.guid), store_connection)
-
-            raise Exception("NI Update job with new private public vars")
+            PrivateExternalTrigger["typeprivatevars"] = typeprivatevars
+            PrivateExternalTrigger["typepublicvars"] = typepublicvars
+            jobData.setNewPrivateTriggerData(PrivateExternalTrigger)
+            self.appObj.appData['jobsData']._saveJobToObjectStore(str(jobData.guid), store_connection)
 
     def getJobDictData(self, jobObj):
         if not jobObj.PrivateExternalTrigger["triggerActive"]:

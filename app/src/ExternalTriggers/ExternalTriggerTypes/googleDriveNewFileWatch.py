@@ -63,12 +63,8 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         return True
 
     def fireTrigger(self, submitJobFunction, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
-        # Not public and private VARS are in jobData
-        ## print("typeprivatevars", jobData.__dict__["PrivateExternalTrigger"]["typeprivatevars"])
-        ## print("typepublicvars", jobData.__dict__["PrivateExternalTrigger"]["typepublicvars"])
-
-        typeprivatevars = jobData.__dict__["PrivateExternalTrigger"]["typeprivatevars"]
-        typepublicvars = jobData.__dict__["PrivateExternalTrigger"]["typepublicvars"]
+        typeprivatevars = jobData.PrivateExternalTrigger["typeprivatevars"]
+        typepublicvars = jobData.PrivateExternalTrigger["typepublicvars"]
 
         google_client = GoogleClient(self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE)
         google_client.setup_auth(
