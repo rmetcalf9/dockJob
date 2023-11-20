@@ -1,6 +1,7 @@
 from ._base import externalTriggerBaseClass
 from APIClients import GoogleClient, GoogleNotFoundException, GoogleUnauthorizedExceptoin
 import json
+import uuid
 
 class googleDriveNewFileWatchClass(externalTriggerBaseClass):
     #return vars = (failmessage, typeprivatevars, typepublicvars)
@@ -118,10 +119,8 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         typepublicvars = jobObj.PrivateExternalTrigger["typepublicvars"]
         if "current_watch_expiry" not in typepublicvars:
             return (False, None, None, None, None)
-        if not (curTime.timestamp()*1000) >= int(typepublicvars["current_watch_expiry"]):
+        if int(typepublicvars["current_watch_expiry"]) >= (curTime.timestamp()*1000):
             return (False, None, None, None, None)
-
-        #TypeError: unsupported operand type(s) for *: 'datetime.datetime' and 'int'
 
         # Google watch has expired
         #  there is no way to renew it
@@ -140,11 +139,10 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         try:
             deactivate_response = google_client.drive().clear_watch_on_files(
                 channel_id=rawnonurlpasscode,
-                resource_id= typeprivatevars["current_watch_resource_id"]
+                resource_id=typeprivatevars["current_watch_resource_id"]
             )
         except:
             print("WARNING - googleDriveNewFileWatch expiration failed to remove watch. Ignoring as it will timeout anyway (or it expired)")
-        return
 
         newrawurlpasscode = str(uuid.uuid4())
         newrawnonurlpasscode = str(uuid.uuid4())

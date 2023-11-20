@@ -151,7 +151,9 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
             )
         self.assertEqual(trigger_resp["result"],"Success")
 
-    #TODO Maybe test where we trigger an actual job based on file change
 
     #New file list mock response:
     #  [{'mimeType': 'application/pdf', 'parents': ['1LhOLAK3AC3XYGm3mr2MpZ1uM0BJPcDwJ'], 'id': '1TjGK6F532IpG881Fu-f5JbYYvZOhoiWM', 'name': 'Scanned_20231118-2054.pdf'}]
+
+
+
