@@ -163,6 +163,7 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
             print(err.args)  # the arguments that the exception has been called with.
             print("****")
 
+        typeprivatevars["refresh_token"] = google_client.get_current_refresh_token()
         typeprivatevars["current_watch_resource_id"] = watch_response["resourceId"]
         typepublicvars["current_watch_expiry"] = watch_response["expiration"]
 
