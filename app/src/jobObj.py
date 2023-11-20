@@ -398,3 +398,4 @@ class jobClass():
         triggerExecutionObj=None
       )
 
+    appObj.externalTriggerManager.loopIterationForJob(jobObj=self, curTime=curTime)

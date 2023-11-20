@@ -126,7 +126,12 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
         }
         dummy_file = { "id": "aaa" }
         with patch('APIClients.DriveApiHelpers.find_folder_from_path', result=dummy_file):
-            with patch('APIClients.DriveApiHelpers.setup_watch_on_files', result=None):
+            def dummy_setup_watch_on_files(a, file_id, trigger_url, channel_id, token):
+                return  {
+                    "resourceId": "dummyChannelresourceid",
+                    "expiration": "1234"
+                }
+            with patch('APIClients.DriveApiHelpers.setup_watch_on_files', dummy_setup_watch_on_files):
                 def a(a, b, c):
                     return ([], [])
                 with patch('APIClients.DriveApiHelpers.get_list_of_new_files', a):

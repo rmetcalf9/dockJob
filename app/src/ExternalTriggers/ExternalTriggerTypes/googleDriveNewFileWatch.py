@@ -42,13 +42,31 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         typeprivatevars = {
             "folder_id": folder_id,
             "refresh_token": google_client.get_current_refresh_token(),
-            "file_id_list": file_id_list
+            "file_id_list": file_id_list,
+            "current_watch_resource_id": watch_response["resourceId"]
         }
         typepublicvars = {
-            "folder_path": triggerOptions["folder_path"]
+            "folder_path": triggerOptions["folder_path"],
+            "current_watch_expiry": watch_response["expiration"]
         }
 
         return (None, typeprivatevars, typepublicvars)
+
+    def deactivate(self, jobObj, rawurlpasscode, rawnonurlpasscode):
+        typeprivatevars = jobObj.PrivateExternalTrigger["typeprivatevars"]
+        typepublicvars = jobObj.PrivateExternalTrigger["typepublicvars"]
+        google_client = GoogleClient(self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE)
+        google_client.setup_auth(
+            refresh_token=typeprivatevars["refresh_token"]
+        )
+        try:
+            deactivate_response = google_client.drive().clear_watch_on_files(
+                channel_id=rawnonurlpasscode,
+                resource_id= typeprivatevars["current_watch_resource_id"]
+            )
+        except:
+            print("WARNING - googleDriveNewFileWatch failed to remove watch. Igniring as it will timeout anyway")
+        return
 
     def getEncodedJobGuidFromMessage(self, urlid, request_headers, request_data):
         if "X-Goog-Channel-Token" not in request_headers:
@@ -93,3 +111,48 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
             typeprivatevars, # typeprivatevars
             typepublicvars # typepublicvars
         )
+
+    # Return value (updateJobNeeded, typeprivatevars, typepublicvars)
+    def loopIterationForJob(self, jobObj, curTime, getJobPasscodes):
+        typeprivatevars = jobObj.PrivateExternalTrigger["typeprivatevars"]
+        typepublicvars = jobObj.PrivateExternalTrigger["typepublicvars"]
+        if not (curTime*1000) >= typepublicvars["current_watch_expiry"]:
+            return (False, None, None)
+
+        # Google watch has expired
+        #  there is no way to renew it
+        #  we must destory and recrate it
+        #  but we need to use different id as new and old watches may exist at same time
+        #  we don't need to worry about missing or duplicating messages as we are just using notification to
+        #  trigger our alogrythm and we rmemeber file id's ourselves
+
+        (rawurlpasscode, rawnonurlpasscode) = self.getJobPasscodes(jobObj)
+
+        google_client = GoogleClient(self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE)
+        google_client.setup_auth(
+            refresh_token=typeprivatevars["refresh_token"]
+        )
+        #deactivate Not strictly nessecary - watch has expired anyway
+        try:
+            deactivate_response = google_client.drive().clear_watch_on_files(
+                channel_id=rawnonurlpasscode,
+                resource_id= typeprivatevars["current_watch_resource_id"]
+            )
+        except:
+            print("WARNING - googleDriveNewFileWatch expiration failed to remove watch. Ignoring as it will timeout anyway (or it expired)")
+        return
+
+        newrawurlpasscode = str(uuid.uuid4())
+        newrawnonurlpasscode = str(uuid.uuid4())
+
+        watch_response = google_client.drive().setup_watch_on_files(
+            file_id=typeprivatevars["folder_id"],
+            trigger_url=self.externalTriggerManager.appObj.APIAPP_TRIGGERAPIURL + "/trigger/" + newrawurlpasscode,
+            channel_id=newrawnonurlpasscode,
+            token=self.externalTriggerManager.encodeJobGuid(jobObj.guid)
+        )
+
+        typeprivatevars["current_watch_resource_id"] = watch_response["resourceId"]
+        typepublicvars["current_watch_expiry"] = watch_response["expiration"]
+
+        return (True, typeprivatevars, typepublicvars, newrawurlpasscode, newrawnonurlpasscode)

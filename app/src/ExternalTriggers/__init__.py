@@ -1,3 +1,5 @@
+import copy
+
 from .ExternalTriggerTypes import getAllTriggerTypeInstances
 from .api import register_api
 from .privateApi import register_private_api
@@ -54,8 +56,7 @@ class ExternalTriggerManager():
             if jobData is not None:
                 PrivateExternalTrigger = jobData.__dict__["PrivateExternalTrigger"]
                 if PrivateExternalTrigger["triggerActive"]:
-                    rawurlpasscode = decryptPassword(self.appObj.bcrypt, PrivateExternalTrigger["urlpasscode"], PrivateExternalTrigger["salt"], self.safePasswordString)
-                    rawnonurlpasscode = decryptPassword(self.appObj.bcrypt, PrivateExternalTrigger["nonurlpasscode"], PrivateExternalTrigger["salt"], self.safePasswordString)
+                    (rawurlpasscode, rawnonurlpasscode) = self.getJobPasscodes(jobData)
 
                     for triggerType in possible_jobs_that_could_match[jobGuid]:
                         if jobData.__dict__["PrivateExternalTrigger"]["type"]==triggerType.__class__.__name__:
@@ -98,9 +99,7 @@ class ExternalTriggerManager():
     def getJobDictData(self, jobObj):
         if not jobObj.PrivateExternalTrigger["triggerActive"]:
             return { "triggerActive": False }
-
-        rawurlpasscode = decryptPassword(self.appObj.bcrypt, jobObj.PrivateExternalTrigger["urlpasscode"], jobObj.PrivateExternalTrigger["salt"], self.safePasswordString)
-        rawnonurlpasscode = decryptPassword(self.appObj.bcrypt, jobObj.PrivateExternalTrigger["nonurlpasscode"], jobObj.PrivateExternalTrigger["salt"], self.safePasswordString)
+        (rawurlpasscode, rawnonurlpasscode) = self.getJobPasscodes(jobObj)
 
         return {
             "triggerActive": True,
@@ -125,14 +124,21 @@ class ExternalTriggerManager():
             )
         return self.appObj.objectStore.executeInsideTransaction(dbfn)
 
+    def getJobPasscodes(self, jobObj):
+        rawurlpasscode = decryptPassword(self.appObj.bcrypt, jobObj.PrivateExternalTrigger["urlpasscode"], jobObj.PrivateExternalTrigger["salt"], self.safePasswordString)
+        rawnonurlpasscode = decryptPassword(self.appObj.bcrypt, jobObj.PrivateExternalTrigger["nonurlpasscode"], jobObj.PrivateExternalTrigger["salt"], self.safePasswordString)
+        return (rawurlpasscode, rawnonurlpasscode)
+
     def activateTriggerWithStoreConnection(self, store_connection, jobguid, triggerType, triggerTypeObj, triggerOptions):
         jobObj = self.appObj.appData['jobsData'].getJobRaw(jobguid)
         if jobObj is None:
             return {"result": "Fail", "message": "Job not found"}, 404
         if jobObj.PrivateExternalTrigger["triggerActive"]:
+            (rawurlpasscode, rawnonurlpasscode) = self.getJobPasscodes(jobObj)
             self.TriggerTypes[triggerType].deactivate(
-                jobguid=jobguid,
-                privateTriggerData=jobObj.PrivateExternalTrigger
+                jobObj=jobObj,
+                rawurlpasscode=rawurlpasscode,
+                rawnonurlpasscode=rawnonurlpasscode
             )
 
         salt = getSafeSaltString(self.appObj.bcrypt)
@@ -143,7 +149,7 @@ class ExternalTriggerManager():
         nonurlpasscode = encryptPassword(self.appObj.bcrypt, rawnonurlpasscode, salt, self.safePasswordString)
 
         (failmessage, typeprivatevars, typepublicvars) = triggerTypeObj.activate(
-            jobguid=jobguid,
+            jobguid=jobObj.guid,
             triggerType=triggerType,
             jobObj=jobObj,
             triggerOptions=triggerOptions,
@@ -189,9 +195,11 @@ class ExternalTriggerManager():
         if triggerType not in self.TriggerTypes:
             print("ERROR!!! - type in data not found when deactivating job" + jobObj.__dict__["PrivateExternalTrigger"]["type"] + " Trying to continue")
         else:
+            (rawurlpasscode, rawnonurlpasscode) = self.getJobPasscodes(jobObj)
             self.TriggerTypes[triggerType].deactivate(
-                jobguid=jobguid,
-                privateTriggerData=jobObj.PrivateExternalTrigger
+                jobObj=jobObj,
+                rawurlpasscode=rawurlpasscode,
+                rawnonurlpasscode=rawnonurlpasscode
             )
 
         privateTriggerData = {
@@ -202,3 +210,35 @@ class ExternalTriggerManager():
         self.appObj.appData['jobsData']._saveJobToObjectStore(str(jobObj.guid), store_connection)
 
         return jobObj._caculatedDict(self.appObj), 201
+
+    def loopIterationForJob(self, jobObj, curTime):
+        if not jobObj.PrivateExternalTrigger["triggerActive"]:
+            return
+        if jobObj.PrivateExternalTrigger["type"] not in self.TriggerTypes:
+            raise Exception("Invalid trigger type")
+        triggerType = self.TriggerTypes[jobObj.PrivateExternalTrigger["type"]]
+        (updateJobNeeded, typeprivatevars, typepublicvars, newrawurlpasscode, newrawnonurlpasscode) = triggerType.loopIterationForJob(
+            jobObj=jobObj,
+            curTime=curTime,
+            getJobPasscodes=self.getJobPasscodes
+        )
+        if updateJobNeeded:
+            PrivateExternalTrigger = copy.deepcopy(jobObj.PrivateExternalTrigger)
+            PrivateExternalTrigger["typeprivatevars"] = typeprivatevars
+            PrivateExternalTrigger["typepublicvars"] = typepublicvars
+
+
+            if newrawurlpasscode is not None:
+                salt = getSafeSaltString(self.appObj.bcrypt)
+                encrypted = encryptPassword(self.appObj.bcrypt, newrawurlpasscode, salt, self.safePasswordString)
+                PrivateExternalTrigger["urlpasscode"] = encrypted
+
+            if newrawnonurlpasscode is not None:
+                salt = getSafeSaltString(self.appObj.bcrypt)
+                encrypted = encryptPassword(self.appObj.bcrypt, newrawnonurlpasscode, salt, self.safePasswordString)
+                PrivateExternalTrigger["nonurlpasscode"] = encrypted
+
+            jobObj.setNewPrivateTriggerData(PrivateExternalTrigger)
+            def dbfn(store_connection):
+                self.appObj.appData['jobsData']._saveJobToObjectStore(str(jobObj.guid), store_connection)
+            self.appObj.objectStore.executeInsideTransaction(dbfn)

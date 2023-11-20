@@ -31,6 +31,7 @@ def add_watch_notification(google_client, context):
     )
 
     context["watch_setup"]["resource_id"] = watch_response["resourceId"]
+    context["watch_setup"]["expiration"] = watch_response["expiration"]
 
     print("Watch response", watch_response)
 

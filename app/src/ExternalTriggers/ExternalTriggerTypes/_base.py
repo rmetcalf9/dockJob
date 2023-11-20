@@ -26,5 +26,10 @@ class externalTriggerBaseClass():
         # by default nothing to do
         return (None, {}, {})
 
-    def deactivate(self, jobguid, privateTriggerData):
+    def deactivate(self, jobObj, rawurlpasscode, rawnonurlpasscode):
         return
+
+    # Return value (updateJobNeeded, typeprivatevars, typepublicvars, newrawurlpasscode, newrawnonurlpasscode)
+    def loopIterationForJob(self, jobObj, curTime, getJobPasscodes):
+        #int(datetime.datetime.now().timestamp() * 1000)
+        return (False, None, None, None, None)
