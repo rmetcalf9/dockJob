@@ -147,12 +147,21 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         newrawurlpasscode = str(uuid.uuid4())
         newrawnonurlpasscode = str(uuid.uuid4())
 
-        watch_response = google_client.drive().setup_watch_on_files(
-            file_id=typeprivatevars["folder_id"],
-            trigger_url=self.externalTriggerManager.appObj.APIAPP_TRIGGERAPIURL + "/trigger/" + newrawurlpasscode,
-            channel_id=newrawnonurlpasscode,
-            token=self.externalTriggerManager.encodeJobGuid(jobObj.guid)
-        )
+        try:
+            watch_response = google_client.drive().setup_watch_on_files(
+                file_id=typeprivatevars["folder_id"],
+                trigger_url=self.externalTriggerManager.appObj.APIAPP_TRIGGERAPIURL + "/trigger/" + newrawurlpasscode,
+                channel_id=newrawnonurlpasscode,
+                token=self.externalTriggerManager.encodeJobGuid(jobObj.guid)
+            )
+        except Exception as err:
+            print("****")
+            print("ERROR - googleDriveNewFileWatch activate watch failed. Ignoring error and continuing thread")
+            print("****")
+            print(err)  # for the repr
+            print(str(err))  # for just the message
+            print(err.args)  # the arguments that the exception has been called with.
+            print("****")
 
         typeprivatevars["current_watch_resource_id"] = watch_response["resourceId"]
         typepublicvars["current_watch_expiry"] = watch_response["expiration"]
