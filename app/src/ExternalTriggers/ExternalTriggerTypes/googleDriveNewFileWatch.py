@@ -130,7 +130,7 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         #  we don't need to worry about missing or duplicating messages as we are just using notification to
         #  trigger our alogrythm and we rmemeber file id's ourselves
 
-        (rawurlpasscode, rawnonurlpasscode) = self.getJobPasscodes(jobObj)
+        (rawurlpasscode, rawnonurlpasscode) = getJobPasscodes(jobObj)
 
         google_client = GoogleClient(self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE)
         google_client.setup_auth(
