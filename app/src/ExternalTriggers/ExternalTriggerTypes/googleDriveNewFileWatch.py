@@ -119,6 +119,8 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         typepublicvars = jobObj.PrivateExternalTrigger["typepublicvars"]
         if "current_watch_expiry" not in typepublicvars:
             return (False, None, None, None, None)
+        if "suspended" in typepublicvars:
+            return (False, None, None, None, None)
         if int(typepublicvars["current_watch_expiry"]) >= (curTime.timestamp()*1000):
             return (False, None, None, None, None)
 
@@ -147,6 +149,7 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         newrawurlpasscode = str(uuid.uuid4())
         newrawnonurlpasscode = str(uuid.uuid4())
 
+        watch_response = None
         try:
             watch_response = google_client.drive().setup_watch_on_files(
                 file_id=typeprivatevars["folder_id"],
@@ -162,6 +165,9 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
             print(str(err))  # for just the message
             print(err.args)  # the arguments that the exception has been called with.
             print("****")
+            typepublicvars["suspended"] = True
+            typepublicvars["error"] = str(err)
+            return (True, typeprivatevars, typepublicvars, None, None)
 
         typeprivatevars["refresh_token"] = google_client.get_current_refresh_token()
         typeprivatevars["current_watch_resource_id"] = watch_response["resourceId"]
