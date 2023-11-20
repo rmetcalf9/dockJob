@@ -1,8 +1,12 @@
+import datetime
 
 class NotFoundException(Exception):
     pass
 class UnauthorizedExceptoin(Exception):
     pass
+
+ONE_HOUR_IN_SECONDS=3600
+MAX_TIME_GOOGLE_ALLOWS_FOR_NOTIFICATOIN_EXPIRY_IN_SECONDS=604800
 
 class DriveApiHelpers():
     drive_service = None
@@ -81,12 +85,16 @@ class DriveApiHelpers():
         # https://googleapis.github.io/google-api-python-client/docs/dyn/drive_v3.files.html#watch
         files = self.drive_service.files()
 
+        # TODO Change this to max time
+        expirtaion_time = int(datetime.datetime.now().timestamp()*1000) + (ONE_HOUR_IN_SECONDS * 1000)
+        #expirtaion_time = int(datetime.datetime.now().timestamp()*1000) + (MAX_TIME_GOOGLE_ALLOWS_FOR_NOTIFICATOIN_EXPIRY_IN_SECONDS * 1000)
+
         body = {
             "id": channel_id,  # A UUID or similar unique string that identifies this channel.
             "type": "web_hook",  # The type of delivery mechanism used for this channel.
             "address": trigger_url,
             "token": token, # An arbitrary string delivered to the target address with each notification delivered over this channel. Optional.
-            "expiration": None, # Date and time of notification channel expiration, expressed as a Unix timestamp, in milliseconds. Optional.
+            "expiration": expirtaion_time, # Date and time of notification channel expiration, expressed as a Unix timestamp, in milliseconds. Optional.
             "kind": "api#channel", # Identifies this as a notification channel used to watch for changes to a resource, which is `api#channel`.
             "params": None,
             "payload": None, #True or False,  # A Boolean value to indicate whether payload is wanted. Optional.
@@ -96,6 +104,20 @@ class DriveApiHelpers():
 
         request = files.watch(
             fileId = file_id,
+            body = body
+        )
+        result = request.execute()
+        return result
+
+    def clear_watch_on_files(self, channel_id, resource_id):
+        # resource_id is what is returned when channel is created
+        channels = self.drive_service.channels()
+        body = {
+            "id": channel_id,
+            "resourceId": resource_id
+        }
+        self.drive_service.channels()
+        request = channels.stop(
             body = body
         )
         result = request.execute()

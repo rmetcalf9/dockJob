@@ -8,6 +8,7 @@ class GoogleClient():
     client_id = None
     client_secret = None
     creds = None
+    local_app = None
 
     drive_service = None
 
@@ -15,8 +16,16 @@ class GoogleClient():
         self.client_Secret_file = client_Secret_file
         with open(self.client_Secret_file, 'r') as secret_file:
             secrets = json.load(secret_file)
-        self.client_id = secrets["web"]["client_id"]
-        self.client_secret = secrets["web"]["client_secret"]
+        if "web" in secrets:
+            self.local_app = False
+            self.client_id = secrets["web"]["client_id"]
+            self.client_secret = secrets["web"]["client_secret"]
+        elif "installed" in secrets:
+            self.local_app = True
+            self.client_id = secrets["installed"]["client_id"]
+            self.client_secret = secrets["installed"]["client_secret"]
+        else:
+            raise Exception("Unrecognised client credential file format")
         self.drive_service = None
 
     def get_current_refresh_token(self):
