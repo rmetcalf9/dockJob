@@ -16,7 +16,7 @@
           <q-btn
             @click="autoriseWithGoogle"
             color="primary"
-            label="Auth with google"
+            label="Auth with google and create trigger"
             class = "float-right q-ml-xs"
           ></q-btn>
         </div>
@@ -65,7 +65,6 @@ export default {
         scope: 'https://www.googleapis.com/auth/drive.metadata.readonly',
         ux_mode: 'popup',
         callback: (tokenResponse) => {
-          Loading.hide()
           TTT.createTrigger(tokenResponse.access_token)
         }
       })
@@ -75,10 +74,12 @@ export default {
       const TTT = this
       const callback = {
         ok: function (response) {
+          Loading.hide()
           Notify.create({color: 'positive', message: 'Trigger created'})
           TTT.$emit('triggercreated')
         },
         error: function (error) {
+          Loading.hide()
           Notify.create({color: 'negative', message: 'Failed to activate endpoint - ' + callbackHelper.getErrorFromResponse(error)})
         }
       }
@@ -86,7 +87,6 @@ export default {
         loginStateStore: TTT.loginStateStore,
         apiurl: TTT.serverStaticStateStore.staticServerInfo.data.apiurl
       })
-      console.log('GGG', access_token)
       const postdata = {
         triggerType: 'googleDriveNewFileWatchClass',
         triggerOptions: {

@@ -116,8 +116,12 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
     def loopIterationForJob(self, jobObj, curTime, getJobPasscodes):
         typeprivatevars = jobObj.PrivateExternalTrigger["typeprivatevars"]
         typepublicvars = jobObj.PrivateExternalTrigger["typepublicvars"]
-        if not (curTime*1000) >= typepublicvars["current_watch_expiry"]:
-            return (False, None, None)
+        if "current_watch_expiry" not in typepublicvars:
+            return (False, None, None, None, None)
+        if not (curTime.timestamp()*1000) >= int(typepublicvars["current_watch_expiry"]):
+            return (False, None, None, None, None)
+
+        #TypeError: unsupported operand type(s) for *: 'datetime.datetime' and 'int'
 
         # Google watch has expired
         #  there is no way to renew it

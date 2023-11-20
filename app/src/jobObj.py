@@ -389,6 +389,8 @@ class jobClass():
   # this is required because the job may need to emit an event as a result
   # This is called from the job execution thread
   def loopIteration(self, appObj, curTime):
+    appObj.externalTriggerManager.loopIterationForJob(jobObj=self, curTime=curTime)
+
     if self.mostRecentCompletionStatus == 'Unknown':
       return
     if curTime > self.resetCompletionStatusToUnknownTime:
@@ -397,5 +399,3 @@ class jobClass():
         newStatus='Unknown',
         triggerExecutionObj=None
       )
-
-    appObj.externalTriggerManager.loopIterationForJob(jobObj=self, curTime=curTime)
