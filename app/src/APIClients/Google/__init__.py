@@ -2,6 +2,8 @@ from google.oauth2.credentials import Credentials
 import json
 from .drive import DriveApiHelpers, NotFoundException, UnauthorizedExceptoin
 from googleapiclient.discovery import build
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import Flow
 
 class GoogleClient():
     client_Secret_file = None
@@ -38,6 +40,29 @@ class GoogleClient():
             "client_secret": self.client_secret
         }
         self.creds = Credentials.from_authorized_user_info(info, scopes)
+        if self.creds.expired:
+            try:
+                self.creds.refresh(Request())
+            except:
+                pass
+
+    def refresh_auth(self):
+        self.creds.refresh(Request())
+
+    def setup_auth_from_access_token(self, token, token_uri, scopes=None):
+        print("token_uri", token_uri)
+        flow = Flow.from_client_secrets_file(
+            self.client_Secret_file,
+            scopes=scopes,
+            state=None)
+        flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+        print("flow", flow)
+        flow.fetch_token(authorization_response={"access_token": token})
+
+        raise Exception("I want to be here")
+
+        self.creds = Credentials.from_authorized_user_info(info, scopes)
+        self.creds.refresh(Request())
 
     def drive(self):
         if self.drive_service is None:

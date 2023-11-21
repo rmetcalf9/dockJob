@@ -14,13 +14,13 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         if "folder_path" not in triggerOptions:
             return ("Missing folder", {}, {})
 
-        # I thought I needed to exchange access_token for refresh_token - but I think client may do this automatically
         refresh_token = triggerOptions["access_token"]
 
         google_client = GoogleClient(self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE)
         google_client.setup_auth(
             refresh_token=refresh_token
         )
+        google_client.refresh_auth()
 
         try:
             folder_id = google_client.drive().find_folder_from_path(path="/Projects/Property/Business Cards")["id"]

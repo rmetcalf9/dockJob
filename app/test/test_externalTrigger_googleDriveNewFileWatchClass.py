@@ -105,13 +105,14 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
             "access_token": "dummy_google_access_token",
             "folder_path": "/a/b/invalidfolder"
         }
-        with patch('APIClients.DriveApiHelpers.find_folder_from_path', side_effect=GoogleNotFoundException('mocked error')):
-            activate_response = self.activateTriggerOnJob(
-                jobGuid=setup["setupJob"]["guid"],
-                triggerType="googleDriveNewFileWatchClass",
-                triggerOptions=triggerOptions,
-                check_and_parse_response=False
-            )
+        with patch('APIClients.GoogleClient.refresh_auth', result=None):
+            with patch('APIClients.DriveApiHelpers.find_folder_from_path', side_effect=GoogleNotFoundException('mocked error')):
+                activate_response = self.activateTriggerOnJob(
+                    jobGuid=setup["setupJob"]["guid"],
+                    triggerType="googleDriveNewFileWatchClass",
+                    triggerOptions=triggerOptions,
+                    check_and_parse_response=False
+                )
         self.assertEqual(activate_response.status_code, 400)
         response_json = json.loads(activate_response.text)
         self.assertEqual(response_json["result"], "Fail")
@@ -125,22 +126,23 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
             "folder_path": "/a/b/invalidfolder"
         }
         dummy_file = { "id": "aaa" }
-        with patch('APIClients.DriveApiHelpers.find_folder_from_path', result=dummy_file):
-            def dummy_setup_watch_on_files(a, file_id, trigger_url, channel_id, token):
-                return  {
-                    "resourceId": "dummyChannelresourceid",
-                    "expiration": "1234"
-                }
-            with patch('APIClients.DriveApiHelpers.setup_watch_on_files', dummy_setup_watch_on_files):
-                def a(a, b, c):
-                    return ([], [])
-                with patch('APIClients.DriveApiHelpers.get_list_of_new_files', a):
-                    activate_response = self.activateTriggerOnJob(
-                        jobGuid=setup["setupJob"]["guid"],
-                        triggerType="googleDriveNewFileWatchClass",
-                        triggerOptions=triggerOptions,
-                        check_and_parse_response=False
-                    )
+        with patch('APIClients.GoogleClient.refresh_auth', result=None):
+            with patch('APIClients.DriveApiHelpers.find_folder_from_path', result=dummy_file):
+                def dummy_setup_watch_on_files(a, file_id, trigger_url, channel_id, token):
+                    return  {
+                        "resourceId": "dummyChannelresourceid",
+                        "expiration": "1234"
+                    }
+                with patch('APIClients.DriveApiHelpers.setup_watch_on_files', dummy_setup_watch_on_files):
+                    def a(a, b, c):
+                        return ([], [])
+                    with patch('APIClients.DriveApiHelpers.get_list_of_new_files', a):
+                        activate_response = self.activateTriggerOnJob(
+                            jobGuid=setup["setupJob"]["guid"],
+                            triggerType="googleDriveNewFileWatchClass",
+                            triggerOptions=triggerOptions,
+                            check_and_parse_response=False
+                        )
         self.assertEqual(activate_response.status_code, 201)
 
         def a(a, b, c):

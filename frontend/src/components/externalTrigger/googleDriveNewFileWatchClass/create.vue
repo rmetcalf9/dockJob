@@ -65,6 +65,8 @@ export default {
         scope: 'https://www.googleapis.com/auth/drive.metadata.readonly',
         ux_mode: 'popup',
         callback: (tokenResponse) => {
+          console.log('tok', tokenResponse)
+          // TODO confirm X-Requested-With: XmlHttpRequest somehow
           TTT.createTrigger(tokenResponse.access_token)
         }
       })

@@ -39,8 +39,13 @@ def obtain_a_refresh_token():
     creds = flow.run_local_server(port=0)
     cred_json = json.loads(creds.to_json())
     refresh_token = cred_json["refresh_token"]
-    with open(private_login_file, 'w') as token:
-        token.write(json.dumps({"refresh_token": refresh_token}))
+    #with open(private_login_file, 'w') as token:
+    #    token.write(json.dumps({"refresh_token": refresh_token}))
+
+    #print("DDD", cred_json)
+    #google_client.setup_auth_from_access_token(token=cred_json["token"], token_uri=cred_json["token_uri"])
+
+    #return google_client.get_current_refresh_token()
     return refresh_token
 
 if os.path.exists(private_login_file):
@@ -53,12 +58,13 @@ else:
 google_client.setup_auth(
     refresh_token=refresh_token
 )
+if not google_client.creds.valid:
+    refresh_token = obtain_a_refresh_token()
+    google_client.setup_auth(
+        refresh_token=refresh_token
+    )
 
-# if not google_client.creds.valid:
-#     refresh_token = obtain_a_refresh_token()
-#     google_client.setup_auth(
-#         refresh_token=refresh_token
-#     )
+google_client.refresh_auth()
 
 options = []
 options.append(("List files in folder", Manapp.list_files_in_folder))
