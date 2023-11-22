@@ -3,8 +3,9 @@ from .googleDriveNewFileWatch import googleDriveNewFileWatchClass
 
 def getAllTriggerTypeInstances(externalTriggerManager):
     retVal = {}
-    triggerType = googleDriveRawClass(externalTriggerManager)
-    retVal[triggerType.__class__.__name__] = triggerType
-    triggerType = googleDriveNewFileWatchClass(externalTriggerManager)
-    retVal[triggerType.__class__.__name__] = triggerType
+    triggerType = googleDriveRawClass(externalTriggerManager, googleDriveRawClass.__name__)
+    retVal[triggerType.getTypeName()] = triggerType
+    triggerType = googleDriveNewFileWatchClass(externalTriggerManager, googleDriveNewFileWatchClass.__name__)
+    retVal[triggerType.getTypeName()] = triggerType
+
     return retVal

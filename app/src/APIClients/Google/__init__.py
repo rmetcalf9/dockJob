@@ -4,6 +4,7 @@ from .drive import DriveApiHelpers, NotFoundException, UnauthorizedExceptoin
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import Flow
+import requests
 
 class GoogleClient():
     client_Secret_file = None
@@ -11,6 +12,7 @@ class GoogleClient():
     client_secret = None
     creds = None
     local_app = None
+    token_uri = None
 
     drive_service = None
 
@@ -22,6 +24,7 @@ class GoogleClient():
             self.local_app = False
             self.client_id = secrets["web"]["client_id"]
             self.client_secret = secrets["web"]["client_secret"]
+            self.token_uri = secrets["web"]["token_uri"]
         elif "installed" in secrets:
             self.local_app = True
             self.client_id = secrets["installed"]["client_id"]
@@ -49,20 +52,26 @@ class GoogleClient():
     def refresh_auth(self):
         self.creds.refresh(Request())
 
-    def setup_auth_from_access_token(self, token, token_uri, scopes=None):
-        print("token_uri", token_uri)
-        flow = Flow.from_client_secrets_file(
-            self.client_Secret_file,
-            scopes=scopes,
-            state=None)
-        flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
-        print("flow", flow)
-        flow.fetch_token(authorization_response={"access_token": token})
+    def setup_auth_from_code(self, authResponse):
+        if self.token_uri is None:
+            raise Exception("No token_uri was in client secret.")
 
-        raise Exception("I want to be here")
-
-        self.creds = Credentials.from_authorized_user_info(info, scopes)
-        self.creds.refresh(Request())
+        body = {
+            "code": authResponse["code"],
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "redirect_uri": "postmessage",
+            "grant_type": "authorization_code"
+        }
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        response = requests.post(url=self.token_uri, headers=headers, data=body)
+        if response.status_code != 200:
+            print(response)
+            print(response.status_code)
+            print(response.text)
+            raise Exception("Bad response when trying to get code from redirect url")
+        responseDict = json.loads(response.text)
+        self.setup_auth(refresh_token=responseDict["refresh_token"])
 
     def drive(self):
         if self.drive_service is None:

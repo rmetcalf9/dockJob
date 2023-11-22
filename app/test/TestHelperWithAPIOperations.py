@@ -68,5 +68,9 @@ class TestHelperWithAPIOperationsClass(TestHelperSuperClass.testHelperAPIClient)
 
     if not check_and_parse_response:
         return apiResultTMP
-    self.assertEqual(apiResultTMP.status_code, 201, msg=msg + " " + apiResultTMP.get_data(as_text=True))
-    return json.loads(apiResultTMP.get_data(as_text=True))
+    if apiResultTMP.status_code == 201:
+      return json.loads(apiResultTMP.get_data(as_text=True))
+    print("ERROR activateTriggerOnJob failed")
+    print("Status:", apiResultTMP.status_code)
+    print("Body:", apiResultTMP.text)
+    self.assertTrue(False)

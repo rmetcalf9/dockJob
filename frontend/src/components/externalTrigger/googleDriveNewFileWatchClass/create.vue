@@ -60,19 +60,19 @@ export default {
     autoriseWithGoogle () {
       const TTT = this
       Loading.show()
-      const client = window.google.accounts.oauth2.initTokenClient({
+      const client = window.google.accounts.oauth2.initCodeClient({
         client_id: '425120641293-lg3p5p4n5g3vrk0soe77n35md9k0tt98.apps.googleusercontent.com',
         scope: 'https://www.googleapis.com/auth/drive.metadata.readonly',
         ux_mode: 'popup',
         callback: (tokenResponse) => {
-          console.log('tok', tokenResponse)
+          console.log('tokenResponse from authroise', tokenResponse)
           // TODO confirm X-Requested-With: XmlHttpRequest somehow
-          TTT.createTrigger(tokenResponse.access_token)
+          TTT.createTrigger(tokenResponse)
         }
       })
-      client.requestAccessToken()
+      client.requestCode()
     },
-    createTrigger (access_token) {
+    createTrigger (authResponse) {
       const TTT = this
       const callback = {
         ok: function (response) {
@@ -92,7 +92,7 @@ export default {
       const postdata = {
         triggerType: 'googleDriveNewFileWatchClass',
         triggerOptions: {
-          access_token,
+          authResponse,
           folder_path: TTT.folder_path
         }
       }

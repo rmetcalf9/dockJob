@@ -6,9 +6,14 @@ from appObj import appObj
 import copy
 from TestHelperWithAPIOperations import TestHelperWithAPIOperationsClass
 from appObj import appObj
-from APIClients import GoogleNotFoundException
+from APIClients import GoogleNotFoundException, DriveApiHelpers
 from unittest.mock import patch
 from test_externalTrigger_endpoints import example_changes_recource_message, external_trigger_api_prefix
+
+
+def mock_drive(a):
+    return DriveApiHelpers(None)
+
 
 class helper(TestHelperWithAPIOperationsClass):
     def setup(self):
@@ -62,7 +67,7 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
         self.assertEqual(response_json["result"], "Fail")
         self.assertEqual(response_json["message"], "Google client not activated")
 
-    def test_activateapionjob_missing_accesstoken(self):
+    def test_activateapionjob_missing_authResponse(self):
         setup = self.setup()
 
         triggerOptions={
@@ -78,13 +83,13 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
         self.assertEqual(activate_response.status_code, 400)
         response_json = json.loads(activate_response.text)
         self.assertEqual(response_json["result"], "Fail")
-        self.assertEqual(response_json["message"], "Missing access_token")
+        self.assertEqual(response_json["message"], "Missing authResponse")
 
     def test_activateapionjob_missing_folder(self):
         setup = self.setup()
 
         triggerOptions={
-            "access_token": "dummy_google_access_token"
+            "authResponse": "dummy_google_access_token"
         }
 
         activate_response = self.activateTriggerOnJob(
@@ -102,17 +107,20 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
         setup = self.setup()
 
         triggerOptions={
-            "access_token": "dummy_google_access_token",
+            "authResponse": {"code":"dummy_google_access_token"},
             "folder_path": "/a/b/invalidfolder"
         }
-        with patch('APIClients.GoogleClient.refresh_auth', result=None):
-            with patch('APIClients.DriveApiHelpers.find_folder_from_path', side_effect=GoogleNotFoundException('mocked error')):
-                activate_response = self.activateTriggerOnJob(
-                    jobGuid=setup["setupJob"]["guid"],
-                    triggerType="googleDriveNewFileWatchClass",
-                    triggerOptions=triggerOptions,
-                    check_and_parse_response=False
-                )
+        with patch("APIClients.GoogleClient.drive", mock_drive):
+            with patch("APIClients.GoogleClient.setup_auth_from_code", result=None):
+                with patch('APIClients.GoogleClient.refresh_auth', result=None):
+                    with patch('APIClients.GoogleClient.refresh_auth', result=None):
+                        with patch('APIClients.DriveApiHelpers.find_folder_from_path', side_effect=GoogleNotFoundException('mocked error')):
+                            activate_response = self.activateTriggerOnJob(
+                                jobGuid=setup["setupJob"]["guid"],
+                                triggerType="googleDriveNewFileWatchClass",
+                                triggerOptions=triggerOptions,
+                                check_and_parse_response=False
+                            )
         self.assertEqual(activate_response.status_code, 400)
         response_json = json.loads(activate_response.text)
         self.assertEqual(response_json["result"], "Fail")
@@ -122,29 +130,34 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
         setup = self.setup()
 
         triggerOptions={
-            "access_token": "dummy_google_access_token",
+            "authResponse": {},
             "folder_path": "/a/b/invalidfolder"
         }
-        dummy_file = { "id": "aaa" }
-        with patch('APIClients.GoogleClient.refresh_auth', result=None):
-            with patch('APIClients.DriveApiHelpers.find_folder_from_path', result=dummy_file):
-                def dummy_setup_watch_on_files(a, file_id, trigger_url, channel_id, token):
-                    return  {
-                        "resourceId": "dummyChannelresourceid",
-                        "expiration": "1234"
-                    }
-                with patch('APIClients.DriveApiHelpers.setup_watch_on_files', dummy_setup_watch_on_files):
-                    def a(a, b, c):
-                        return ([], [])
-                    with patch('APIClients.DriveApiHelpers.get_list_of_new_files', a):
-                        activate_response = self.activateTriggerOnJob(
-                            jobGuid=setup["setupJob"]["guid"],
-                            triggerType="googleDriveNewFileWatchClass",
-                            triggerOptions=triggerOptions,
-                            check_and_parse_response=False
-                        )
-        self.assertEqual(activate_response.status_code, 201)
-
+        with patch("APIClients.GoogleClient.drive", mock_drive):
+            with patch("APIClients.GoogleClient.setup_auth_from_code", result=None):
+                with patch('APIClients.GoogleClient.refresh_auth', result=None):
+                    def mock_find_folder_from_path(a, path):
+                        return { "id": "aaa" }
+                    with patch('APIClients.DriveApiHelpers.find_folder_from_path', mock_find_folder_from_path):
+                        def dummy_setup_watch_on_files(a, file_id, trigger_url, channel_id, token):
+                            return  {
+                                "resourceId": "dummyChannelresourceid",
+                                "expiration": "1234"
+                            }
+                        with patch('APIClients.DriveApiHelpers.setup_watch_on_files', dummy_setup_watch_on_files):
+                            def mock_get_list_of_new_files(a, b, c):
+                                print("DDD")
+                                return ([], [])
+                            with patch('APIClients.DriveApiHelpers.get_list_of_new_files', mock_get_list_of_new_files):
+                                def mock_get_current_refresh_token(a):
+                                    return "dummy_refresh_token"
+                                with patch('APIClients.GoogleClient.get_current_refresh_token', mock_get_current_refresh_token):
+                                        activate_response = self.activateTriggerOnJob(
+                                        jobGuid=setup["setupJob"]["guid"],
+                                        triggerType="googleDriveNewFileWatchClass",
+                                        triggerOptions=triggerOptions,
+                                        check_and_parse_response=True
+                                    )
         def a(a, b, c):
             return ([], [])
         with patch('APIClients.DriveApiHelpers.get_list_of_new_files', a):

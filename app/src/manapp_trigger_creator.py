@@ -42,8 +42,6 @@ def obtain_a_refresh_token():
     #with open(private_login_file, 'w') as token:
     #    token.write(json.dumps({"refresh_token": refresh_token}))
 
-    #print("DDD", cred_json)
-    #google_client.setup_auth_from_access_token(token=cred_json["token"], token_uri=cred_json["token_uri"])
 
     #return google_client.get_current_refresh_token()
     return refresh_token

@@ -1,8 +1,15 @@
 
 class externalTriggerBaseClass():
     externalTriggerManager = None
-    def __init__(self, externalTriggerManager):
+    typeName = None
+    def __init__(self, externalTriggerManager, typeName):
         self.externalTriggerManager = externalTriggerManager
+        self.typeName = typeName
+
+    # Trigger types can have an endpoint this is for things like getting auth codes from google
+    def getTypeName(self):
+        return self.typeName
+
     def getStaticServerInfoData(self):
         return {}
 

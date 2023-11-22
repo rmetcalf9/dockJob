@@ -9,16 +9,14 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         if self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE == "notactive":
             return ("Google client not activated", {}, {})
 
-        if "access_token" not in triggerOptions:
-            return ("Missing access_token", {}, {})
+        if "authResponse" not in triggerOptions:
+            return ("Missing authResponse", {}, {})
         if "folder_path" not in triggerOptions:
             return ("Missing folder", {}, {})
 
-        refresh_token = triggerOptions["access_token"]
-
         google_client = GoogleClient(self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE)
-        google_client.setup_auth(
-            refresh_token=refresh_token
+        google_client.setup_auth_from_code(
+            authResponse=triggerOptions["authResponse"]
         )
         google_client.refresh_auth()
 
@@ -39,6 +37,7 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
 
         #Set the folder watcher up and put in initial list of file ids
         (_, file_id_list) = google_client.drive().get_list_of_new_files(folder_id, None)
+        print("TODO")
 
         typeprivatevars = {
             "folder_id": folder_id,
