@@ -3,7 +3,7 @@ import copy
 from .ExternalTriggerTypes import getAllTriggerTypeInstances
 from .api import register_api
 from .privateApi import register_private_api
-from encryption import getSafePasswordString, decryptPassword, encryptPassword, getSafeSaltString
+from encryption import getSafePasswordString, decryptPassword as decryptPasswordExt, encryptPassword as encryptPasswordExt, getSafeSaltString
 import uuid
 
 saltForJobIdPasswordEncryption="JDJiJDEyJFRGQmZ1RzhjY3IzVTVxTzVTeERXbnU="
@@ -26,12 +26,17 @@ class ExternalTriggerManager():
             "types": types
         }
 
+    def encryptPassword(self, plainText, safeSaltString):
+        return encryptPasswordExt(self.appObj.bcrypt, plainText, safeSaltString, self.safePasswordString)
+    def decryptPassword(self, cypherText, safeSaltString):
+        return decryptPasswordExt(self.appObj.bcrypt, cypherText, safeSaltString, self.safePasswordString)
+
     def encodeJobGuid(self, job_guid):
-        return encryptPassword(self.appObj.bcrypt, job_guid, saltForJobIdPasswordEncryption, self.safePasswordString)
+        return self.encryptPassword(job_guid, saltForJobIdPasswordEncryption)
     def decodeJobGuid(self, cypherText):
         #must use hardcoded salt as cannot use salts on the job as we don't know which job yet
         try:
-            return decryptPassword(self.appObj.bcrypt, cypherText, saltForJobIdPasswordEncryption, self.safePasswordString)
+            return self.decryptPassword(cypherText, saltForJobIdPasswordEncryption)
         except:
             return None
 
@@ -111,6 +116,11 @@ class ExternalTriggerManager():
             "typepublicvars": jobObj.PrivateExternalTrigger["typepublicvars"]
         }
 
+    def getJobPasscodes(self, jobObj):
+        rawurlpasscode = self.decryptPassword(jobObj.PrivateExternalTrigger["urlpasscode"], jobObj.PrivateExternalTrigger["salt"])
+        rawnonurlpasscode = self.decryptPassword(jobObj.PrivateExternalTrigger["nonurlpasscode"], jobObj.PrivateExternalTrigger["salt"])
+        return (rawurlpasscode, rawnonurlpasscode)
+
     def activateTrigger(self, jobguid, triggerType, triggerOptions):
         if triggerType not in self.TriggerTypes.keys():
             return {"result": "Fail", "message": "Invalid trigger type"}, 400
@@ -123,11 +133,6 @@ class ExternalTriggerManager():
                 triggerOptions=triggerOptions
             )
         return self.appObj.objectStore.executeInsideTransaction(dbfn)
-
-    def getJobPasscodes(self, jobObj):
-        rawurlpasscode = decryptPassword(self.appObj.bcrypt, jobObj.PrivateExternalTrigger["urlpasscode"], jobObj.PrivateExternalTrigger["salt"], self.safePasswordString)
-        rawnonurlpasscode = decryptPassword(self.appObj.bcrypt, jobObj.PrivateExternalTrigger["nonurlpasscode"], jobObj.PrivateExternalTrigger["salt"], self.safePasswordString)
-        return (rawurlpasscode, rawnonurlpasscode)
 
     def activateTriggerWithStoreConnection(self, store_connection, jobguid, triggerType, triggerTypeObj, triggerOptions):
         jobObj = self.appObj.appData['jobsData'].getJobRaw(jobguid)
@@ -145,8 +150,8 @@ class ExternalTriggerManager():
 
         rawurlpasscode = str(uuid.uuid4())
         rawnonurlpasscode = str(uuid.uuid4())
-        urlpasscode = encryptPassword(self.appObj.bcrypt, rawurlpasscode, salt, self.safePasswordString)
-        nonurlpasscode = encryptPassword(self.appObj.bcrypt, rawnonurlpasscode, salt, self.safePasswordString)
+        urlpasscode = self.encryptPassword(plainText=rawurlpasscode, safeSaltString=salt)
+        nonurlpasscode = self.encryptPassword(plainText=rawnonurlpasscode, safeSaltString=salt)
 
         (failmessage, typeprivatevars, typepublicvars) = triggerTypeObj.activate(
             jobguid=jobObj.guid,
@@ -229,13 +234,11 @@ class ExternalTriggerManager():
             PrivateExternalTrigger["typepublicvars"] = typepublicvars
 
             if newrawurlpasscode is not None:
-                salt = getSafeSaltString(self.appObj.bcrypt)
-                encrypted = encryptPassword(self.appObj.bcrypt, newrawurlpasscode, salt, self.safePasswordString)
+                encrypted = self.encryptPassword(newrawurlpasscode, jobObj.PrivateExternalTrigger["salt"])
                 PrivateExternalTrigger["urlpasscode"] = encrypted
 
             if newrawnonurlpasscode is not None:
-                salt = getSafeSaltString(self.appObj.bcrypt)
-                encrypted = encryptPassword(self.appObj.bcrypt, newrawnonurlpasscode, salt, self.safePasswordString)
+                encrypted = self.encryptPassword(newrawnonurlpasscode, jobObj.PrivateExternalTrigger["salt"])
                 PrivateExternalTrigger["nonurlpasscode"] = encrypted
 
             jobObj.setNewPrivateTriggerData(PrivateExternalTrigger)
