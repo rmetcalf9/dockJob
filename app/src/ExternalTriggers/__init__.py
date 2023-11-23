@@ -92,10 +92,13 @@ class ExternalTriggerManager():
                 stdinData=stdinData
             )
 
+        print("DEBUG REMOVE trig 1")
         (updateJobNeeded, typeprivatevars, typepublicvars) = triggerType.fireTrigger(
             submitJobFunction, jobData, urlid, request_headers, request_data, rawurlpasscode,rawnonurlpasscode
         )
+        print("DEBUG REMOVE trig 2")
         if updateJobNeeded:
+            print("DEBUG REMOVE trig 3")
             # This code is going to look something like
             PrivateExternalTrigger["typeprivatevars"] = typeprivatevars
             PrivateExternalTrigger["typepublicvars"] = typepublicvars
