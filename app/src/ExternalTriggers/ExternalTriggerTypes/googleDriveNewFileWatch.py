@@ -34,8 +34,6 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
             channel_id=rawnonurlpasscode,
             token=self.externalTriggerManager.encodeJobGuid(jobObj.__dict__["guid"])
         )
-        print("TODO DEBUG watch_response", watch_response)
-
         #Set the folder watcher up and put in initial list of file ids
         (_, file_id_list) = google_client.drive().get_list_of_new_files(folder_id, None)
 
@@ -74,11 +72,17 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         return request_headers["X-Goog-Channel-Token"]
 
     def requestMatches(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
-        print("TODO DEBUG googleDriveNewFileWatch")
+        print("TODO DEL REMOVE urlid", urlid)
+        print("TODO DEL REMOVE rawurlpasscode", rawurlpasscode)
         if urlid != rawurlpasscode:
+            print("TODO DEL REMOVE MISMATCH - urlid")
             return False
+        print("TODO DEL REMOVE request_headers[\"X-Goog-Channel-ID\"]", request_headers["X-Goog-Channel-ID"])
+        print("TODO DEL REMOVE rawnonurlpasscode", rawnonurlpasscode)
         if request_headers["X-Goog-Channel-ID"] != rawnonurlpasscode:
+            print("TODO DEL REMOVE MISMATCH - rawnonurlpasscode")
             return False
+        print("TODO DEL RMEOBE MATCHED")
         return True
 
     def fireTrigger(self, submitJobFunction, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
