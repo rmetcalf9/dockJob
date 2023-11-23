@@ -56,6 +56,7 @@ class ExternalTriggerManager():
         return self.appObj.objectStore.executeInsideTransaction(dbfn)
 
     def processTriggerWithContext(self, store_connection, possible_jobs_that_could_match, urlid, request_headers, request_data):
+        print("TODO DEBUG DEL RECEIVEDD TRIGGER")
         for jobGuid in possible_jobs_that_could_match.keys():
             jobData = self.appObj.appData['jobsData'].getJobRaw(jobGuid)
             if jobData is not None:
@@ -228,7 +229,6 @@ class ExternalTriggerManager():
             getJobPasscodes=self.getJobPasscodes
         )
         if updateJobNeeded:
-            print("DEBUG TODO DEL", "Saving updated trigger data")
             PrivateExternalTrigger = copy.deepcopy(jobObj.PrivateExternalTrigger)
             PrivateExternalTrigger["typeprivatevars"] = typeprivatevars
             PrivateExternalTrigger["typepublicvars"] = typepublicvars
@@ -243,10 +243,7 @@ class ExternalTriggerManager():
 
             jobObj.setNewPrivateTriggerData(PrivateExternalTrigger)
 
-            print("DEBUG TODO DEL", PrivateExternalTrigger)
-            print("DEBUG TODO DEL - testing decrypt of new codes works")
             (_, _) = self.getJobPasscodes(jobObj)
-            print("DEBUG TODO DEL - complete")
 
             def dbfn(store_connection):
                 self.appObj.appData['jobsData']._saveJobToObjectStore(str(jobObj.guid), store_connection)

@@ -39,8 +39,8 @@ def obtain_a_refresh_token():
     creds = flow.run_local_server(port=0)
     cred_json = json.loads(creds.to_json())
     refresh_token = cred_json["refresh_token"]
-    #with open(private_login_file, 'w') as token:
-    #    token.write(json.dumps({"refresh_token": refresh_token}))
+    with open(private_login_file, 'w') as token:
+       token.write(json.dumps({"refresh_token": refresh_token}))
 
 
     #return google_client.get_current_refresh_token()
