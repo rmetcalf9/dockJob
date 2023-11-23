@@ -37,7 +37,6 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
 
         #Set the folder watcher up and put in initial list of file ids
         (_, file_id_list) = google_client.drive().get_list_of_new_files(folder_id, None)
-        print("TODO")
 
         typeprivatevars = {
             "folder_id": folder_id,
@@ -144,6 +143,7 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
             )
         except:
             print("WARNING - googleDriveNewFileWatch expiration failed to remove watch. Ignoring as it will timeout anyway (or it expired)")
+
 
         newrawurlpasscode = str(uuid.uuid4())
         newrawnonurlpasscode = str(uuid.uuid4())

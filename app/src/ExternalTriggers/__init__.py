@@ -223,10 +223,10 @@ class ExternalTriggerManager():
             getJobPasscodes=self.getJobPasscodes
         )
         if updateJobNeeded:
+            print("DEBUG TODO DEL", "Saving updated trigger data")
             PrivateExternalTrigger = copy.deepcopy(jobObj.PrivateExternalTrigger)
             PrivateExternalTrigger["typeprivatevars"] = typeprivatevars
             PrivateExternalTrigger["typepublicvars"] = typepublicvars
-
 
             if newrawurlpasscode is not None:
                 salt = getSafeSaltString(self.appObj.bcrypt)
@@ -239,6 +239,12 @@ class ExternalTriggerManager():
                 PrivateExternalTrigger["nonurlpasscode"] = encrypted
 
             jobObj.setNewPrivateTriggerData(PrivateExternalTrigger)
+
+            print("DEBUG TODO DEL", PrivateExternalTrigger)
+            print("DEBUG TODO DEL - testing decrypt of new codes works")
+            (_, _) = self.getJobPasscodes(jobObj)
+            print("DEBUG TODO DEL - complete")
+
             def dbfn(store_connection):
                 self.appObj.appData['jobsData']._saveJobToObjectStore(str(jobObj.guid), store_connection)
             self.appObj.objectStore.executeInsideTransaction(dbfn)

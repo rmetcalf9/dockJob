@@ -9,10 +9,32 @@ from appObj import appObj
 from APIClients import GoogleNotFoundException, DriveApiHelpers
 from unittest.mock import patch
 from test_externalTrigger_endpoints import example_changes_recource_message, external_trigger_api_prefix
-
+import datetime
 
 def mock_drive(a):
     return DriveApiHelpers(None)
+
+def mock_find_folder_from_path(a, path):
+    return {"id": "aaa"}
+
+def dummy_setup_watch_on_files(a, file_id, trigger_url, channel_id, token):
+    return {
+        "resourceId": "dummyChannelresourceid",
+        "expiration": "1234"
+    }
+
+def dummy_clear_watch_on_files(a, channel_id, resource_id):
+    return {
+        "resourceId": "dummyChannelresourceid",
+        "expiration": "1234"
+    }
+
+
+def mock_get_list_of_new_files(a, b, c):
+    return ([], [])
+
+def mock_get_current_refresh_token(a):
+    return "dummy_refresh_token"
 
 
 class helper(TestHelperWithAPIOperationsClass):
@@ -136,21 +158,9 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
         with patch("APIClients.GoogleClient.drive", mock_drive):
             with patch("APIClients.GoogleClient.setup_auth_from_code", result=None):
                 with patch('APIClients.GoogleClient.refresh_auth', result=None):
-                    def mock_find_folder_from_path(a, path):
-                        return { "id": "aaa" }
                     with patch('APIClients.DriveApiHelpers.find_folder_from_path', mock_find_folder_from_path):
-                        def dummy_setup_watch_on_files(a, file_id, trigger_url, channel_id, token):
-                            return  {
-                                "resourceId": "dummyChannelresourceid",
-                                "expiration": "1234"
-                            }
                         with patch('APIClients.DriveApiHelpers.setup_watch_on_files', dummy_setup_watch_on_files):
-                            def mock_get_list_of_new_files(a, b, c):
-                                print("DDD")
-                                return ([], [])
                             with patch('APIClients.DriveApiHelpers.get_list_of_new_files', mock_get_list_of_new_files):
-                                def mock_get_current_refresh_token(a):
-                                    return "dummy_refresh_token"
                                 with patch('APIClients.GoogleClient.get_current_refresh_token', mock_get_current_refresh_token):
                                         activate_response = self.activateTriggerOnJob(
                                         jobGuid=setup["setupJob"]["guid"],
@@ -158,9 +168,7 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
                                         triggerOptions=triggerOptions,
                                         check_and_parse_response=True
                                     )
-        def a(a, b, c):
-            return ([], [])
-        with patch('APIClients.DriveApiHelpers.get_list_of_new_files', a):
+        with patch('APIClients.DriveApiHelpers.get_list_of_new_files', mock_get_list_of_new_files):
             trigger_resp = self.triggerJob(
                 jobguid = setup["setupJob"]["guid"]
             )
@@ -171,4 +179,52 @@ class test_externalTrigger_googleDriveNewFileWatchClass(helper):
     #  [{'mimeType': 'application/pdf', 'parents': ['1LhOLAK3AC3XYGm3mr2MpZ1uM0BJPcDwJ'], 'id': '1TjGK6F532IpG881Fu-f5JbYYvZOhoiWM', 'name': 'Scanned_20231118-2054.pdf'}]
 
 
+    def test_refresh_results_has_valid_passwords(self):
+        setup = self.setup()
+        triggerOptions={
+            "authResponse": { "code": "123" },
+            "folder_path": "/a/b/invalidfolder"
+        }
+        _ = self.getJob(guid=setup["setupJob"]["guid"])
+
+        with patch('APIClients.GoogleClient.get_current_refresh_token', mock_get_current_refresh_token):
+            with patch('APIClients.DriveApiHelpers.get_list_of_new_files', mock_get_list_of_new_files):
+                with patch('APIClients.DriveApiHelpers.setup_watch_on_files', dummy_setup_watch_on_files):
+                    with patch('APIClients.DriveApiHelpers.find_folder_from_path', mock_find_folder_from_path):
+                        with patch("APIClients.GoogleClient.drive", mock_drive):
+                            with patch('APIClients.GoogleClient.refresh_auth', result=None):
+                                with patch("APIClients.GoogleClient.setup_auth_from_code", result=None):
+                                    activate_response = self.activateTriggerOnJob(
+                                        jobGuid=setup["setupJob"]["guid"],
+                                        triggerType="googleDriveNewFileWatchClass",
+                                        triggerOptions=triggerOptions,
+                                        check_and_parse_response=False
+                                    )
+
+        preJobDict = self.getJob(guid=setup["setupJob"]["guid"])
+        origurlpasscode = preJobDict["ExternalTrigger"]["urlpasscode"]
+        orignonurlpasscode = preJobDict["ExternalTrigger"]["nonurlpasscode"]
+
+        with patch('APIClients.DriveApiHelpers.get_list_of_new_files', mock_get_list_of_new_files):
+            trigger_resp = self.triggerJob(
+                jobguid = setup["setupJob"]["guid"]
+            )
+        self.assertEqual(trigger_resp["result"],"Success")
+
+        jobObj = appObj.appData['jobsData'].getJob(guid=setup["setupJob"]["guid"])
+
+        futureTime = appObj.getCurDateTime() + datetime.timedelta(days=70)
+
+        with patch('APIClients.DriveApiHelpers.setup_watch_on_files', dummy_setup_watch_on_files):
+            with patch('APIClients.DriveApiHelpers.clear_watch_on_files', dummy_clear_watch_on_files):
+                appObj.externalTriggerManager.loopIterationForJob(jobObj, futureTime)
+
+        with patch('APIClients.DriveApiHelpers.get_list_of_new_files', mock_get_list_of_new_files):
+            trigger_resp = self.triggerJob(
+                jobguid = setup["setupJob"]["guid"]
+            )
+
+        postJobDict = self.getJob(guid=setup["setupJob"]["guid"])
+        self.assertNotEquals(origurlpasscode, postJobDict["ExternalTrigger"]["urlpasscode"])
+        self.assertNotEquals(orignonurlpasscode, postJobDict["ExternalTrigger"]["nonurlpasscode"])
 
