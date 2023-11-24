@@ -85,9 +85,8 @@ class DriveApiHelpers():
         # https://googleapis.github.io/google-api-python-client/docs/dyn/drive_v3.files.html#watch
         files = self.drive_service.files()
 
-        # TODO Change this to max time
-        expirtaion_time = int(datetime.datetime.now().timestamp()*1000) + (ONE_HOUR_IN_SECONDS * 1000)
-        #expirtaion_time = int(datetime.datetime.now().timestamp()*1000) + (MAX_TIME_GOOGLE_ALLOWS_FOR_NOTIFICATOIN_EXPIRY_IN_SECONDS * 1000)
+        #expirtaion_time = int(datetime.datetime.now().timestamp()*1000) + (ONE_HOUR_IN_SECONDS * 1000)
+        expirtaion_time = int(datetime.datetime.now().timestamp()*1000) + (MAX_TIME_GOOGLE_ALLOWS_FOR_NOTIFICATOIN_EXPIRY_IN_SECONDS * 1000)
 
         body = {
             "id": channel_id,  # A UUID or similar unique string that identifies this channel.

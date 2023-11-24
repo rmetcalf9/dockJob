@@ -56,7 +56,6 @@ class ExternalTriggerManager():
         return self.appObj.objectStore.executeInsideTransaction(dbfn)
 
     def processTriggerWithContext(self, store_connection, possible_jobs_that_could_match, urlid, request_headers, request_data):
-        print("TODO DEBUG DEL RECEIVEDD TRIGGER")
         for jobGuid in possible_jobs_that_could_match.keys():
             jobData = self.appObj.appData['jobsData'].getJobRaw(jobGuid)
             if jobData is not None:

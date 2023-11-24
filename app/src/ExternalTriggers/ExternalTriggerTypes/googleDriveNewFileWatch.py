@@ -72,48 +72,35 @@ class googleDriveNewFileWatchClass(externalTriggerBaseClass):
         return request_headers["X-Goog-Channel-Token"]
 
     def requestMatches(self, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
-        print("TODO DEL REMOVE urlid", urlid)
-        print("TODO DEL REMOVE rawurlpasscode", rawurlpasscode)
         if urlid != rawurlpasscode:
-            print("TODO DEL REMOVE MISMATCH - urlid")
             return False
-        print("TODO DEL REMOVE request_headers[\"X-Goog-Channel-ID\"]", request_headers["X-Goog-Channel-ID"])
-        print("TODO DEL REMOVE rawnonurlpasscode", rawnonurlpasscode)
         if request_headers["X-Goog-Channel-ID"] != rawnonurlpasscode:
-            print("TODO DEL REMOVE MISMATCH - rawnonurlpasscode")
             return False
-        print("TODO DEL REMOVE MATCHED")
         return True
 
     def fireTrigger(self, submitJobFunction, jobData, urlid, request_headers, request_data, rawurlpasscode, rawnonurlpasscode):
         typeprivatevars = jobData.PrivateExternalTrigger["typeprivatevars"]
         typepublicvars = jobData.PrivateExternalTrigger["typepublicvars"]
 
-        print("TODO DEL fw fireTrigger")
         google_client = GoogleClient(self.externalTriggerManager.appObj.DOCKJOB_APICLIENT_GOOGLE_CLIENT_SECRET_FILE)
         google_client.setup_auth(
             refresh_token=typeprivatevars["refresh_token"]
         )
-        print("TODO DEL fw fireTrigger 2")
 
         (new_files, file_id_list) = google_client.drive().get_list_of_new_files(typeprivatevars["folder_id"], typeprivatevars["file_id_list"])
 
-        print("TODO DEL fw fireTrigger 3")
         for new_file in new_files:
-            print("TODO DEL fw fireTrigger 4")
             dataForStdin = {
                 "event": "newResourceInGoogleDrive",
                 "fileInfo": new_file,
                 "typepublicvars": typepublicvars,
                 "directurl": "https://drive.google.com/uc?export=download&id=" + new_file["id"]
             }
-            print("TODO DEL fw fireTrigger 5")
             submitJobFunction(
                 stdinData=json.dumps(dataForStdin).encode("utf-8"),
                 executionName="Triggered by Triggered by googleDriveNewFileWatchClass - New file " + new_file["name"]
             )
 
-        print("TODO DEL fw fireTrigger 6")
         typeprivatevars["refresh_token"] = google_client.get_current_refresh_token()
         typeprivatevars["file_id_list"] = file_id_list
 
